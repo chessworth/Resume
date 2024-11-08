@@ -4,14 +4,14 @@ import './App.css';
 import Square from './pages/tic_tac_toe/components/square';
 import './pages/tic_tac_toe/index.css';
 
-function Board({xIsNext, squares, currentMove, onPlay} : {xIsNext : boolean, squares : string[], currentMove: number, onPlay : (nextSquares : string[]) => void}) {
+function Board({xIsNext, squares, currentMove, onPlay} : {xIsNext : boolean, squares : string[], currentMove: number, onPlay : (s : string[], i: number) => void}) {
   function handleClick(i : number) {
     if (squares[i] || calculateWinner(squares) ) {
       return;
     }
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? "X" : "O";
-    onPlay(nextSquares);
+    onPlay(nextSquares, i);
   }
 
   const winner = calculateWinner(squares);
@@ -83,14 +83,25 @@ function highlightWinner(squares : string[], line? : number[]) {
   }
 }
 
+class GameHistory {
+  Board: string[] = Array<string>(9).fill('');
+  rowIndex: number = 0;
+  colIndex: number = 0;
+}
+
 function Game() {
-  const [history, setHistory] = useState([Array<string>(9).fill('')]);
+  const [history, setHistory] = useState(Array<GameHistory>(1).fill(new GameHistory()));
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].Board;
 
-  function handlePlay(nextSquares: string[]) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextSquares: string[], index: number) {
+    let addedHistory: GameHistory = {} as GameHistory;
+    addedHistory.Board = nextSquares;
+    addedHistory.rowIndex = Math.round((index-1)/3) + 1;
+    addedHistory.colIndex = index%3 + 1;
+
+    const nextHistory = [...history.slice(0, currentMove + 1), addedHistory];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -102,14 +113,14 @@ function Game() {
   const moves = history.map((squares, move) => {
     let description;
     if (move == currentMove) {
-      description = move > 0 ? ('You are at move #' + move) : 'You are at game start';
+      description = move > 0 ? ('You are at move #' + move+ ': Row ' + squares.rowIndex + ', Column ' + squares.colIndex) : 'You are at game start';
       return (
         <li key={move}>{description}
         </li>
       );
     }
     if (move > 0) {
-      description = 'move #' + move;
+      description = 'move #' + move + ': Row ' + squares.rowIndex + ', Column ' + squares.colIndex;
     } else {
       description = 'Go to game start';
     }
@@ -122,11 +133,11 @@ function Game() {
 
   return (
     <div className="game">
+      <div className="game-info">
+        <ul>{moves}</ul>
+      </div>
       <div className="game-board">
         <Board xIsNext={xIsNext} squares={currentSquares} currentMove={currentMove} onPlay={handlePlay} />
-      </div>
-      <div className="game-info">
-        <ol>{moves}</ol>
       </div>
     </div>
   );

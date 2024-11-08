@@ -90,6 +90,11 @@
   }
   
   .game-info {
-    margin-left: 20px;
+    margin-right: 20px;
+    min-width: 300px;
+  }
+
+  li {
+    padding: 5px 0;
   }
   
