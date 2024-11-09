@@ -7,6 +7,7 @@ class GameHistory {
   Board: string[] = Array<string>(9).fill('');
   rowIndex: number = 0;
   colIndex: number = 0;
+  move: string = '';
 }
 
 function Game() {
@@ -20,6 +21,7 @@ function Game() {
     addedHistory.Board = nextSquares;
     addedHistory.rowIndex = Math.round((index-1)/3) + 1;
     addedHistory.colIndex = index%3 + 1;
+    addedHistory.move = xIsNext ? 'X' : 'O';
 
     const nextHistory = [...history.slice(0, currentMove + 1), addedHistory];
     setHistory(nextHistory);
@@ -32,15 +34,16 @@ function Game() {
 
   const moves = history.map((squares, move) => {
     let description;
+    const moveDetails = 'Move ' + move + ': ' + squares.move + ' moved to R' + squares.rowIndex + ', C' + squares.colIndex;
     if (move == currentMove) {
-      description = move > 0 ? ('You are at Move #' + move+ ': Row ' + squares.rowIndex + ', Column ' + squares.colIndex) : 'You are at game start';
+      description = move > 0 ? ('You are at ' + moveDetails) : 'You are at game start';
       return (
         <li key={move}>{description}
         </li>
       );
     }
     if (move > 0) {
-      description = 'Move #' + move + ': Row ' + squares.rowIndex + ', Column ' + squares.colIndex;
+      description = moveDetails;
     } else {
       description = 'Go to game start';
     }
