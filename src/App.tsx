@@ -14,7 +14,7 @@ function App() {
     <Container>
       <Nav />
       <Routes>
-              <Route path="/" element={<div className='testHome' />} />
+              <Route path="/Resume" element={<div className='testHome' />} />
               <Route path="/game" element={<Game />} />
               <Route path='/blog' /*element={<Blog />}*/ />
               <Route path='/contact' /*element={<Contact />}*/ />
