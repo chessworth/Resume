@@ -45,20 +45,33 @@ ul.topnav {
 li {
   padding: 0;
 }
-.topnav .shrink a {
+.topnav .shrink:not(.hover) a {
   padding: 15px;
   text-indent: 500%;
   rotate: 90deg;
   width: 50px;
   transition: 
-    text-indent .7s .4s,
+    text-indent 2.5s,
     padding .5s,
     font-size .5s,
     rotate .5s,
     width .5s ;
 }
-li.shrink {
-  rotate: 90deg;
+.hover.shrink a {
+  margin-bottom: 15px;
+}
+li.shrink:not(.hover) {
+  rotate: -90deg;
   transition: 
     rotate .5s .8s;
+}
+li.shrink.hover {
+  align-self: flex-end;
+  transition: align-self .5s;
+}
+.react-icons {
+  vertical-align: middle;
+}
+.fa-nav {
+  float: left;
 }
