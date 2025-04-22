@@ -4,9 +4,12 @@ import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserStateContext } from './components/nav/UserStateContext';
-import Game from './pages/tic_tac_toe/components/game';
+
+import Game from './pages/game/Game';
 import Nav from './components/nav/Nav';
 import Container from './components/container/Container';
+import Home from './pages/home/Home';
+import PokerTable from './pages/teenpatti/PokerTable';
 
 function App() {
   const lightMode = useContext(UserStateContext);
@@ -14,8 +17,9 @@ function App() {
     <Container>
       <Nav />
       <Routes>
-              <Route path="/Resume" element={<div className='testHome' />} />
+              <Route path="/Resume" element={<Home />} />
               <Route path="/game" element={<Game />} />
+              <Route path="/teenpatti" element={<PokerTable />} />
               <Route path='/blog' /*element={<Blog />}*/ />
               <Route path='/contact' /*element={<Contact />}*/ />
               <Route path="*" /*element={<NoMatch />}*/ />

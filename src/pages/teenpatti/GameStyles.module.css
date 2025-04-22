@@ -1,0 +1,329 @@
+/* Full page layout */
+.tableContainer {
+    display: flex;
+    position: relative;
+    height: 100vh;
+    background: #1e1e1e;
+    color: #fff;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 100px;
+    justify-content: center;
+  }
+
+  .sidebarToggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: #444;
+    border: none;
+    color: white;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 5px;
+  }
+  
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: -350px;
+    width: 350px;
+    height: 100%;
+    background: #2c2c2c;
+    transition: left 0.3s ease;
+    padding: 20px;
+    box-shadow: 3px 0 8px rgba(0,0,0,0.6);
+    z-index: 9;
+    padding-top: 28px;
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }  
+  
+  /* Table styling */
+  .pokerTable {
+    background: radial-gradient(circle, #228B22 0%, #006400 100%);
+    border-radius: 50%;
+    width: 700px;
+    height: 700px;
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    overflow: visible;
+    margin-top: 200px;
+    margin-bottom: 150px;
+  }
+
+  .tableCircle {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #006400 0%, #013220 100%);
+    border-radius: 50%;
+    position: relative;
+    border: 4px solid #222;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Player seat styling */
+  .playerSeat {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    text-align: center;
+    width: 160px;
+    transform: translate(-50%, -50%);
+  }
+  
+  /* Name tag */
+  .playerName {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  /* Cards layout */
+  .cardContainer {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 6px 0;
+  }
+  
+  /* Card look */
+  .card {
+    width: 45px;
+    height: 65px;
+    background-color: white;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: transform 0.2s;
+  }
+  
+  .cardBack {
+    background: repeating-linear-gradient(45deg, #444 0, #555 5px);
+    color: #fff;
+    font-size: 1.5rem;
+    justify-content: center;
+  }
+  
+  .cardTop,
+  .cardBottom {
+    font-size: 0.7rem;
+  }
+  
+  .cardSuit {
+    font-size: 1.2rem;
+  }
+  
+  .red {
+    color: red;
+  }
+  
+  .black {
+    color: black;
+  }
+
+  .controls {
+    position: absolute;
+    top: 75px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+  
+  input, button {
+    margin-top: 4px;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: none;
+  }
+  
+  input {
+    margin: 5px 15px;
+    width: 85%;
+    border: .08rem solid #979797;
+    background: none;
+    color: #fff;
+  }
+
+  button {
+    background: #444;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  button:hover {
+    background: #666;
+  }
+
+  .revealButton {
+    margin-top: 8px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    border: none;
+    background-color: #ffffff;
+    color: #000;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .revealButton:hover {
+    background-color: #ddd;
+  }
+  .playerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .removeButton {
+    background: transparent;
+    border: none;
+    color: red;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+  .chips {
+    color: gold;
+    margin-bottom: 8px;
+    font-size: 1rem;
+  }
+  
+  .handRank {
+    margin-top: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .cardBack {
+    background-color: black;
+    color: white;
+  }  
+  .pot {
+    left: 47%;
+    top: 40%;
+    position: absolute;
+    z-index: 3;
+  }
+  .settingsHeading {
+    padding-left: 50px;
+  }
+  .toggleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #777;
+    transition: 0.4s;
+    border-radius: 20px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: '';
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  
+  .switch input:checked + .slider {
+    background-color: #4caf50;
+  }
+  
+  .switch input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+  .pauseIconButton {
+    border: none;
+    font-size: 1.4rem;
+    margin-top: -5%;
+    padding: 5px 10px;
+  }
+  .pauseIconButton:hover {
+    color: #ccc;
+  }
+  .potIcon {
+    color: #d3b200;
+  }
+  /* Style for action buttons container at the bottom */
+  .actionButtonsContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    z-index: 10;
+    align-items: center;
+  }
+  
+  /* Style for individual action buttons */
+  .foldButton, .betButton, .callButton, .backShowButton {
+    background-color: #04AA6D;
+    color: white;
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 40px;
+  }
+  .betInput {
+    width: 100px;
+    margin: 0 8px;
+    padding: 4px;
+    border-radius: 4px;
+    height: 35px;
+  }
+  .actionButtonsContainer button{
+    width: 120px;
+  }

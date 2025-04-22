@@ -10,7 +10,7 @@ class GameHistory {
   move: string = '';
 }
 
-function Game() {
+function TicTacToe() {
   const [history, setHistory] = useState(Array<GameHistory>(1).fill(new GameHistory()));
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
@@ -66,4 +66,4 @@ function Game() {
   );
 }
 
-export default Game;
+export default TicTacToe;
