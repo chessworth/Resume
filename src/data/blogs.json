@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "name": "Blog 1",
+        "description": "Description for Blog 1",
+        "body": "<p>Description for Blog 1</p>"
+    },
+    {
+        "id": 2,
+        "name": "Blog 2",
+        "description": "Description for Blog 2",
+        "body": "<p>Description for Blog 1</p>"
+    },
+    {
+        "id": 3,
+        "name": "Blog 3",
+        "description": "Description for Blog 3",
+        "body":"<p>Description for Blog 3</p>"
+    }
+]
