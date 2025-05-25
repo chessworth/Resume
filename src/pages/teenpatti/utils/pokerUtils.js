@@ -108,7 +108,7 @@ export let customRules = {
     return { pairValue, kicker };
     }
     
-    export function compareHands(a, b, aId = null, bId = null, isBackShow = false) {
+    export function compareHands(a, b, aId = null, bId = null) {
     const ranks = [
     'High Card',
     'Pair',
@@ -165,7 +165,7 @@ export let customRules = {
     }
     
     // Custom rule: if still tied, player who requested show loses
-    if (customRules.showLoserOnTie && isBackShow && aId !== null && bId !== null) {
+    if (customRules.showLoserOnTie && aId !== null && bId !== null) {
     return -1; // a is requester, loses on tie
     }
     return 0;

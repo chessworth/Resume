@@ -8,7 +8,7 @@ const suitSymbols = {
   S: '♠'
 };
 
-const Card = ({ value, hidden = false }) => {
+const Card = ({ value, hidden = false, revealed = false }) => {
   if (hidden) return <div className={`${styles.card} ${styles.cardBack}`}>🂠</div>;
 
   const rank = value.slice(0, -1);
@@ -16,7 +16,7 @@ const Card = ({ value, hidden = false }) => {
   const isRed = suit === 'H' || suit === 'D';
 
   return (
-    <div className={`${styles.card} ${isRed ? styles.red : styles.black}`}>
+    <div className={`${styles.card} ${isRed ? styles.red : styles.black} ${revealed ? styles.revealed : ''}`}>
       <div className={styles.cardTop}>{rank}</div>
       <div className={styles.cardSuit}>{suitSymbols[suit]}</div>
       <div className={styles.cardBottom}>{rank}</div>
