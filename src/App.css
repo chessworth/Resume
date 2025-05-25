@@ -38,7 +38,7 @@
   margin: 10% 1%;
   padding: 5% 10%;
   height: 5000px;
-  background: hsl(0deg 0% 0% / 66%);
+  background: hsl(0deg 0% 100% / 4%);
   flex: auto;
   border-radius: 50px;
 }

@@ -1,10 +1,18 @@
+:root {
+    --lightmode-text-primary: #604a4c;
+    --lightmode-text-hover: #50311f;
+    --lightmode-bg-primary: #ffffffec;
+    --darkmode-text-primary: #ffffff;
+    --darkmode-text-hover: #ffffff;
+    --darkmode-bg-primary: #604a4c;
+}
 /* Blog page title */
 .title {
   font-size: 2.5rem;
   margin-bottom: 2rem;
   font-weight: 700;
   text-align: center;
-  color: hsl(10, 34%, 80%);
+  color: hsl(0, 0%, 100%);
 }
 
 /* Blog list container */
@@ -20,7 +28,7 @@
 
 /* Each blog list item */
 .blogList li {
-  background-color: #ffffff;
+  background-color: var(--lightmode-bg-primary);
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);

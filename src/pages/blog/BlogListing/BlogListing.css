@@ -6,13 +6,13 @@
 }
 
 .listingTitle a {
-  color: #604a4c;
+  color: var(--lightmode-text-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .listingTitle a:hover {
-  color: #50311f;
+  color: var(--lightmode-text-hover);
   text-decoration: underline;
 }
 
