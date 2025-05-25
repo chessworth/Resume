@@ -39,3 +39,22 @@
   transform: translateY(-4px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
+
+.blogContainer {
+    background-color: hsla(0, 0%, 0%, 0.667);
+    color: var(--lightmode-bg-primary);
+}
+
+pre:has(code){
+    margin: 30px;
+}
+
+code {
+    padding: 0 3px;
+    background-color: hsla(0, 0%, 0%, 0.667);
+}
+
+pre code {
+    padding:20px;
+    color: var(--lightmode-bg-primary);
+}

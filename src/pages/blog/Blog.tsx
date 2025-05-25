@@ -9,7 +9,7 @@ const Blog: React.FC = () => {
     if (id !== null) {
         const blog = blogs.find((blog) => blog.id === Number(id));
         return (
-            <div className='pageContainer'>
+            <div className='pageContainer blogContainer'>
                 <h1 className='title'>{blog?.name}</h1>   
                 <div dangerouslySetInnerHTML={{ __html: blog?.body || '' }} />
             </div>
