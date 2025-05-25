@@ -28,15 +28,23 @@
   color: #61dafb;
 }
 .container {
-  background-color: hsl(158 10% 88% / 1);
   display: flex;
+  background-image: url(./assets/texture.jpeg);
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 .pageContainer {
   margin: 10% 1%;
   padding: 5% 10%;
   height: 5000px;
-  background: hsl(235 12% 44% / 1);
+  background: hsl(0deg 0% 0% / 66%);
   flex: auto;
+  border-radius: 50px;
+}
+h1 {
+    font-size: 30px;
+    color: hsl(0 0% 90% / 1);
 }
 
 @keyframes App-logo-spin {
