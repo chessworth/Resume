@@ -19,8 +19,10 @@ const Blog: React.FC = () => {
         <div className='pageContainer'>
             <h1 className='title'>Blog</h1>   
             <ul className='blogList'>
-                {blogs.map((blog) => (
-                    <li key={blog.id}><BlogListing linkUrl={"/blog?id=" + blog.id} title={blog.name} description={blog.description} /></li>
+                {blogs.sort((a, b) => {
+                    return new Date(b.date).getTime() - new Date(a.date).getTime();
+                }).map((blog) => (
+                    <li key={blog.id}><BlogListing linkUrl={"/blog?id=" + blog.id} title={blog.name} description={blog.description} date={new Date(blog.date)} /></li>
                 ))}
             </ul>
         </div>

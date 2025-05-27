@@ -22,3 +22,12 @@
   color: #4b5563;
   margin: 0;
 }
+.listingHeader {
+    display: flex;
+    justify-content: space-between;
+}
+.listingHeader h3 {
+    color: var(--lightmode-text-primary);
+    opacity: 0.9;
+    font-style: italic;
+}
