@@ -43,6 +43,7 @@
 .blogContainer {
     background-color: hsla(0, 0%, 0%, 0.667);
     color: var(--lightmode-bg-primary);
+    height: auto;
 }
 
 pre:has(code){
