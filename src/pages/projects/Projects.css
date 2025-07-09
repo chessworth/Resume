@@ -85,3 +85,9 @@
     padding: 5px 0;
   }
   
+  /* projects css */
+  .projectList {
+    list-style-type: none;
+    box-shadow: #00000038 0px 0px 0px 20px, #000000a3 0 0 20px 2px;
+    padding: 0;
+  }

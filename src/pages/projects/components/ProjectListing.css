@@ -1,0 +1,18 @@
+.icon img {
+    height: 25vh;
+    vertical-align: bottom;
+}
+.projectListing {
+    display: flex;
+    color: var(--lightmode-text-primary);
+    background-color: var(--lightmode-bg-primary);
+    margin: 50px 0;
+}
+.projectDetails {
+    padding: 0 30px;
+    margin: 40px 0;
+}
+.projectTitle {
+    font-size: 1.5em;
+    margin-bottom: 25px;
+}

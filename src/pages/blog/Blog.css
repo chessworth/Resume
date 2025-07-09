@@ -1,11 +1,3 @@
-:root {
-    --lightmode-text-primary: #604a4c;
-    --lightmode-text-hover: #50311f;
-    --lightmode-bg-primary: #ffffffec;
-    --darkmode-text-primary: #ffffff;
-    --darkmode-text-hover: #ffffff;
-    --darkmode-bg-primary: #604a4c;
-}
 /* Blog page title */
 .title {
   font-size: 2.5rem;
