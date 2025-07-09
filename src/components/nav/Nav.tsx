@@ -41,7 +41,7 @@ function Nav() {
     <nav className='navContainer'>
       <ul className="topnav">
         <NavListItem linkUrl="/Resume" text="Home" iconType={faHouse} />
-        <NavListItem linkUrl="/game" text="Games" iconType={faGamepad} />
+        <NavListItem linkUrl="/projects" text="Projects" iconType={faGamepad} />
         <NavListItem linkUrl="/teenpatti" text="Poker" iconType={faDiamond} />
         <NavListItem linkUrl="/blog" text="Blog" iconType={faBook} />
         <NavListItem linkUrl="/contact" text="Contact" iconType={faContactCard} />

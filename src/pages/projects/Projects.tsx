@@ -1,10 +1,10 @@
 import TicTacToe from "./components/Tictactoe";
 
-function Game() {
+function Projects() {
     return (
         <div className="pageContainer">
             <TicTacToe />
         </div>
     );
 }
-export default Game;
+export default Projects;
