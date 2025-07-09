@@ -35,25 +35,29 @@ const Home: React.FC = () => {
   return (
     <div className="homepage scroll-container">
       <section className="section header" ref={el => setRef(el, 0)}>
-        <h1>Gursimran Singh</h1>
-        <p>Software Developer • Game Programmer • .NET Enthusiast</p>
+        <h1 className="sectionHeading">Gursimran Singh</h1>
+        <div className="sectionBody">
+            <p>Software Developer • Game Programmer • .NET Enthusiast</p>
+        </div>
       </section>
 
       <section className="section about" ref={el => setRef(el, 1)}>
-        <h2>About Me</h2>
-        <p>
-          I'm a software developer based in Toronto with experience in web and game development. My career has spanned a range of technologies including Angular, C#, .NET Core, and Unreal Engine.
-        </p>
-        <ul className="highlights">
-          <li>Improved game frame rates by 25% using Unreal Engine optimizations</li>
-          <li>Reduced server response times by 25% using AWS Lambda functions</li>
-          <li>Created and maintained over 30+ front-end views in enterprise-level Angular applications</li>
-          <li>Developed REST APIs with 99.9% uptime and reliable performance</li>
-        </ul>
+        <h2 className="sectionHeading">About Me</h2>
+        <div className="sectionBody">
+            <p>
+            I'm a software developer based in the GTA with experience in web and game development.<br></br> My career has spanned a range of technologies including Angular, C#, .NET Core, and Unreal Engine.
+            </p>
+            <ul className="highlights">
+                <li>3+ years of professional experience in full-stack and game development</li>
+                <li>Specialized in Angular, .NET Core, C#, and modern C++</li>
+                <li>High Honours graduate, Sheridan College Software Engineering (2021)</li>
+                <li>Led and contributed to projects across web, mobile, and Windows desktop platforms</li>
+            </ul>
+        </div>
       </section>
 
       <section className="section hobbies" ref={el => setRef(el, 2)}>
-        <h2>Hobbies & Interests</h2>
+        <h2 className="sectionHeading">Hobbies & Interests</h2>
         <p>
           Outside of coding, I enjoy playing and running Dungeons & Dragons, exploring game design theory, and contributing to open source side projects.
         </p>

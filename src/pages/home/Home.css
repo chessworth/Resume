@@ -14,19 +14,32 @@ body, html {
 .homepage {
   width: 100%;
   padding-top: 3.5%;
+  height: 100vh;
 }
 
 .section {
   height: 30vh;
   width: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row-reverse;
   align-items: center;
   padding: 40px 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  justify-content: space-evenly;
+}
+
+.section:nth-child(even) {
+    flex-direction: row;
+}
+
+.header, .hobbies{
+    height: 25vh;
+}
+
+.about {
+    height: 40vh;
 }
 
 .header, .about, .hobbies {
