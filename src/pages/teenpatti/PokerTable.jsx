@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './GameStyles.module.css';
 import PlayerSeat from './PlayerSeat';
 import SettingsMenu from './SettingsMenu';
-import { compareHands, setCustomRules, evaluateHand } from './utils/pokerUtils';
+import { compareHands, setCustomRules } from './utils/pokerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faCoins, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 // import ChipStack from './ChipStack';
@@ -20,7 +20,6 @@ const PokerTable = () => {
   const [turnIndex, setTurnIndex] = useState(null);
   const [gameTurnIndex, setGameTurnIndex] = useState(0);
   const [lastBet, setLastBet] = useState(0);
-  const [currentRound, setCurrentRound] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
   const [pauseGame, setPauseGame] = useState(false);
@@ -155,7 +154,6 @@ const PokerTable = () => {
         setMinBetAmount(settings.ante);
         setBetAmount(settings.ante);
         setTurnIndex(gameTurnIndex);
-        setCurrentRound([]);
         setRevealedHands([]);
     };
 
