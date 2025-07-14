@@ -1,7 +1,29 @@
 [build]
-  command = "npm run build"
   publish = "build/"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/manifest.json"
+  to = "/manifest.json"
+  status = 200
+
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/favicon.ico"
+  status = 200
+
+[[redirects]]
+  from = "/logo192.png"
+  to = "/logo192.png"
+  status = 200
+
+[[redirects]]
+  from = "/logo512.png"
+  to = "/logo512.png"
+  status = 200
+
+# Catch-all for SPA routing
 [[redirects]]
   from = "/*"
-  to = "/"
+  to = "/index.html"
   status = 200
