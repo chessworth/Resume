@@ -4,7 +4,7 @@ import blogs from '../../data/blogs.json';
 import { useSearchParams } from 'react-router-dom';
 
 const Blog: React.FC = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const id = searchParams.get("id");
     if (id !== null) {
         const blog = blogs.find((blog) => blog.id === Number(id));

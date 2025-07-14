@@ -1,7 +1,5 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
-import { useContext } from 'react';
-import { UserStateContext } from './components/nav/UserStateContext';
 
 import Projects from './pages/projects/Projects';
 import Nav from './components/nav/Nav';
@@ -11,7 +9,8 @@ import PokerTable from './pages/teenpatti/PokerTable';
 import Blog from './pages/blog/Blog';
 
 function App() {
-  const lightMode = useContext(UserStateContext);
+  // TODO: ADD permanent dark mode/light mode context
+  //const lightMode = useContext(UserStateContext);
   return (
     <Container>
       <Nav />
