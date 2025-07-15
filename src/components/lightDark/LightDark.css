@@ -1,0 +1,10 @@
+button.lightDarkButton {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    padding: 7px;
+    background-color: #ffffff4a
+}
+button.lightDarkButton.dark {
+    background-color: black;
+}

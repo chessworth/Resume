@@ -7,12 +7,14 @@ import Container from './components/container/Container';
 import Home from './pages/home/Home';
 import PokerTable from './pages/teenpatti/PokerTable';
 import Blog from './pages/blog/Blog';
+import { useState } from 'react';
+import LightDark from './components/lightDark/LightDark';
 
 function App() {
-  // TODO: ADD permanent dark mode/light mode context
-  //const lightMode = useContext(UserStateContext);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   return (
     <Container>
+      <LightDark isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
       <Nav />
       <Routes>
               <Route path="/Resume" element={<Home />} />
