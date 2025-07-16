@@ -43,12 +43,20 @@ body, html {
 }
 
 .header, .about, .hobbies {
-  background-color: #222;
-  color: white;
   border-radius: 0;
   text-align: center;
   animation: fadeInDown 1s ease-out;
   margin-bottom: 7px;
+}
+
+.dark .section{
+  background-color: var(--darkmode-bg-primary);
+  color: var(--darkmode-text-primary);
+}
+
+.light .section{
+  background-color: var(--lightmode-bg-primary);
+  color: var(--lightmode-text-primary);
 }
 
 .highlights {

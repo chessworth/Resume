@@ -1,7 +1,7 @@
 :root {
     --lightmode-text-primary: #604a4c;
     --lightmode-text-hover: #50311f;
-    --lightmode-bg-primary: #ffffffec;
+    --lightmode-bg-primary: #e6e6e6d4;
     --darkmode-text-primary: #ffffff;
     --darkmode-text-hover: #ffffff;
     --darkmode-bg-primary: #604a4c;
@@ -53,7 +53,6 @@
 }
 h1 {
     font-size: 30px;
-    color: hsl(0 0% 90% / 1);
 }
 
 @keyframes App-logo-spin {

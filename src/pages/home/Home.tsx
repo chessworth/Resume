@@ -9,8 +9,7 @@ const Home: React.FC = () => {
     sectionRefs.current[index] = el;
   };
   
-  const theme = useContext(DarkModeContext);
-  console.log(theme);
+  const theme = useContext(DarkModeContext) ? 'dark' : 'light';
 
   useEffect(() => {
     const options = {
@@ -36,7 +35,7 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="homepage scroll-container">
+    <div className={"homepage scroll-container " + theme}>
       <section className="section header" ref={el => setRef(el, 0)}>
         <h1 className="sectionHeading">Gursimran Singh</h1>
         <div className="sectionBody">
