@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import "./Home.css";
+import { DarkModeContext } from "../../contexts/DarkModeContext";
 
 const Home: React.FC = () => {
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
@@ -8,6 +9,8 @@ const Home: React.FC = () => {
     sectionRefs.current[index] = el;
   };
   
+  const theme = useContext(DarkModeContext);
+  console.log(theme);
 
   useEffect(() => {
     const options = {
