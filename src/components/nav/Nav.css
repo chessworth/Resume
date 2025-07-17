@@ -1,3 +1,12 @@
+:root{
+  --nav-bg-darkmode: #483d48;;
+  --nav-bg-lightmode: #e6e6e6d4;
+  --nav-color-lightmode: #604a4c;
+  --nav-color-hover-lightmode: #50311f;
+  --nav-color-darkmode: #ffffff;
+  --nav-color-hover-darkmode: #ffffff;
+}
+
 .topnav {
   overflow: hidden;
   margin: 0;
@@ -6,10 +15,10 @@
 }
 .topnav a {
   float: left;
-  color: #f2f2f2;
   text-align: center;
   text-decoration: none;
-  background-color: #111;
+  color: var(--nav-color-lightmode);
+  background-color: var(--nav-bg-lightmode);
   padding: 12px 10px;
   margin: 15px 9px 20px 2px;
   font-size: 10px;
@@ -23,10 +32,19 @@
     width .5s,
     text-indent .5s;
 }
+.dark .topnav a {
+  color: var(--nav-color-darkmode);
+  background-color: var(--nav-bg-darkmode);
+}
 
 .topnav a:hover {
-  background-color: #ddd;
-  color: black;
+  background-color: var(--nav-color-hover-lightmode);
+  color: var(--nav-color-darkmode);
+}
+
+.dark .topnav a:hover {
+  background-color: var(--nav-color-hover-darkmode);
+  color: var(--nav-color-lightmode);
 }
 
 .topnav a.active {

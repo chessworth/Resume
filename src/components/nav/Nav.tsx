@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faHouse, faBook, faGamepad, faContactCard, faDiamond } from '@fortawesome/free-solid-svg-icons';
+import { DarkModeContext } from '../../contexts/DarkModeContext';
 
 function NavListItem({linkUrl, text, iconType} : {linkUrl : string, text : string, iconType : IconProp}) {
   const [scrollPos, setScrollPos] = useState(0);
@@ -37,7 +38,7 @@ function NavListItem({linkUrl, text, iconType} : {linkUrl : string, text : strin
 
 function Nav() {
   return (
-    <nav className='navContainer'>
+    <nav className={'navContainer ' + ( React.useContext(DarkModeContext) ? 'dark' : 'light' )}>
       <ul className="topnav">
         <NavListItem linkUrl="/Resume" text="Home" iconType={faHouse} />
         <NavListItem linkUrl="/projects" text="Projects" iconType={faGamepad} />
