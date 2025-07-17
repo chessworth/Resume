@@ -3,7 +3,7 @@ import './Nav.css';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faHouse, faBook, faGamepad, faContactCard, faDiamond } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faBook, faGamepad, faContactCard } from '@fortawesome/free-solid-svg-icons';
 import { DarkModeContext } from '../../contexts/DarkModeContext';
 
 function NavListItem({linkUrl, text, iconType} : {linkUrl : string, text : string, iconType : IconProp}) {
@@ -42,7 +42,6 @@ function Nav() {
       <ul className="topnav">
         <NavListItem linkUrl="/Resume" text="Home" iconType={faHouse} />
         <NavListItem linkUrl="/projects" text="Projects" iconType={faGamepad} />
-        <NavListItem linkUrl="/teenpatti" text="Poker" iconType={faDiamond} />
         <NavListItem linkUrl="/blog" text="Blog" iconType={faBook} />
         <NavListItem linkUrl="/contact" text="Contact" iconType={faContactCard} />
       </ul>
