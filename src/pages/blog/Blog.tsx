@@ -2,10 +2,13 @@ import './Blog.css';
 import BlogListing from './BlogListing/BlogListing';
 import blogs from '../../data/blogs.json';
 import { useSearchParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { DarkModeContext } from '../../contexts/DarkModeContext';
 
 const Blog: React.FC = () => {
     const [searchParams] = useSearchParams();
     const id = searchParams.get("id");
+    const darkMode = useContext(DarkModeContext) ? 'dark' : 'light';
     if (id !== null) {
         const blog = blogs.find((blog) => blog.id === Number(id));
         return (
@@ -16,7 +19,7 @@ const Blog: React.FC = () => {
         )
     }
     return (
-        <div className='pageContainer'>
+        <div className={'pageContainer ' + darkMode}>
             <h1 className='title'>Blog</h1>   
             <ul className='blogList'>
                 {blogs.sort((a, b) => {

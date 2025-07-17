@@ -6,9 +6,16 @@
 }
 
 .listingTitle a {
-  color: var(--lightmode-text-primary);
   text-decoration: none;
   transition: color 0.2s ease;
+}
+
+.dark *{
+  color: var(--darkmode-text-primary);
+}
+
+.light *{
+  color: var(--lightmode-text-primary);
 }
 
 .listingTitle a:hover {
@@ -22,12 +29,15 @@
   color: #4b5563;
   margin: 0;
 }
+.dark .listingDescription{
+  color: var(--darkmode-text-secondary);
+}
+
 .listingHeader {
     display: flex;
     justify-content: space-between;
 }
 .listingHeader h3 {
-    color: var(--lightmode-text-primary);
     opacity: 0.9;
     font-style: italic;
 }

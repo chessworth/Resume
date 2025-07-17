@@ -3,8 +3,9 @@
     --lightmode-text-hover: #50311f;
     --lightmode-bg-primary: #e6e6e6d4;
     --darkmode-text-primary: #ffffff;
+    --darkmode-text-secondary: #e8e8e8;
     --darkmode-text-hover: #ffffff;
-    --darkmode-bg-primary: #483739;
+    --darkmode-bg-primary: hsla(353, 20%, 25%, 0.8);
 }
 
 .App {

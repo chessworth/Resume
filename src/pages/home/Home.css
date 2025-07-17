@@ -34,19 +34,30 @@ body, html {
     flex-direction: row;
 }
 
-.header, .hobbies{
+.header{
     height: 20vh;
 }
 
 .about {
-    height: 35vh;
+    height: 30vh;
+}
+
+li {
+    text-align: left;
+}
+
+section ul {
+  margin-left: 45px;
 }
 
 .header, .about, .hobbies {
   border-radius: 0;
-  text-align: center;
   animation: fadeInDown 1s ease-out;
   margin-bottom: 7px;
+}
+
+.hobbies {
+  height: 25vh
 }
 
 .dark .section{
@@ -85,11 +96,11 @@ body, html {
 }
 
 .scroll-container > *:nth-child(2) {
-  animation-delay: 3.2s;
+  animation-delay: 1.7s;
 }
 
 .scroll-container > *:nth-child(3) {
-  animation-delay: 6.2s;
+  animation-delay: 3.2s;
 }
 
 .section > * {

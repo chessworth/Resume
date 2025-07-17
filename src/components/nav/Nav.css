@@ -48,9 +48,14 @@
 }
 
 .topnav a.active {
-  background-color: #04AA6D;
+  background-color: hsl(335 50% 45% / 1);
   color: white;
 }
+
+.dark .topnav a.active {
+  background-color: hsl(335 50% 31% / 1);
+}
+
 ul.topnav {
   padding-inline-start: 0;
   list-style: none;

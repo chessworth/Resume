@@ -47,7 +47,7 @@ const Home: React.FC = () => {
         <h2 className="sectionHeading">About Me</h2>
         <div className="sectionBody">
             <p>
-            I'm a software developer based in the GTA with experience in web and game development.<br></br> My career has spanned a range of technologies including Angular, C#, .NET Core, and Unreal Engine.
+            I'm a software developer based in the GTA with experience in website, application and game development.<br></br> My career has spanned a range of technologies including Angular, C#, .NET Core, and Unreal Engine.
             </p>
             <ul className="highlights">
                 <li>3+ years of professional experience in full-stack and game development</li>
@@ -61,7 +61,12 @@ const Home: React.FC = () => {
       <section className="section hobbies" ref={el => setRef(el, 2)}>
         <h2 className="sectionHeading">Hobbies & Interests</h2>
         <p>
-          Outside of coding, I enjoy playing and running Dungeons & Dragons, exploring game design theory, and contributing to open source side projects.
+          Outside of coding, I enjoy a bunch of hobbies including but not limited to:
+          <ul className="hobbiesList">
+            <li>Reading (primarily fantasy novels, but I will give anything a shot)</li>
+            <li>Music (mostly listening, some messing around with a piano or harmonica)</li>
+            <li>Writing, mostly short form like poetry but I intend to write a novel one day</li>
+          </ul>
         </p>
       </section>
     </div>

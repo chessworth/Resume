@@ -12,7 +12,7 @@ import LightDark from './components/lightDark/LightDark';
 import { DarkModeContext } from './contexts/DarkModeContext';
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   return (
     <DarkModeContext.Provider value={isDarkMode}>
       <Container>

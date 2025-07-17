@@ -4,7 +4,11 @@
   margin-bottom: 2rem;
   font-weight: 700;
   text-align: center;
-  color: hsl(0, 0%, 100%);
+  color: var(--lightmode-text-primary);
+}
+
+.dark .title {
+  color: var(--darkmode-text-primary);
 }
 
 /* Blog list container */
@@ -25,6 +29,10 @@
   border-radius: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark .blogList li {
+  background-color: var(--darkmode-bg-primary);
 }
 
 .blogList li:hover {
