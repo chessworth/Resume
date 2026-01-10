@@ -214,7 +214,7 @@ export const NutritionTracker: React.FC = () => {
                     className="nt-input"
                     style={{width: '100px', textAlign: 'right', paddingRight: '2rem', fontSize: '1.25rem', fontWeight: 900, borderColor: 'var(--primary)'}}
                   />
-                  <span style={{position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, fontSize: '0.75rem', color: 'var(--primary)'}}>g</span>
+                  <span style={{position: 'absolute', right: '1.75rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, fontSize: '0.75rem', color: 'var(--primary)'}}>g</span>
                 </div>
               </div>
               <input type="range" min="1" max="1000" step="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} style={{width: '100%', accentColor: 'var(--primary)'}} />
