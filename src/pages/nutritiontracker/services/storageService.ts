@@ -1,10 +1,9 @@
+import { FoodItem, DailyLog, UserGoals } from "../types";
+//import { supabase } from "./supabaseClient"; // PLACEHOLDER: Imported placeholder client
 
-import { FoodItem, DailyLog, UserGoals, Micronutrients } from "../types";
-import { supabase } from "./supabaseClient"; // PLACEHOLDER: Imported placeholder client
-
-const FOODS_KEY = 'nutritrack_foods';
-const LOGS_KEY = 'nutritrack_logs';
-const GOALS_KEY = 'nutritrack_goals';
+const FOODS_KEY = "nutritrack_foods";
+const LOGS_KEY = "nutritrack_logs";
+const GOALS_KEY = "nutritrack_goals";
 
 /**
  * Default goals used when no user goals are saved in storage.
@@ -20,14 +19,14 @@ const defaultGoals: UserGoals = {
     iron: 18,
     calcium: 1000,
     potassium: 3500,
-    sodium: 2300
-  }
+    sodium: 2300,
+  },
 };
 
 /**
- * Service for local persistence handling. 
+ * Service for local persistence handling.
  * Designed to be swappable with a real database (e.g., Supabase).
- * 
+ *
  * PLACEHOLDER NOTE: The methods currently prioritize LocalStorage but are structured
  * to be easily converted to async Supabase calls.
  */
@@ -62,7 +61,7 @@ export const storageService = {
     // PLACEHOLDER: In production, use: await supabase.from('logs').select('*').eq('date', date)
     const data = localStorage.getItem(LOGS_KEY);
     const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
-    return allLogs.filter(log => log.date === date);
+    return allLogs.filter((log) => log.date === date);
   },
 
   /**
@@ -85,7 +84,7 @@ export const storageService = {
     // PLACEHOLDER: In production, use: await supabase.from('logs').update(updatedLog).eq('id', updatedLog.id)
     const data = localStorage.getItem(LOGS_KEY);
     const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
-    const index = allLogs.findIndex(l => l.id === updatedLog.id);
+    const index = allLogs.findIndex((l) => l.id === updatedLog.id);
     if (index !== -1) {
       allLogs[index] = updatedLog;
       localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
@@ -100,7 +99,7 @@ export const storageService = {
     // PLACEHOLDER: In production, use: await supabase.from('logs').delete().eq('id', id)
     const data = localStorage.getItem(LOGS_KEY);
     const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
-    const filtered = allLogs.filter(l => l.id !== id);
+    const filtered = allLogs.filter((l) => l.id !== id);
     localStorage.setItem(LOGS_KEY, JSON.stringify(filtered));
   },
 
@@ -124,5 +123,5 @@ export const storageService = {
   saveGoals: (goals: UserGoals) => {
     // PLACEHOLDER: In production, use: await supabase.from('user_profiles').update({ goals }).eq('user_id', currentUserId)
     localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
-  }
+  },
 };
