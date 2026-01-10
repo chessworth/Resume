@@ -7,6 +7,7 @@ import Container from './components/container/Container';
 import Home from './pages/home/Home';
 import PokerTable from './pages/teenpatti/PokerTable';
 import Blog from './pages/blog/Blog';
+import {NutritionTracker} from './pages/nutritiontracker/App';
 import { useState } from 'react';
 import LightDark from './components/lightDark/LightDark';
 import { DarkModeContext } from './contexts/DarkModeContext';
@@ -24,7 +25,7 @@ function App() {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/teenpatti" element={<PokerTable />} />
                 <Route path='/blog' element={<Blog />} />
-                <Route path='/contact' /*element={<Contact />}*/ />
+                <Route path='/nutritiontracker' element={<NutritionTracker />} />
                 <Route path="*" /*element={<NoMatch />}*/ />
         </Routes>
       </Container>

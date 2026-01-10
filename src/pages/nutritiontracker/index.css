@@ -1,0 +1,104 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+/* Semantic NutriTrack Components */
+.nt-card {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}
+
+.nt-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    color: #0f172a; /* Explicit Black/Dark Text */
+    font-weight: 600;
+    outline: none;
+    transition: all 0.2s;
+}
+.nt-input:focus {
+    box-shadow: 0 0 0 2px #10b981;
+    border-color: transparent;
+    }
+
+.nt-btn-emerald {
+    background-color: #059669;
+    color: white;
+    font-weight: 900;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.nt-btn-emerald:hover { background-color: #047857; }
+.nt-btn-emerald:active { transform: scale(0.98); }
+
+.nt-btn-dark {
+    background-color: #0f172a;
+    color: white;
+    font-weight: 900;
+    padding: 1rem;
+    border-radius: 1rem;
+    transition: all 0.2s;
+}
+.nt-btn-dark:hover { background-color: #000; }
+
+.nt-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.nt-modal-content {
+    background: white;
+    width: 100%;
+    max-width: 32rem;
+    border-radius: 2rem;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.nt-badge {
+    font-size: 0.625rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+}
+
+.nt-progress-bg {
+    width: 100%;
+    background-color: #f1f5f9;
+    height: 0.5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+/* Transition Utility */
+.nt-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
