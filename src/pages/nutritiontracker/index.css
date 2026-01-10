@@ -43,6 +43,8 @@ body {
 .nt-app {
   min-height: 100vh;
   padding-bottom: 8rem;
+  background: wheat;
+  width: 100%;
 }
 
 .nt-container {
@@ -298,6 +300,7 @@ body {
   font-family: inherit;
   transition: all 0.2s;
   outline: none;
+  color: var(--slate-900);
 }
 
 .nt-input:focus {
