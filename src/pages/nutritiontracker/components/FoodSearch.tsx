@@ -24,7 +24,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
     food.name.toLowerCase().includes(query.toLowerCase())
   );
   
-  /**
+ /**
   * Triggers the AI nutritional analysis for the current query string.
   */
   const handleAISearch = async () => {
