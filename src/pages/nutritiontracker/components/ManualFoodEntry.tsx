@@ -16,7 +16,7 @@ const ManualFoodEntry: React.FC<ManualFoodEntryProps> = ({ onSave, onClose }) =>
   const [name, setName] = useState('');
   const [category] = useState('Custom');
   const [macros, setMacros] = useState<Macronutrients>({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
-  const [micros] = useState<Micronutrients>({ vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0 });
+  const [micros] = useState<Micronutrients>({ vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0, vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, magnesium: 0 });
 
   /**
    * Validates and submits the new food item definition.

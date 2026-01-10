@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { FoodItem, DailyLog, DailyStats, UserGoals, Micronutrients } from './types';
+import { FoodItem, DailyLog, DailyStats, UserGoals, Micronutrients, UserProfile } from './types';
 import { storageService } from './services/storageService';
+import { userService } from './services/userService';
 import Dashboard from './components/Dashboard';
 import FoodSearch from './components/FoodSearch';
 import GoalSettings from './components/GoalSettings';
 import ManualFoodEntry from './components/ManualFoodEntry';
 import LogEditModal from './components/LogEditModal';
 import './index.css';
+import Auth from './components/Auth';
 
 export const NutritionTracker: React.FC = () => {
+  const [user, setUser] = useState<UserProfile | null>(userService.getCurrentUser());
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [quantity, setQuantity] = useState<number>(100);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -31,6 +34,7 @@ export const NutritionTracker: React.FC = () => {
   const todayStr = new Date().toISOString().split('T')[0];
 
   const refreshStats = useCallback(() => {
+    if (!user) return;
     const foods = storageService.getFoods();
     setFoodLibrary(foods);
 
@@ -76,12 +80,21 @@ export const NutritionTracker: React.FC = () => {
     }, { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, totalFiber: 0, totalMicros: initialMicros });
 
     setTodayStats({ ...totals, logs });
-  }, [todayStr]);
+  }, [todayStr, user]);
 
   useEffect(() => {
     refreshStats();
   }, [refreshStats]);
 
+  const handleLogout = () => {
+    userService.logout();
+    setUser(null);
+  };
+
+  if (!user) {
+    return <Auth onLoginSuccess={setUser} />;
+  }
+  
   const handleAddLog = () => {
     if (!selectedFood) return;
     const ratio = quantity / 100;
@@ -150,9 +163,21 @@ export const NutritionTracker: React.FC = () => {
             </div>
             <h1>Nutri<span className="highlight">Track</span></h1>
           </div>
-          <button onClick={() => setIsSettingsOpen(true)} className="nt-btn-icon">
-            <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-          </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="nt-user-profile">
+               <div className="nt-user-icon">
+                  <i className={`fa-solid ${user.icon}`}></i>
+               </div>
+               <span className="nt-user-name">{user.name}</span>
+            </div>
+            <button onClick={() => setIsSettingsOpen(true)} className="nt-btn-icon">
+              <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+            </button>
+            <button onClick={handleLogout} className="nt-btn-icon" style={{ color: 'var(--danger)' }}>
+                <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </button>
+          </div>
         </div>
       </header>
 

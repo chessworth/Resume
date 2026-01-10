@@ -12,7 +12,7 @@ const defaultGoals: UserGoals = {
   fat: 70,
   fiber: 30,
   micros: {
-    vitaminC: 90, iron: 18, calcium: 1000, potassium: 3500, sodium: 2300
+    vitaminC: 90, iron: 18, calcium: 1000, potassium: 3500, sodium: 2300, vitaminA: 900, vitaminD: 15, vitaminE: 15, vitaminK: 120, magnesium: 400
   }
 };
 

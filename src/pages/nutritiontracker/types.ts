@@ -13,6 +13,11 @@ export interface Micronutrients {
   calcium: number; // mg
   potassium: number; // mg
   sodium: number; // mg
+  vitaminA: number; // mcg
+  vitaminD: number; // mcg
+  vitaminE: number; // mg
+  vitaminK: number; // mcg
+  magnesium: number; // mg
 }
 
 export interface UserGoals {
@@ -52,4 +57,11 @@ export interface DailyStats {
   totalFiber: number;
   totalMicros: Micronutrients;
   logs: DailyLog[];
+}
+export interface UserProfile {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  icon: string; // FontAwesome class name
 }
