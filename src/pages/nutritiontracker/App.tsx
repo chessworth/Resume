@@ -24,7 +24,7 @@ export const NutritionTracker: React.FC = () => {
     totalCarbs: 0,
     totalFat: 0,
     totalFiber: 0,
-    totalMicros: { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0 },
+    totalMicros: { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0, vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, magnesium: 0 },
     logs: []
   });
 
@@ -35,7 +35,7 @@ export const NutritionTracker: React.FC = () => {
     setFoodLibrary(foods);
 
     const logs = storageService.getLogs(todayStr);
-    const initialMicros: Micronutrients = { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0 };
+    const initialMicros: Micronutrients = { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0, vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, magnesium: 0 };
     
     const totals = logs.reduce((acc, log) => {
       const food = foods.find(f => f.id === log.foodId);
@@ -47,6 +47,11 @@ export const NutritionTracker: React.FC = () => {
         calcium: (food?.micros.calcium || 0) * ratio,
         potassium: (food?.micros.potassium || 0) * ratio,
         sodium: (food?.micros.sodium || 0) * ratio,
+        vitaminA: (food?.micros.vitaminA || 0) * ratio,
+        vitaminD: (food?.micros.vitaminD || 0) * ratio,
+        vitaminE: (food?.micros.vitaminE || 0) * ratio,
+        vitaminK: (food?.micros.vitaminK || 0) * ratio,
+        magnesium: (food?.micros.magnesium || 0) * ratio,
       };
 
       return {
@@ -61,6 +66,11 @@ export const NutritionTracker: React.FC = () => {
           calcium: acc.totalMicros.calcium + entryMicros.calcium,
           potassium: acc.totalMicros.potassium + entryMicros.potassium,
           sodium: acc.totalMicros.sodium + entryMicros.sodium,
+          vitaminA: acc.totalMicros.vitaminA + entryMicros.vitaminA,
+          vitaminD: acc.totalMicros.vitaminD + entryMicros.vitaminD,
+          vitaminE: acc.totalMicros.vitaminE + entryMicros.vitaminE,
+          vitaminK: acc.totalMicros.vitaminK + entryMicros.vitaminK,
+          magnesium: acc.totalMicros.magnesium + entryMicros.magnesium
         }
       };
     }, { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, totalFiber: 0, totalMicros: initialMicros });
@@ -94,6 +104,11 @@ export const NutritionTracker: React.FC = () => {
         calcium: selectedFood.micros.calcium * ratio,
         potassium: selectedFood.micros.potassium * ratio,
         sodium: selectedFood.micros.sodium * ratio,
+        vitaminA: selectedFood.micros.vitaminA * ratio,
+        vitaminD: selectedFood.micros.vitaminD * ratio,
+        vitaminE: selectedFood.micros.vitaminE * ratio,
+        vitaminK: selectedFood.micros.vitaminK * ratio,
+        magnesium: selectedFood.micros.magnesium * ratio,
       }
     };
     storageService.addLog(log);
