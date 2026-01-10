@@ -33,6 +33,7 @@ export const NutritionTracker: React.FC = () => {
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<DailyLog | null>(null);
   
+  const [foodLibrary, setFoodLibrary] = useState<FoodItem[]>([]);
   const [userGoals, setUserGoals] = useState<UserGoals>(storageService.getGoals());
   const [todayStats, setTodayStats] = useState<DailyStats>({
     totalCalories: 0,
@@ -51,11 +52,14 @@ export const NutritionTracker: React.FC = () => {
    * Aggregates both macros and micronutrients into current state.
    */
   const refreshStats = useCallback(() => {
+    const foods = storageService.getFoods();
+    setFoodLibrary(foods); // Update reactive food library state
+
     const logs = storageService.getLogs(todayStr);
     const initialMicros: Micronutrients = { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0 };
     
     const totals = logs.reduce((acc, log) => {
-      const food = storageService.getFoods().find(f => f.id === log.foodId);
+      const food = foods.find(f => f.id === log.foodId);
       const ratio = log.quantityGrams / 100;
 
       const entryMicros = log.calculatedMicros || {
@@ -130,8 +134,8 @@ export const NutritionTracker: React.FC = () => {
    */
   const handleSaveManualFood = (food: FoodItem) => {
     storageService.saveFood(food);
-    setIsManualEntryOpen(false);
     refreshStats();
+    setIsManualEntryOpen(false);
     setSelectedFood(food);
   };
 
@@ -189,6 +193,7 @@ export const NutritionTracker: React.FC = () => {
             <span className="nt-badge bg-emerald-100 text-emerald-700">AI Enabled</span>
           </div>
           <FoodSearch 
+            availableFoods={foodLibrary}
             onSelectFood={setSelectedFood} 
             onRefreshFoods={refreshStats}
             onOpenManualEntry={() => setIsManualEntryOpen(true)}

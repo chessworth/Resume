@@ -1,10 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, } from 'react';
 import { FoodItem } from '../types';
 import { fetchFoodDataFromAI } from '../services/geminiService';
 import { storageService } from '../services/storageService';
 
 interface FoodSearchProps {
+  availableFoods: FoodItem[];
   onSelectFood: (food: FoodItem) => void;
   onRefreshFoods: () => void;
   onOpenManualEntry: () => void;
@@ -15,13 +16,11 @@ interface FoodSearchProps {
  * Prioritizes local library search, then offers Gemini AI fallback or Manual Entry.
  * @param {FoodSearchProps} props - Callbacks for selection, refresh and manual opening.
  */
-const FoodSearch: React.FC<FoodSearchProps> = ({ onSelectFood, onRefreshFoods, onOpenManualEntry }) => {
+const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, onRefreshFoods, onOpenManualEntry }) => {
   const [query, setQuery] = useState('');
   const [isSearchingAI, setIsSearchingAI] = useState(false);
   const [aiError, setAiError] = useState('');
 
-  // Memoize foods to avoid re-calculation unless query or searching state changes
-  const availableFoods = useMemo(() => storageService.getFoods(), [query, isSearchingAI]);
 
   // Filter local library based on search string
   const filteredFoods = availableFoods.filter(food => 
