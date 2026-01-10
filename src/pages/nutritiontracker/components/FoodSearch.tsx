@@ -60,7 +60,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
 
   return (
     <div className="nt-card">
-      <div style={{display: 'flex', gap: '0.75rem'}}>
+      <div style={{display: 'flex', gap: '5%'}}>
         <div style={{position: 'relative', flex: 1}}>
           <input
             type="text"
@@ -70,7 +70,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
             className="nt-input"
             style={{paddingLeft: '3rem'}}
           />
-          <svg style={{position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: 'var(--slate-400)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg style={{position: 'absolute', left: '2rem', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: 'var(--slate-400)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>

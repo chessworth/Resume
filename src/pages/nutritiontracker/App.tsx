@@ -7,7 +7,6 @@ import FoodSearch from './components/FoodSearch';
 import GoalSettings from './components/GoalSettings';
 import ManualFoodEntry from './components/ManualFoodEntry';
 import LogEditModal from './components/LogEditModal';
-import './index.css';
 
 export const NutritionTracker: React.FC = () => {
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
