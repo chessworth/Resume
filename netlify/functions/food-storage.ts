@@ -1,6 +1,3 @@
-
-// Note: In a production Netlify environment, you would run: npm install @supabase/supabase-js
-// The following code simulates the logic using that library.
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client with environment variables
@@ -81,7 +78,12 @@ export const handler = async (event: any) => {
             iron: micros.iron,
             calcium: micros.calcium,
             potassium: micros.potassium,
-            sodium: micros.sodium
+            sodium: micros.sodium,
+            vitamin_a: micros.vitaminA,
+            vitamin_d: micros.vitaminD,
+            vitamin_e: micros.vitaminE,
+            vitamin_k: micros.vitaminK,
+            magnesium: micros.magnesium
           });
 
         if (microError) throw microError;
@@ -104,6 +106,7 @@ export const handler = async (event: any) => {
           .from('daily_logs')
           .insert({
             id: id,
+            user_id: id,
             food_id: foodId,
             food_name: foodName,
             log_date: date,

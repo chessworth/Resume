@@ -43,9 +43,14 @@ export const handler = async (event: any) => {
                 iron: { type: Type.NUMBER },
                 calcium: { type: Type.NUMBER },
                 potassium: { type: Type.NUMBER },
-                sodium: { type: Type.NUMBER }
+                sodium: { type: Type.NUMBER },
+                vitaminA: { type: Type.NUMBER },
+                vitaminD: { type: Type.NUMBER },
+                vitaminE: { type: Type.NUMBER },
+                vitaminK: { type: Type.NUMBER },
+                magnesium: { type: Type.NUMBER }
               },
-              required: ["vitaminC", "iron", "calcium", "potassium", "sodium"]
+              required: ["vitaminC", "iron", "calcium", "potassium", "sodium", "vitaminA", "vitaminD", "vitaminE", "vitaminK", "magnesium"]
             }
           },
           required: ["name", "description", "category", "macros", "micros"]
