@@ -10,9 +10,18 @@ import ManualFoodEntry from './components/ManualFoodEntry';
 import LogEditModal from './components/LogEditModal';
 import './index.css';
 import Auth from './components/Auth';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconName, library } from '@fortawesome/fontawesome-svg-core';
+import { faUserNinja, faUserAstronaut, faUserSecret, faRobot, faGhost, faDragon, faCat, faDog, faHippo, faPizzaSlice } from '@fortawesome/free-solid-svg-icons';
+
+library.add( 
+  faUserNinja, faUserAstronaut, faUserSecret, faRobot, 
+  faGhost, faDragon, faCat, faDog, faHippo, faPizzaSlice
+);
 
 export const NutritionTracker: React.FC = () => {
-  const [user, setUser] = useState<UserProfile | null>(userService.getCurrentUser());
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [quantity, setQuantity] = useState<number>(100);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -32,6 +41,21 @@ export const NutritionTracker: React.FC = () => {
   });
 
   const todayStr = new Date().toISOString().split('T')[0];
+
+    // Auth initialization
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const currentUser = await userService.getCurrentUser();
+        setUser(currentUser);
+      } catch (e) {
+        console.error("Auth init failed", e);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    initAuth();
+  }, []);
 
   const refreshStats = useCallback(() => {
     if (!user) return;
@@ -83,13 +107,23 @@ export const NutritionTracker: React.FC = () => {
   }, [todayStr, user]);
 
   useEffect(() => {
-    refreshStats();
-  }, [refreshStats]);
+    if (user) refreshStats();
+  }, [refreshStats, user]);
 
-  const handleLogout = () => {
-    userService.logout();
+  const handleLogout = async () => {
+    await userService.logout();
     setUser(null);
   };
+
+  if (authLoading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slate-50)' }}>
+         <div className="nt-logo-icon fa-spin" style={{ width: '4rem', height: '4rem' }}>
+           <svg style={{width: '32px', height: '32px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+         </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Auth onLoginSuccess={setUser} />;
@@ -167,7 +201,7 @@ export const NutritionTracker: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div className="nt-user-profile">
                <div className="nt-user-icon">
-                  <i className={`fa-solid ${user.icon}`}></i>
+                  <FontAwesomeIcon icon={user.icon ? ['fas', user.icon as IconName] : 'user-astronaut'} />
                </div>
                <span className="nt-user-name">{user.name}</span>
             </div>

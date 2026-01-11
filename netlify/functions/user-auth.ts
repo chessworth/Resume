@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.SUPABASE_SERVICE_ROLE_KEY || '' // Use Service Role to allow admin-like actions if needed
 );
 
 export const handler = async (event: any) => {
@@ -15,57 +15,63 @@ export const handler = async (event: any) => {
     const { action, payload } = JSON.parse(event.body || "{}");
 
     switch (action) {
-      case "SIGN_UP": {
-        const userId = crypto.randomUUID();
-        const { error } = await supabase
-          .from('users')
-          .insert({
-            id: userId,
-            name: payload.name,
-            email: payload.email,
-            phone: payload.phone,
-            icon: payload.icon,
-            created_at: new Date().toISOString()
-          });
+      case "LOGIN": {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: payload.email,
+          password: payload.password,
+        });
 
         if (error) throw error;
-
-        return {
-          statusCode: 201,
-          body: JSON.stringify({ id: userId, ...payload })
-        };
-      }
-
-      case "LOGIN": {
-        // Simple mock login based on email
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('email', payload.email)
-          .single();
-
-        if (error || !data) {
-            // If user doesn't exist in this simulation, we'd throw or return 404
-            // For this sandbox, let's create a temporary one if email matches "test"
-            if (payload.email === 'test@example.com') {
-                return { statusCode: 200, body: JSON.stringify({ id: 'mock-id', name: 'Test User', icon: 'fa-user-ninja' })};
-            }
-            throw new Error("User not found");
-        }
+        if (!data.user) throw new Error("User not found");
 
         return {
           statusCode: 200,
-          body: JSON.stringify(data)
+          body: JSON.stringify({
+            id: data.user.id,
+            name: data.user.user_metadata.full_name || 'User',
+            email: data.user.email,
+            phone: data.user.user_metadata.phone,
+            icon: data.user.user_metadata.icon || 'fa-user'
+          })
+        };
+      }
+
+      case "SIGN_UP": {
+        const { data, error } = await supabase.auth.signUp({
+          email: payload.email,
+          password: payload.password,
+          options: {
+            data: {
+              full_name: payload.name,
+              phone: payload.phone,
+              icon: payload.icon,
+            }
+          }
+        });
+
+        if (error) throw error;
+        if (!data.user) throw new Error("Sign up failed");
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            id: data.user.id,
+            name: data.user.user_metadata.full_name,
+            email: data.user.email,
+            phone: data.user.user_metadata.phone,
+            icon: data.user.user_metadata.icon
+          })
         };
       }
 
       default:
-        return { statusCode: 400, body: "Invalid action" };
+        return { statusCode: 400, body: JSON.stringify({ error: "Invalid action" }) };
     }
   } catch (error: any) {
+    console.error("Auth Proxy Error:", error);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      statusCode: 401,
+      body: JSON.stringify({ error: error.message || "Authentication error" })
     };
   }
 };
