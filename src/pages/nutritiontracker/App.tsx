@@ -134,6 +134,7 @@ export const NutritionTracker: React.FC = () => {
     const ratio = quantity / 100;
     const log: DailyLog = {
       id: crypto.randomUUID(),
+      user_id: user.id,
       foodId: selectedFood.id,
       foodName: selectedFood.name,
       date: todayStr,

@@ -41,6 +41,7 @@ export interface FoodItem {
 
 export interface DailyLog {
   id: string;
+  user_id: string;
   foodId: string;
   foodName: string;
   date: string; // YYYY-MM-DD
