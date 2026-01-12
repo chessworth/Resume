@@ -53,7 +53,15 @@ export const storageService = {
   },
 
   addLog: async (log: DailyLog) => {
-    // 1. Sync with Supabase via Backend Function
+    // 1. Persist Locally
+    log.id = crypto.randomUUID();
+    const cryptoId = log.id;
+    const data = localStorage.getItem(LOGS_KEY);
+    const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
+    allLogs.push(log);
+    localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
+    
+    // 2. Sync with Supabase via Backend Function
     try {
       let syncedID = await fetch('/.netlify/functions/food-storage', {
         method: 'POST',
@@ -64,11 +72,12 @@ export const storageService = {
     } catch (e) {
       console.warn("Log sync failed, but local copy saved.");
     }
-    // 2. Persist Locally
-    const data = localStorage.getItem(LOGS_KEY);
-    const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
-    allLogs.push(log);
-    localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
+    //if succesful, update local log id
+    const index = allLogs.findIndex(l => l.id === cryptoId);
+    if (index !== -1) {
+      allLogs[index].id = log.id;
+      localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
+    }
   },
 
   updateLog: (updatedLog: DailyLog) => {
