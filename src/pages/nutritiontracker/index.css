@@ -399,30 +399,36 @@ body {
 
 .nt-btn-premium {
   background: radial-gradient(
-    ellipse farthest-corner at right bottom,
-    #fedb37 0%,
-    #fdb931 4%,
-    #9f7928 15%,
-    #8a6e2f 20%,
-    #5d4a1f 50%
-  ) bottom right;
-  background-size: 200% 200%;
-  animation: premiumShine 3s alternate infinite;
+    ellipse at 50% 52%,
+    #ffe056 2%,
+    #fac14f 4%,
+    #be902e 13%,
+    #8e7439 24%,
+    #5d4a1f 52%
+  ) bottom right/200% 200%;
+  animation: premiumShine 3s linear infinite;
 }
 
 .nt-btn-premium:hover {
   background: radial-gradient(
-    ellipse farthest-corner at right bottom,
-    #fedb37 2%,
-    #fdb931 7.5%,
-    #9f7928 15%,
-    #8a6e2f 24%,
-    #5d4a1f 50%
-  );
+    circle at 50% 75%,
+    #ffe056 2%,
+    #fac14f 4%,
+    #be902e 13%,
+    #8e7439 24%,
+    #5d4a1f 52%
+  ) bottom right/200% 200%;
+  animation: premiumShine 3s linear infinite;
 }
 @keyframes premiumShine {
-  to {
-    background-position:bottom left;
+  0% {
+    background-position:0% 0%;
+  }
+  60% {
+    background-position:100% 0%;
+  }
+  100% {
+    background-position:0% 0%;
   }
 }
 
