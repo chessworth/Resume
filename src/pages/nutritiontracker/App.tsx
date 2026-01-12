@@ -132,7 +132,7 @@ export const NutritionTracker: React.FC = () => {
   }
   
   const handleAddLog = () => {
-    if (!selectedFood) return;
+    if (!selectedFood || !selectedFood.id) return;
     const ratio = quantity / 100;
     const log: DailyLog = {
       id: crypto.randomUUID(),
@@ -168,7 +168,7 @@ export const NutritionTracker: React.FC = () => {
   };
 
   const handleSaveManualFood = (food: FoodItem) => {
-    storageService.saveFood(food);
+    storageService.saveFood(food, true);
     refreshStats();
     setIsManualEntryOpen(false);
     setSelectedFood(food);

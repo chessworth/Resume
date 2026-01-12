@@ -44,7 +44,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
           micros: result.micros!,
           servingSizeGrams: result.servingSizeGrams || 100
         };
-        storageService.saveFood(newFood);
+        storageService.saveFood(newFood, true);
         onRefreshFoods();
         onSelectFood(newFood);
         setQuery('');
