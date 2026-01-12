@@ -8,7 +8,7 @@ import { FoodItem } from "../types";
  */
 export const searchFoodInDatabase = async (foodName: string): Promise<Partial<FoodItem> | null> => {
   try {
-    const response = await fetch('/.netlify/functions/search-food-database', {
+    const response = await fetch('/.netlify/functions/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ foodName, isAiSearch: false })

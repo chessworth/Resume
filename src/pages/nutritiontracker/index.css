@@ -401,23 +401,31 @@ body {
   background: radial-gradient(
     ellipse farthest-corner at right bottom,
     #fedb37 0%,
-    #fdb931 8%,
-    #9f7928 30%,
-    #8a6e2f 40%,
-    #5d4a1f 100%
-  );
+    #fdb931 4%,
+    #9f7928 15%,
+    #8a6e2f 20%,
+    #5d4a1f 50%
+  ) bottom right;
+  background-size: 200% 200%;
+  animation: premiumShine 3s alternate infinite;
 }
 
 .nt-btn-premium:hover {
   background: radial-gradient(
     ellipse farthest-corner at right bottom,
-    #fedb37 7%,
-    #fdb931 15%,
-    #9f7928 37%,
-    #8a6e2f 47%,
-    #5d4a1f 100%
+    #fedb37 2%,
+    #fdb931 7.5%,
+    #9f7928 15%,
+    #8a6e2f 24%,
+    #5d4a1f 50%
   );
 }
+@keyframes premiumShine {
+  to {
+    background-position:bottom left;
+  }
+}
+
 .nt-btn-group {
   display: flex;
   flex-direction: column;

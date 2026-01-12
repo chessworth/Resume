@@ -13,7 +13,7 @@ export const fetchFoodDataFromAI = async (foodName: string): Promise<Partial<Foo
     const response = await fetch('/.netlify/functions/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ foodName })
+      body: JSON.stringify({ foodName, isAiSearch: true })
     });
 
     if (!response.ok) {
