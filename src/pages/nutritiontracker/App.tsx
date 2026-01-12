@@ -132,7 +132,11 @@ export const NutritionTracker: React.FC = () => {
   }
   
   const handleAddLog = () => {
-    if (!selectedFood || !selectedFood.id) return;
+    if (!selectedFood) return;
+    if (!selectedFood.id){
+      if (!selectedFood.macros.food_id || !selectedFood.micros.food_id) return;
+      selectedFood.id = selectedFood.macros.food_id ?? selectedFood.micros.food_id;
+    }
     const ratio = quantity / 100;
     const log: DailyLog = {
       id: crypto.randomUUID(),

@@ -5,6 +5,7 @@ export interface Macronutrients {
   carbs: number;
   fat: number;
   fiber: number;
+  food_id?: string;
 }
 
 export interface Micronutrients {
@@ -18,6 +19,7 @@ export interface Micronutrients {
   vitaminE: number; // mg
   vitaminK: number; // mcg
   magnesium: number; // mg
+  food_id?: string;
 }
 
 export interface UserGoals {
