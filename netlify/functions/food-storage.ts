@@ -54,14 +54,17 @@ export const handler = async (event: any) => {
         // 1. Insert Base Food Item
         const { data, error: foodError } = await supabase
           .from("foods")
-          .upsert({
-            name: name,
-            description: description,
-            category: category,
-            serving_size_grams: servingSizeGrams,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'name' })
-          .select('id')
+          .upsert(
+            {
+              name: name,
+              description: description,
+              category: category,
+              serving_size_grams: servingSizeGrams,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "name" }
+          )
+          .select("id")
           .single();
 
         if (foodError) throw foodError;
@@ -84,7 +87,7 @@ export const handler = async (event: any) => {
         const { error: microError } = await supabase
           .from("micronutrients")
           .upsert({
-            food_id: data,
+            food_id: data.id,
             vitamin_c: micros.vitaminC,
             iron: micros.iron,
             calcium: micros.calcium,
@@ -124,21 +127,25 @@ export const handler = async (event: any) => {
           calculatedMicros,
         } = payload;
 
-        const { data, error: logError } = await supabase.from("daily_logs").insert({
-          user_id: user_id,
-          food_id: foodId,
-          food_name: foodName,
-          log_date: date,
-          quantity_grams: quantityGrams,
-          // We store the calculated values at the time of eating
-          // to preserve history if the base food definition changes later
-          calories_consumed: calculatedNutrients.calories,
-          protein_consumed: calculatedNutrients.protein,
-          carbs_consumed: calculatedNutrients.carbs,
-          fat_consumed: calculatedNutrients.fat,
-          fiber_consumed: calculatedNutrients.fiber,
-          micros_snapshot: calculatedMicros, // JSONB column for flexibility
-        }).select('id').single();
+        const { data, error: logError } = await supabase
+          .from("daily_logs")
+          .insert({
+            user_id: user_id,
+            food_id: foodId,
+            food_name: foodName,
+            log_date: date,
+            quantity_grams: quantityGrams,
+            // We store the calculated values at the time of eating
+            // to preserve history if the base food definition changes later
+            calories_consumed: calculatedNutrients.calories,
+            protein_consumed: calculatedNutrients.protein,
+            carbs_consumed: calculatedNutrients.carbs,
+            fat_consumed: calculatedNutrients.fat,
+            fiber_consumed: calculatedNutrients.fiber,
+            micros_snapshot: calculatedMicros, // JSONB column for flexibility
+          })
+          .select("id")
+          .single();
 
         if (logError) throw logError;
 
