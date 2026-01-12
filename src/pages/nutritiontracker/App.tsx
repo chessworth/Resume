@@ -165,9 +165,7 @@ export const NutritionTracker: React.FC = () => {
         magnesium: selectedFood.micros.magnesium * ratio,
       }
     };
-    await storageService.addLog(log).then(() => {
-      refreshStats();
-    });
+    await storageService.addLog(log);
     setSelectedFood(null);
     setQuantity(100);
     refreshStats();

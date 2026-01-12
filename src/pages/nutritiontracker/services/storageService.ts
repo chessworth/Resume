@@ -68,17 +68,20 @@ export const storageService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'LOG_CONSUMPTION', payload: log })
       });
-      log.id = (await syncedID.json()).id;
+      //if succesful, update local log id
+      await syncedID.json().then((res) => {
+        log.id = res.id;
+        
+        const index = allLogs.findIndex(l => l.id === cryptoId);
+        if (index !== -1) {
+          allLogs[index].id = log.id;
+          localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
+        }
+        return log.id;
+      });
     } catch (e) {
       console.warn("Log sync failed, but local copy saved.");
     }
-    //if succesful, update local log id
-    const index = allLogs.findIndex(l => l.id === cryptoId);
-    if (index !== -1) {
-      allLogs[index].id = log.id;
-      localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
-    }
-    return log.id;
   },
 
   updateLog: (updatedLog: DailyLog) => {
