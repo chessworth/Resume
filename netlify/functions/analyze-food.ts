@@ -24,8 +24,8 @@ export const handler = async (event: any) => {
 
       // Fetch food data from Supabase
       const { data, error } = await supabase
-        .from("food")
-        .select("*")
+        .from("foods")
+        .select("*, macronutrients(*), micronutrients(*)")
         .eq("name", foodName)
         .limit(1);
 
