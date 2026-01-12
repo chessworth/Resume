@@ -25,7 +25,7 @@ export const handler = async (event: any) => {
       // Fetch food data from Supabase
       const { data, error } = await supabase
         .from("foods")
-        .select("*, macronutrients(*), micronutrients(*)")
+        .select("*, macronutrients(*) as macros, micronutrients(*) as micros")
         .eq("name", foodName)
         .limit(1);
 

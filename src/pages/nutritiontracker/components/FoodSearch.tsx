@@ -36,7 +36,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
       const result = await searchFoodInDatabase(query);
       if (result) {
         const newFood: FoodItem = {
-          id: crypto.randomUUID(),
+          id: result.id!,
           name: result.name || query,
           description: result.description || '',
           category: result.category || 'General',

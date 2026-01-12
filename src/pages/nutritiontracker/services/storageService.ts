@@ -25,17 +25,19 @@ export const storageService = {
     return data ? JSON.parse(data) : [];
   },
 
-  saveFood: async (food: FoodItem) => {
-    // 1. Try to Sync with Supabase via Backend Function
-    try {
-      let syncedID = await fetch('/.netlify/functions/food-storage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'SAVE_FOOD', payload: food })
-      });
-      food.id = (await syncedID.json()).id;
-    } catch (e) {
-      console.warn("Server sync failed, but local copy saved.");
+  saveFood: async (food: FoodItem, localOnly:boolean = false) => {
+    // 1. Try to Sync with Supabase via Backend Function if not localOnly
+    if (!localOnly) {
+      try {
+        let syncedID = await fetch('/.netlify/functions/food-storage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'SAVE_FOOD', payload: food })
+        });
+        food.id = (await syncedID.json()).id;
+      } catch (e) {
+        console.warn("Server sync failed, but local copy saved.");
+      }
     }
     
     // 2. Persist Locally

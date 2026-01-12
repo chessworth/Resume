@@ -20,8 +20,7 @@ export const searchFoodInDatabase = async (foodName: string): Promise<Partial<Fo
 
     const data = await response.json();
     return {
-      ...data,
-      servingSizeGrams: 100
+      ...data
     };
   } catch (error) {
     console.error("Database Search Error:", error);
