@@ -78,6 +78,7 @@ export const storageService = {
       allLogs[index].id = log.id;
       localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
     }
+    return log.id;
   },
 
   updateLog: (updatedLog: DailyLog) => {

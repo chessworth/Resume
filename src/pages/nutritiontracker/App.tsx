@@ -130,8 +130,8 @@ export const NutritionTracker: React.FC = () => {
   if (!user) {
     return <Auth onLoginSuccess={setUser} />;
   }
-  
-  const handleAddLog = () => {
+
+  const handleAddLog = async () => {
     if (!selectedFood) return;
     if (!selectedFood.id){
       if (!selectedFood.macros.food_id || !selectedFood.micros.food_id) return;
@@ -165,7 +165,9 @@ export const NutritionTracker: React.FC = () => {
         magnesium: selectedFood.micros.magnesium * ratio,
       }
     };
-    storageService.addLog(log);
+    await storageService.addLog(log).then(() => {
+      refreshStats();
+    });
     setSelectedFood(null);
     setQuantity(100);
     refreshStats();
