@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FoodItem } from '../types';
 import { fetchFoodDataFromAI } from '../services/geminiService';
+import { searchFoodInDatabase } from '../services/databaseService';
 import { storageService } from '../services/storageService';
 
 interface FoodSearchProps {
@@ -23,6 +24,41 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
   const filteredFoods = availableFoods.filter(food => 
     food.name.toLowerCase().includes(query.toLowerCase())
   );
+
+  /**
+   * Searches the external database for the current query string.
+   */
+  const searchdatabase = async () => {
+    if (!query.trim()) return;
+    setIsSearchingAI(true);
+    setAiError('');
+    try {
+      const result = await searchFoodInDatabase(query);
+      if (result) {
+        const newFood: FoodItem = {
+          id: crypto.randomUUID(),
+          name: result.name || query,
+          description: result.description || '',
+          category: result.category || 'General',
+          macros: result.macros!,
+          micros: result.micros!,
+          servingSizeGrams: result.servingSizeGrams || 100
+        };
+        storageService.saveFood(newFood);
+        onRefreshFoods();
+        onSelectFood(newFood);
+        setQuery('');
+      }
+      else {
+        setAiError('Could not find data in databse. Try Different query or Search AI');
+      }
+    } catch (e) {
+      console.error(e);
+      setAiError('Network error. Try again later.');
+    } finally {
+      setIsSearchingAI(false);
+    }
+  };
   
  /**
   * Triggers the AI nutritional analysis for the current query string.
@@ -106,7 +142,11 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
         {query.length > 2 && filteredFoods.length === 0 && !isSearchingAI && (
           <div style={{textAlign: 'center', padding: '2rem'}}>
             <p style={{color: 'var(--slate-400)', marginBottom: '1.5rem', fontSize: '0.875rem'}}>Not in library.</p>
-            <button onClick={handleAISearch} className="nt-btn nt-btn-primary">
+            <button onClick={searchdatabase} className="nt-btn nt-btn-primary">
+              <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
+              Search Database
+            </button>
+            <button onClick={handleAISearch} className="nt-btn nt-btn-primary nt-btn-premium">
               <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
               Analyze with Gemini
             </button>

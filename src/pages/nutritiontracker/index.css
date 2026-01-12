@@ -397,6 +397,17 @@ body {
   transform: translateY(-1px);
 }
 
+.nt-btn-premium {
+  background: var(--primary);
+  color: var(--accent);
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+  border: var(--accent) 1px solid;
+}
+
+.nt-btn-premium:hover {
+  border-width: 2px;
+}
+
 .nt-btn-dark {
   background: var(--slate-900);
   color: var(--white);
