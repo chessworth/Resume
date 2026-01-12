@@ -71,13 +71,14 @@ export const storageService = {
       //if succesful, update local log id
       await syncedID.json().then((res) => {
         log.id = res.id;
-        
+        const data = localStorage.getItem(LOGS_KEY);
+        const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
         const index = allLogs.findIndex(l => l.id === cryptoId);
         if (index !== -1) {
           allLogs[index].id = log.id;
           localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
         }
-        return log.id;
+        //return log.id;
       });
     } catch (e) {
       console.warn("Log sync failed, but local copy saved.");
