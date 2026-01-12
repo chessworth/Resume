@@ -25,7 +25,7 @@ export const handler = async (event: any) => {
       // Fetch food data from Supabase
       const { data, error } = await supabase
         .from("foods")
-        .select("*, macronutrients(*) as macros, micronutrients(*) as micros")
+        .select("*, macronutrients(*), micronutrients(*)")
         .eq("name", foodName)
         .limit(1);
 
@@ -39,9 +39,18 @@ export const handler = async (event: any) => {
           body: JSON.stringify({ error: "Food item not found in database" }),
         };
       } else {
+        // manipulate data to match expected return format
+        const foodItem = data[0];
+        const result = {
+          ...foodItem,
+          macros: foodItem.macronutrients,
+          micros: foodItem.micronutrients,
+        };
+        delete result.macronutrients;
+        delete result.micronutrients;
         return {
           statusCode: 200,
-          body: JSON.stringify(data[0]),
+          body: JSON.stringify(result),
         };
       }
     } else {
