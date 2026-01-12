@@ -15,7 +15,6 @@ import { IconName, library } from '@fortawesome/fontawesome-svg-core';
 import { faUserNinja, faUserAstronaut, faUserSecret, faRobot, faGhost, faDragon, faCat, faDog, faHippo, faPizzaSlice } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet-async';
 import nutriTrackerIcon from '../projects/assets/nutritiontrackericon.png';
-import nutriTrackerLogo from '../projects/assets/NutriTrackerLogo.png';
 
 library.add( 
   faUserNinja, faUserAstronaut, faUserSecret, faRobot, 
@@ -203,7 +202,10 @@ export const NutritionTracker: React.FC = () => {
       <header className="nt-header">
         <div className="nt-container nt-header-content">
           <div className="nt-logo">
-            <img src={nutriTrackerLogo} alt="NutriTracker Logo" />
+            <div className="nt-logo-icon">
+               <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+            <h1>Nutri<span className="highlight">Track</span></h1>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
