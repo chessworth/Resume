@@ -142,14 +142,16 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
         {query.length > 2 && filteredFoods.length === 0 && !isSearchingAI && (
           <div style={{textAlign: 'center', padding: '2rem'}}>
             <p style={{color: 'var(--slate-400)', marginBottom: '1.5rem', fontSize: '0.875rem'}}>Not in library.</p>
-            <button onClick={searchdatabase} className="nt-btn nt-btn-primary">
-              <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
-              Search Database
-            </button>
-            <button onClick={handleAISearch} className="nt-btn nt-btn-primary nt-btn-premium">
-              <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
-              Analyze with Gemini
-            </button>
+            <div className='nt-btn-group'>
+              <button onClick={searchdatabase} className="nt-btn nt-btn-primary">
+                <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
+                Search Database
+              </button>
+              <button onClick={handleAISearch} className="nt-btn nt-btn-primary nt-btn-premium">
+                <svg style={{width: '20px', height: '20px'}} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" /></svg>
+                Analyze with Gemini
+              </button>
+            </div>
           </div>
         )}
 
