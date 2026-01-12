@@ -43,7 +43,6 @@ export const handler = async (event: any) => {
          * Table 3: micronutrients (Linked by food_id)
          */
         const {
-          id,
           name,
           description,
           category,
@@ -85,7 +84,7 @@ export const handler = async (event: any) => {
         const { error: microError } = await supabase
           .from("micronutrients")
           .upsert({
-            food_id: data.id,
+            food_id: data,
             vitamin_c: micros.vitaminC,
             iron: micros.iron,
             calcium: micros.calcium,
@@ -105,7 +104,7 @@ export const handler = async (event: any) => {
           statusCode: 201,
           body: JSON.stringify({
             message: "Food and nutrients synced to Supabase",
-            id,
+            id: data.id,
           }),
         };
       }
@@ -116,7 +115,6 @@ export const handler = async (event: any) => {
          * Table: daily_logs
          */
         const {
-          id,
           user_id,
           foodId,
           foodName,
@@ -126,8 +124,7 @@ export const handler = async (event: any) => {
           calculatedMicros,
         } = payload;
 
-        const { error: logError } = await supabase.from("daily_logs").insert({
-          id: id,
+        const { data, error: logError } = await supabase.from("daily_logs").insert({
           user_id: user_id,
           food_id: foodId,
           food_name: foodName,
@@ -141,7 +138,7 @@ export const handler = async (event: any) => {
           fat_consumed: calculatedNutrients.fat,
           fiber_consumed: calculatedNutrients.fiber,
           micros_snapshot: calculatedMicros, // JSONB column for flexibility
-        });
+        }).select('id').single();
 
         if (logError) throw logError;
 
@@ -150,6 +147,7 @@ export const handler = async (event: any) => {
           statusCode: 201,
           body: JSON.stringify({
             message: "Consumption log synced to Supabase",
+            id: data.id,
           }),
         };
       }

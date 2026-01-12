@@ -13,6 +13,7 @@ import Auth from './components/Auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconName, library } from '@fortawesome/fontawesome-svg-core';
 import { faUserNinja, faUserAstronaut, faUserSecret, faRobot, faGhost, faDragon, faCat, faDog, faHippo, faPizzaSlice } from '@fortawesome/free-solid-svg-icons';
+import { Helmet } from 'react-helmet-async';
 
 library.add( 
   faUserNinja, faUserAstronaut, faUserSecret, faRobot, 
@@ -190,6 +191,13 @@ export const NutritionTracker: React.FC = () => {
 
   return (
     <div className="nt-app">
+      <Helmet>
+        <title>NutriTracker - Home</title>
+        <meta name="description" content="Home Page of NutriTracker, A Nutrition Tracking App" /> 
+        <link rel="icon" href="assets/favicon.ico" />
+        <meta property="og:description" content="Home Page of NutriTracker, A Nutrition Tracking App" />
+        <meta property="og:title" content="My Awesome Home Page"/>
+      </Helmet>
       <header className="nt-header">
         <div className="nt-container nt-header-content">
           <div className="nt-logo">

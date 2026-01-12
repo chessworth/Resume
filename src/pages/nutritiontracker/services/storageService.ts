@@ -26,21 +26,22 @@ export const storageService = {
   },
 
   saveFood: async (food: FoodItem) => {
-    // 1. Persist Locally
-    const foods = storageService.getFoods();
-    foods.push(food);
-    localStorage.setItem(FOODS_KEY, JSON.stringify(foods));
-
-    // 2. Sync with Supabase via Backend Function
+    // 1. Try to Sync with Supabase via Backend Function
     try {
-      await fetch('/.netlify/functions/food-storage', {
+      let syncedID = await fetch('/.netlify/functions/food-storage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'SAVE_FOOD', payload: food })
       });
+      food.id = (await syncedID.json()).id;
     } catch (e) {
       console.warn("Server sync failed, but local copy saved.");
     }
+    
+    // 2. Persist Locally
+    const foods = storageService.getFoods();
+    foods.push(food);
+    localStorage.setItem(FOODS_KEY, JSON.stringify(foods));
   },
 
   getLogs: (date: string): DailyLog[] => {
@@ -50,22 +51,22 @@ export const storageService = {
   },
 
   addLog: async (log: DailyLog) => {
-    // 1. Persist Locally
-    const data = localStorage.getItem(LOGS_KEY);
-    const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
-    allLogs.push(log);
-    localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
-
-    // 2. Sync with Supabase via Backend Function
+    // 1. Sync with Supabase via Backend Function
     try {
-      await fetch('/.netlify/functions/food-storage', {
+      let syncedID = await fetch('/.netlify/functions/food-storage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'LOG_CONSUMPTION', payload: log })
       });
+      log.id = (await syncedID.json()).id;
     } catch (e) {
       console.warn("Log sync failed, but local copy saved.");
     }
+    // 2. Persist Locally
+    const data = localStorage.getItem(LOGS_KEY);
+    const allLogs: DailyLog[] = data ? JSON.parse(data) : [];
+    allLogs.push(log);
+    localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
   },
 
   updateLog: (updatedLog: DailyLog) => {
