@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
 import Board from './Board';
 import '../index.css';
 
@@ -35,7 +34,7 @@ function TicTacToe() {
   const moves = history.map((squares, move) => {
     let description;
     const moveDetails = 'Move ' + move + ': ' + squares.move + ' moved to R' + squares.rowIndex + ', C' + squares.colIndex;
-    if (move == currentMove) {
+    if (move === currentMove) {
       description = move > 0 ? ('You are at ' + moveDetails) : 'You are at game start';
       return (
         <li key={move}>{description}

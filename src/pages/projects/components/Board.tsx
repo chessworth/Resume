@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
 import Square from './square';
 
 function Board({xIsNext, squares, currentMove, onPlay} : {xIsNext : boolean, squares : string[], currentMove: number, onPlay : (s : string[], i: number) => void}) {
@@ -17,7 +15,7 @@ function Board({xIsNext, squares, currentMove, onPlay} : {xIsNext : boolean, squ
     if (winner) {
       status = "Winner: " + winner;
     }
-    else if (currentMove == 9) {
+    else if (currentMove === 9) {
       status = "Game Drawn";
     }
     else {
@@ -74,7 +72,7 @@ function Board({xIsNext, squares, currentMove, onPlay} : {xIsNext : boolean, squ
     }
     else {
       const highlighted = document.getElementsByClassName('highlight');
-      if (highlighted.length != 0){
+      if (highlighted.length !== 0){
         for (let i = 0; i < highlighted.length; i++){
           highlighted[i].classList.remove('highlight');
         }
