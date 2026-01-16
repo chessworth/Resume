@@ -23,8 +23,9 @@ export const handler = async (event: any) => {
       );
 
       // Fetch food data from Supabase
-      const { data, error } = await supabase
-        .rpc("search_foods", { query: foodName });
+      const { data, error } = await supabase.rpc("food_search", {
+        query: foodName,
+      });
 
       if (error) {
         throw new Error(error.message);

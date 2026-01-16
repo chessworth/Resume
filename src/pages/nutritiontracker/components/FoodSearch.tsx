@@ -139,7 +139,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
           </button>
         ))}
 
-        {query.length > 2 && filteredFoods.length === 0 && !isSearchingAI && (
+        {(query.length > 2 || filteredFoods.length === 0) && !isSearchingAI && (
           <div style={{textAlign: 'center', padding: '2rem'}}>
             <p style={{color: 'var(--slate-400)', marginBottom: '1.5rem', fontSize: '0.875rem'}}>Not in library.</p>
             <div className='nt-btn-group'>
