@@ -11,6 +11,6 @@
         "name": "Nutrition Tracker (AI)",
         "description": "A Nutrition tracker made with Gemini - Allows manual entry of food items and generates detailed nutritional data using AI.",
         "url": "https://resumeg.netlify.app/nutritiontracker",
-        "iconName": "nutritiontracker"
+        "iconName": "NutriTrackerLogo"
     }
 ]
