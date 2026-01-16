@@ -24,10 +24,7 @@ export const handler = async (event: any) => {
 
       // Fetch food data from Supabase
       const { data, error } = await supabase
-        .from("foods")
-        .select("*, macronutrients(*), micronutrients(*)")
-        .eq("name", foodName)
-        .limit(1);
+        .rpc("search_foods", { query: foodName });
 
       if (error) {
         throw new Error(error.message);
