@@ -1,5 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, PostgrestError } from "@supabase/supabase-js";
+
+export interface SupabaseRespone {
+  data: any[] | null;
+  error: PostgrestError | null;
+}
 
 export const handler = async (event: any) => {
   // Only allow POST requests
@@ -21,32 +26,46 @@ export const handler = async (event: any) => {
         process.env.SUPABASE_URL || "",
         process.env.SUPABASE_SERVICE_ROLE_KEY || ""
       );
+      let SupabaseResponse: SupabaseRespone = { data: null, error: null };
 
       // Fetch food data from Supabase
-      const { data, error } = await supabase
+      SupabaseResponse = await supabase
         .from("foods")
         .select("*, macronutrients(*), micronutrients(*)")
-        .textSearch("food_search", foodName);
+        .textSearch("food_search", foodName, { type: "websearch" });
 
-      if (error) {
-        throw new Error(error.message);
+      if (SupabaseResponse.error) {
+        throw new Error(SupabaseResponse.error.message);
       }
 
-      if (data.length === 0) {
-        return {
-          statusCode: 404,
-          body: JSON.stringify({ error: "Food item not found in database" }),
-        };
+      if (SupabaseResponse.data?.length === 0 || !SupabaseResponse.data) {
+        // We try again with a partial search
+        SupabaseResponse = await supabase
+          .from("foods")
+          .select("*, macronutrients(*), micronutrients(*)")
+          .textSearch("food_search", foodName + ':*');
+
+        if (SupabaseResponse.error) {
+          throw new Error(SupabaseResponse.error.message);
+        }
+
+        if (SupabaseResponse.data?.length === 0 || !SupabaseResponse.data) {
+          return {
+            statusCode: 404,
+            body: JSON.stringify({ error: "Food item not found in database" }),
+          };
+        }
       } else {
         // manipulate data to match expected return format
-        const foodItem = data[0];
+        const foodItem = SupabaseResponse.data[0];
         const result = {
           ...foodItem,
           macros: foodItem.macronutrients,
           micros: foodItem.micronutrients,
         };
-        delete result.macronutrients;
-        delete result.micronutrients;
+        // remove unneeded fields - paused for testing
+        //delete result.macronutrients;
+        //delete result.micronutrients;
         return {
           statusCode: 200,
           body: JSON.stringify(result),
