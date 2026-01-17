@@ -66,7 +66,7 @@ export const handler = async (event: any) => {
         // remove unneeded fields
         delete result.macronutrients;
         delete result.micronutrients;
-        delete result.food_search;
+        //delete result.food_search;
         return {
           statusCode: 200,
           body: JSON.stringify(result),
