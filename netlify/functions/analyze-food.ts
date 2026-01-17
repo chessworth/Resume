@@ -38,7 +38,7 @@ export const handler = async (event: any) => {
         throw new Error(SupabaseResponse.error.message);
       }
 
-      if (SupabaseResponse.data?.length === 0 || !SupabaseResponse.data) {
+      if (!SupabaseResponse.data || SupabaseResponse.data.length === 0) {
         // We try again with a partial search
         SupabaseResponse = await supabase
           .from("foods")
@@ -49,7 +49,7 @@ export const handler = async (event: any) => {
           throw new Error(SupabaseResponse.error.message);
         }
 
-        if (SupabaseResponse.data?.length === 0 || !SupabaseResponse.data) {
+        if (!SupabaseResponse.data || SupabaseResponse.data.length === 0) {
           return {
             statusCode: 404,
             body: JSON.stringify({ error: "Food item not found in database" }),
@@ -66,7 +66,7 @@ export const handler = async (event: any) => {
         // remove unneeded fields
         delete result.macronutrients;
         delete result.micronutrients;
-        //delete result.food_search;
+        delete result.food_search;
         return {
           statusCode: 200,
           body: JSON.stringify(result),
