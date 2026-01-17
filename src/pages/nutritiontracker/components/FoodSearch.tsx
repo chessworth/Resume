@@ -36,7 +36,9 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
     try {
       const result = await searchFoodInDatabase(query);
       if (result) {
-        setDatabaseSearchResult(result);
+        const formattedResult: Partial<FoodItem>[] = [];
+        result.forEach(item => formattedResult.push(item));
+        setDatabaseSearchResult(formattedResult);
       }
       else {
         setAiError('Could not find data in databse. Try Different query or Search AI');
