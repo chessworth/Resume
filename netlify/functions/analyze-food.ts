@@ -58,16 +58,17 @@ export const handler = async (event: any) => {
       }
       if (SupabaseResponse.data.length > 0) {
         // manipulate data to match expected return format
-        const foodItem = SupabaseResponse.data[0];
-        const result = {
-          ...foodItem,
-          macros: foodItem.macronutrients,
-          micros: foodItem.micronutrients,
-        };
-        // remove unneeded fields
-        delete result.macronutrients;
-        delete result.micronutrients;
-        delete result.food_search;
+        const foodItems = SupabaseResponse.data;
+        const result = foodItems.map((foodItem) => {
+          foodItem.macros = foodItem.macronutrients;
+          foodItem.micros = foodItem.micronutrients;
+
+          //remove unneeded files
+          delete foodItem.macronutrients;
+          delete foodItem.micronutrients;
+          delete foodItem.food_search;
+          return foodItem;
+        })
         return {
           statusCode: 200,
           body: JSON.stringify(result),
