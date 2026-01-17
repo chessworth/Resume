@@ -24,7 +24,7 @@ export const handler = async (event: any) => {
       // Initialize Supabase client
       const supabase = createClient(
         process.env.SUPABASE_URL || "",
-        process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+        process.env.SUPABASE_SERVICE_ROLE_KEY || "",
       );
       let SupabaseResponse: SupabaseRespone = { data: null, error: null };
 
@@ -43,7 +43,7 @@ export const handler = async (event: any) => {
         SupabaseResponse = await supabase
           .from("foods")
           .select("*, macronutrients(*), micronutrients(*)")
-          .textSearch("food_search", foodName + ':*');
+          .textSearch("food_search", foodName + ":*");
 
         if (SupabaseResponse.error) {
           throw new Error(SupabaseResponse.error.message);
@@ -66,6 +66,7 @@ export const handler = async (event: any) => {
         // remove unneeded fields
         delete result.macronutrients;
         delete result.micronutrients;
+        delete result.food_search;
         return {
           statusCode: 200,
           body: JSON.stringify(result),
