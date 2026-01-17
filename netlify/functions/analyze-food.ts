@@ -63,9 +63,9 @@ export const handler = async (event: any) => {
           macros: foodItem.macronutrients,
           micros: foodItem.micronutrients,
         };
-        // remove unneeded fields - paused for testing
-        //delete result.macronutrients;
-        //delete result.micronutrients;
+        // remove unneeded fields
+        delete result.macronutrients;
+        delete result.micronutrients;
         return {
           statusCode: 200,
           body: JSON.stringify(result),
