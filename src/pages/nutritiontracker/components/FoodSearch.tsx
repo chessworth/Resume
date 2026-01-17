@@ -37,7 +37,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
       const result = await searchFoodInDatabase(query);
       if (result) {
         const formattedResult: Partial<FoodItem>[] = [];
-        result.forEach(item => formattedResult.push(item));
+        Object.values(result).forEach(item => formattedResult.push(item));
         setDatabaseSearchResult(formattedResult);
       }
       else {
