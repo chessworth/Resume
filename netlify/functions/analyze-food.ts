@@ -55,7 +55,8 @@ export const handler = async (event: any) => {
             body: JSON.stringify({ error: "Food item not found in database" }),
           };
         }
-      } else {
+      }
+      if (SupabaseResponse.data.length > 0) {
         // manipulate data to match expected return format
         const foodItem = SupabaseResponse.data[0];
         const result = {
