@@ -18,8 +18,9 @@ interface FoodSearchProps {
  */
 const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, onRefreshFoods, onOpenManualEntry }) => {
   const [query, setQuery] = useState('');
-  const [isSearchingAI, setIsSearchingAI] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [aiError, setAiError] = useState('');
+  const [databaseSearchResult, setDatabaseSearchResult] = useState<Partial<FoodItem>[]>([]);
 
   const filteredFoods = availableFoods.filter(food => 
     food.name.toLowerCase().includes(query.toLowerCase())
@@ -30,24 +31,12 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
    */
   const searchdatabase = async () => {
     if (!query.trim()) return;
-    setIsSearchingAI(true);
+    setIsSearching(true);
     setAiError('');
     try {
       const result = await searchFoodInDatabase(query);
       if (result) {
-        const newFood: FoodItem = {
-          id: result.id!,
-          name: result.name || query,
-          description: result.description || '',
-          category: result.category || 'General',
-          macros: result.macros!,
-          micros: result.micros!,
-          servingSizeGrams: result.servingSizeGrams || 100
-        };
-        storageService.saveFood(newFood, true);
-        onRefreshFoods();
-        onSelectFood(newFood);
-        setQuery('');
+        setDatabaseSearchResult(result);
       }
       else {
         setAiError('Could not find data in databse. Try Different query or Search AI');
@@ -56,7 +45,26 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
       console.error(e);
       setAiError('Network error. Try again later.');
     } finally {
-      setIsSearchingAI(false);
+      setIsSearching(false);
+    }
+  };
+
+  const pickFoodFromDatabase = (foodId: string) => {
+    const food = databaseSearchResult.find(f => f.id === foodId);
+    if (food) {
+      const newFood: FoodItem = {
+        id: food.id!,
+        name: food.name || query,
+        description: food.description || '',
+        category: food.category || 'General',
+        macros: food.macros!,
+        micros: food.micros!,
+        servingSizeGrams: food.servingSizeGrams || 100
+      };
+      storageService.saveFood(newFood, true);
+      onRefreshFoods();
+      onSelectFood(newFood);
+      setQuery('');
     }
   };
   
@@ -65,7 +73,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
   */
   const handleAISearch = async () => {
     if (!query.trim()) return;
-    setIsSearchingAI(true);
+    setIsSearching(true);
     setAiError('');
     
     try {
@@ -90,7 +98,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
     } catch (e) {
       setAiError('Network error. Try again later.');
     } finally {
-      setIsSearchingAI(false);
+      setIsSearching(false);
     }
   };
 
@@ -139,7 +147,7 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
           </button>
         ))}
 
-        {(query.length > 2 || filteredFoods.length === 0) && !isSearchingAI && (
+        {(query.length > 2 || filteredFoods.length === 0) && !isSearching && (
           <div style={{textAlign: 'center', padding: '2rem'}}>
             <p style={{color: 'var(--slate-400)', marginBottom: '1.5rem', fontSize: '0.875rem'}}>Not in library.</p>
             <div className='nt-btn-group'>
@@ -155,12 +163,40 @@ const FoodSearch: React.FC<FoodSearchProps> = ({ availableFoods, onSelectFood, o
           </div>
         )}
 
-        {isSearchingAI && (
+        {isSearching && databaseSearchResult.length === 0 && (
           <div style={{textAlign: 'center', padding: '2.5rem'}}>
             <div style={{width: '32px', height: '32px', border: '3px solid var(--primary)', borderBottomColor: 'transparent', borderRadius: '50%', margin: '0 auto 1rem', animation: 'spin 0.8s linear infinite'}}></div>
-            <p className="nt-progress-label">AI analyzing...</p>
+            <p className="nt-progress-label">Searching...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
+        )}
+
+        {databaseSearchResult.length > 0 && (
+          // Display database search results as a list
+          <div style={{marginTop: '1.5rem', maxHeight: '300px', overflowY: 'auto'}}>
+            {databaseSearchResult.map((food) => (
+              <button
+                key={food.id}
+                onClick={() => pickFoodFromDatabase(food.id ?? '')}
+                className="nt-btn"
+                style={{
+                  width: '100%', 
+                  justifyContent: 'space-between', 
+                  background: 'transparent', 
+                  color: 'inherit',
+                  padding: '1rem',
+                  borderBottom: '1px solid var(--slate-50)',
+                  borderRadius: '0'
+                }}
+              >
+                <div style={{textAlign: 'left'}}>
+                  <span style={{fontWeight: 900, display: 'block'}}>{food.name}</span>
+                  <span className="nt-badge" style={{fontSize: '8px', padding: '0.15rem 0.5rem', background: 'var(--slate-100)'}}>{food.category}</span>
+                </div>
+                <span className="nt-badge nt-badge-emerald">Select</span>
+              </button>
+            ))}
+        </div>
         )}
 
         {aiError && (

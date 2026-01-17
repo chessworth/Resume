@@ -2,16 +2,18 @@ import { FoodItem } from "../types";
 
 /**
  * Fetches comprehensive nutritional data for a specific food item from a secure Netlify function using our existing database.
- * 
+ *
  * @param {string} foodName - The name or description of the food to search for.
- * @returns {Promise<Partial<FoodItem> | null>} A partial FoodItem object on success.
+ * @returns {Promise<[Partial<FoodItem>] | null>} An array of partial FoodItem object on success.
  */
-export const searchFoodInDatabase = async (foodName: string): Promise<Partial<FoodItem> | null> => {
+export const searchFoodInDatabase = async (
+  foodName: string,
+): Promise<[Partial<FoodItem>] | null> => {
   try {
-    const response = await fetch('/.netlify/functions/analyze-food', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ foodName, isAiSearch: false })
+    const response = await fetch("/.netlify/functions/analyze-food", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ foodName, isAiSearch: false }),
     });
 
     if (!response.ok) {
@@ -20,7 +22,7 @@ export const searchFoodInDatabase = async (foodName: string): Promise<Partial<Fo
 
     const data = await response.json();
     return {
-      ...data
+      ...data,
     };
   } catch (error) {
     console.error("Database Search Error:", error);
