@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { DailyLog, Macronutrients } from '../types';
+import { DailyLog, Macronutrients, Micronutrients } from '../types';
 
 interface LogEditModalProps {
   log: DailyLog;
@@ -14,7 +14,8 @@ interface LogEditModalProps {
  * @param {LogEditModalProps} props - Log data, Save callback, and Close handler.
  */
 const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => {
-  const [nutrients, setNutrients] = useState<Macronutrients>({ ...log.calculatedNutrients });
+  const [macroNutrients, setMacroNutrients] = useState<Macronutrients>({ ...log.calculatedNutrients });
+  const [microNutrients, setMicroNutrients] = useState<Micronutrients>({ ...log.calculatedMicros });
 
   return (
     <div className="nt-modal-overlay">
@@ -30,20 +31,33 @@ const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => 
         </div>
 
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem'}}>
-          {Object.entries(nutrients).map(([key, val]) => (
+          {Object.entries(macroNutrients).map(([key, val]) => (
             <div key={key} className="nt-form-group">
               <label className="nt-label">{key}</label>
               <input 
                 type="number" 
                 value={val} 
-                onChange={e => setNutrients(p => ({...p, [key]: Number(e.target.value)}))} 
+                onChange={e => setMacroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
+                className="nt-input" 
+              />
+            </div>
+          ))}
+        </div>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem'}}>
+          {Object.entries(microNutrients).map(([key, val]) => (
+            <div key={key} className="nt-form-group">
+              <label className="nt-label">{key}</label>
+              <input 
+                type="number" 
+                value={val} 
+                onChange={e => setMicroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
                 className="nt-input" 
               />
             </div>
           ))}
         </div>
 
-        <button onClick={() => onSave({...log, calculatedNutrients: nutrients})} className="nt-btn nt-btn-dark" style={{width: '100%'}}>Update Entry</button>
+        <button onClick={() => onSave({...log, calculatedNutrients: macroNutrients, calculatedMicros: microNutrients})} className="nt-btn nt-btn-dark" style={{width: '100%'}}>Update Entry</button>
       </div>
     </div>
   );

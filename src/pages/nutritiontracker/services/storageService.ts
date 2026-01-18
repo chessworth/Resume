@@ -1,5 +1,5 @@
 
-import { FoodItem, DailyLog, UserGoals, /* Macronutrients, */ } from "../types";
+import { FoodItem, DailyLog, UserGoals } from "../types";
 
 const FOODS_KEY = 'nutritrack_foods';
 const LOGS_KEY = 'nutritrack_logs';

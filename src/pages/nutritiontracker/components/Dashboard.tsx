@@ -87,6 +87,11 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, goals, onDeleteLog, onEdit
           <ProgressBar label="Calcium" current={stats.totalMicros.calcium} goal={goals.micros.calcium} color="#818cf8" unit="mg" />
           <ProgressBar label="Potass" current={stats.totalMicros.potassium} goal={goals.micros.potassium} color="#22d3ee" unit="mg" />
           <ProgressBar label="Sodium" current={stats.totalMicros.sodium} goal={goals.micros.sodium} color="#94a3b8" unit="mg" />
+          <ProgressBar label="Vit A" current={stats.totalMicros.vitaminA} goal={goals.micros.vitaminA} color="#facc15" unit="mcg" />
+          <ProgressBar label="Vit D" current={stats.totalMicros.vitaminD} goal={goals.micros.vitaminD} color="#34d399" unit="mcg" />
+          <ProgressBar label="Vit E" current={stats.totalMicros.vitaminE} goal={goals.micros.vitaminE} color="#916ff7" unit="mg" />
+          <ProgressBar label="Vit K" current={stats.totalMicros.vitaminK} goal={goals.micros.vitaminK} color="#f472b6" unit="mcg" />
+          <ProgressBar label="Magnesium" current={stats.totalMicros.magnesium} goal={goals.micros.magnesium} color="#60a5fa" unit="mg" />
         </div>
       </div>
 

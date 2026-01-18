@@ -49,7 +49,7 @@ export interface DailyLog {
   date: string; // YYYY-MM-DD
   quantityGrams: number;
   calculatedNutrients: Macronutrients;
-  calculatedMicros?: Micronutrients;
+  calculatedMicros: Micronutrients;
 }
 
 export interface DailyStats {
