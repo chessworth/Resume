@@ -35,6 +35,28 @@ export const handler = async (event: any) => {
         }
 
         switch (action) {
+            case "FETCH_LOGS": {
+                /**
+                 * PRODUCTION LOGIC: Fetch logs for user within date range
+                 * Table: daily_logs
+                 */
+                const { startDate, endDate } = payload;
+
+                const { data, error } = await supabase
+                    .from("daily_logs")
+                    .select("id, user_id, food_id, food_name, log_date, quantity_grams, calories_consumed, protein_consumed, carbs_consumed, fat_consumed, fiber_consumed, micros_snapshot")
+                    .gte("log_date", startDate)
+                    .lte("log_date", endDate);
+
+                if (error) throw error;
+
+                console.log(`Successfully fetched logs for date range: ${startDate} to ${endDate}`);
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(data),
+                };
+            }
             case "LOG_CONSUMPTION": {
                  /**
                  * PRODUCTION LOGIC: Track usage over time
