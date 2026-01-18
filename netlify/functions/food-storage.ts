@@ -111,54 +111,6 @@ export const handler = async (event: any) => {
           }),
         };
       }
-
-      case "LOG_CONSUMPTION": {
-        /**
-         * PRODUCTION LOGIC: Track usage over time
-         * Table: daily_logs
-         */
-        const {
-          user_id,
-          foodId,
-          foodName,
-          date,
-          quantityGrams,
-          calculatedNutrients,
-          calculatedMicros,
-        } = payload;
-
-        const { data, error: logError } = await supabase
-          .from("daily_logs")
-          .insert({
-            user_id: user_id,
-            food_id: foodId,
-            food_name: foodName,
-            log_date: date,
-            quantity_grams: quantityGrams,
-            // We store the calculated values at the time of eating
-            // to preserve history if the base food definition changes later
-            calories_consumed: calculatedNutrients.calories,
-            protein_consumed: calculatedNutrients.protein,
-            carbs_consumed: calculatedNutrients.carbs,
-            fat_consumed: calculatedNutrients.fat,
-            fiber_consumed: calculatedNutrients.fiber,
-            micros_snapshot: calculatedMicros, // JSONB column for flexibility
-          })
-          .select("id")
-          .single();
-
-        if (logError) throw logError;
-
-        console.log(`Successfully logged consumption for: ${foodName}`);
-        return {
-          statusCode: 201,
-          body: JSON.stringify({
-            message: "Consumption log synced to Supabase",
-            id: data.id,
-          }),
-        };
-      }
-
       case "DELETE_LOG": {
         const { error: deleteError } = await supabase
           .from("daily_logs")

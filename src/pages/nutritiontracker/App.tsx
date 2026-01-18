@@ -42,7 +42,7 @@ export const NutritionTracker: React.FC = () => {
     logs: []
   });
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toISOString();
 
     // Auth initialization
   useEffect(() => {
@@ -59,12 +59,13 @@ export const NutritionTracker: React.FC = () => {
     initAuth();
   }, []);
 
-  const refreshStats = useCallback(() => {
+  const refreshStats = useCallback(async () => {
     if (!user) return;
     const foods = storageService.getFoods();
     setFoodLibrary(foods);
 
-    const logs = storageService.getLogs(todayStr);
+    const logs = await storageService.getLogs();
+    if (!logs) return;
     const initialMicros: Micronutrients = { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0, vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, magnesium: 0 };
     
     const totals = logs.reduce((acc, log) => {
@@ -106,7 +107,7 @@ export const NutritionTracker: React.FC = () => {
     }, { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, totalFiber: 0, totalMicros: initialMicros });
 
     setTodayStats({ ...totals, logs });
-  }, [todayStr, user]);
+  }, [user]);
 
   useEffect(() => {
     if (user) refreshStats();

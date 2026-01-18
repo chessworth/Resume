@@ -20,10 +20,8 @@ export const searchFoodInDatabase = async (
       throw new Error(`Server responded with ${response.status}`);
     }
 
-    const data = await response.json();
-    return {
-      ...data,
-    };
+    const data: [Partial<FoodItem>] = await response.json();
+    return data;
   } catch (error) {
     console.error("Database Search Error:", error);
     return null;
