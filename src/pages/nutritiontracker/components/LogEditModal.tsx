@@ -36,7 +36,7 @@ const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => 
               <label className="nt-label">{key}</label>
               <input 
                 type="number" 
-                value={val.toFixed(2)} 
+                value={val ? val.toFixed(2) : '0.00'} 
                 onChange={e => setMacroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
                 className="nt-input" 
               />
@@ -49,7 +49,7 @@ const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => 
               <label className="nt-label">{key}</label>
               <input 
                 type="number" 
-                value={val.toFixed(2)} 
+                value={val ? val.toFixed(2) : '0.00'} 
                 onChange={e => setMicroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
                 className="nt-input" 
               />
