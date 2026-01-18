@@ -36,7 +36,7 @@ const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => 
               <label className="nt-label">{key}</label>
               <input 
                 type="number" 
-                value={val} 
+                value={val.toFixed(2)} 
                 onChange={e => setMacroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
                 className="nt-input" 
               />
@@ -44,12 +44,12 @@ const LogEditModal: React.FC<LogEditModalProps> = ({ log, onSave, onClose }) => 
           ))}
         </div>
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem'}}>
-          {Object.entries(microNutrients).map(([key, val]) => (
+          {Object.entries(microNutrients).sort(([a], [b]) => a.localeCompare(b)).map(([key, val]) => (
             <div key={key} className="nt-form-group">
               <label className="nt-label">{key}</label>
               <input 
                 type="number" 
-                value={val} 
+                value={val.toFixed(2)} 
                 onChange={e => setMicroNutrients(p => ({...p, [key]: Number(e.target.value).toFixed(2)}))} 
                 className="nt-input" 
               />
