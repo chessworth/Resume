@@ -59,12 +59,12 @@ export const NutritionTracker: React.FC = () => {
     initAuth();
   }, []);
 
-  const refreshStats = useCallback(async () => {
+  const refreshStats = useCallback(async (localOnly = false) => {
     if (!user) return;
     const foods = storageService.getFoods();
     setFoodLibrary(foods);
 
-    const logs = await storageService.getLogs();
+    const logs = await storageService.getLogs(localOnly);
     if (!logs) return;
     const initialMicros: Micronutrients = { vitaminC: 0, iron: 0, calcium: 0, potassium: 0, sodium: 0, vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, magnesium: 0 };
     
@@ -169,7 +169,7 @@ export const NutritionTracker: React.FC = () => {
     storageService.addLog(log);
     setSelectedFood(null);
     setQuantity(100);
-    refreshStats();
+    refreshStats(true);
   };
 
   const handleSaveManualFood = (food: FoodItem) => {

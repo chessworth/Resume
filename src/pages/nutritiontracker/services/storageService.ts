@@ -54,7 +54,7 @@ export const storageService = {
     localStorage.setItem(FOODS_KEY, JSON.stringify(foods));
   },
 
-  getLogs: async (): Promise<DailyLog[] | null> => {
+  getLogs: async (localOnly: boolean = false): Promise<DailyLog[] | null> => {
     // TODO: Filter by date
     const offset = new Date().getTimezoneOffset();
     //get today's date based on client timezone.
@@ -68,18 +68,21 @@ export const storageService = {
 
     // fetch today's logs from supabase via backend function
     try {
-      const response = await fetch("/.netlify/functions/daily-logs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "FETCH_LOGS",
-          payload: {
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-          },
-        }),
-      });
-      if (!response || !response.ok) {
+      let response: Response | null = null;
+      if (!localOnly) {
+        response = await fetch("/.netlify/functions/daily-logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "FETCH_LOGS",
+            payload: {
+              startDate: startDate.toISOString(),
+              endDate: endDate.toISOString(),
+            },
+          }),
+        });
+      }
+      if (localOnly || !response || !response.ok) {
         //fallback to local storage
         const data = localStorage.getItem(LOGS_KEY);
         return data ? JSON.parse(data) : [];
@@ -102,7 +105,7 @@ export const storageService = {
         calculatedMicros: dto.micros_snapshot,
       }));
       //persist fetched logs locally
-      localStorage.setItem(LOGS_KEY, JSON.stringify(data));
+      localStorage.setItem(LOGS_KEY, JSON.stringify(mapped));
       return mapped;
     } catch (e) {
       console.warn("Server sync failed, but local copy used.");
@@ -136,7 +139,6 @@ export const storageService = {
           allLogs[index].id = log.id;
           localStorage.setItem(LOGS_KEY, JSON.stringify(allLogs));
         }
-        //return log.id;
       });
     } catch (e) {
       console.warn("Log sync failed, but local copy saved.");
