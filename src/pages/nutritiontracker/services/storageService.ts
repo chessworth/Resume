@@ -1,4 +1,4 @@
-import { FoodItem, DailyLog, UserGoals } from "../types";
+import { FoodItem, DailyLog, UserGoals, DailyLogDTO } from "../types";
 
 const FOODS_KEY = "nutritrack_foods";
 const LOGS_KEY = "nutritrack_logs";
@@ -84,10 +84,26 @@ export const storageService = {
         const data = localStorage.getItem(LOGS_KEY);
         return data ? JSON.parse(data) : [];
       }
-      const data: DailyLog[] = await response.json();
+      const data: DailyLogDTO[] = await response.json();
+      const mapped: DailyLog[] = data.map((dto) => ({
+        id: dto.id,
+        user_id: dto.user_id,
+        foodId: dto.food_id,
+        foodName: dto.food_name,
+        date: dto.log_date,
+        quantityGrams: dto.quantity_grams,
+        calculatedNutrients: {
+          calories: dto.calories_consumed,
+          protein: dto.protein_consumed,
+          carbs: dto.carbs_consumed,
+          fat: dto.fat_consumed,
+          fiber: dto.fiber_consumed,
+        },
+        calculatedMicros: dto.micros_snapshot,
+      }));
       //persist fetched logs locally
       localStorage.setItem(LOGS_KEY, JSON.stringify(data));
-      return data;
+      return mapped;
     } catch (e) {
       console.warn("Server sync failed, but local copy used.");
       return null;

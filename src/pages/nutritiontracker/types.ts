@@ -41,6 +41,21 @@ export interface FoodItem {
   servingSizeGrams: number;
 }
 
+export interface DailyLogDTO {
+  calories_consumed: number;
+  protein_consumed: number;
+  carbs_consumed: number;
+  fat_consumed: number;
+  fiber_consumed: number;
+  food_id: string;
+  food_name: string;
+  id: string;
+  log_date: string;
+  micros_snapshot: Micronutrients;
+  quantity_grams: number;
+  user_id: string;
+}
+
 export interface DailyLog {
   id: string;
   user_id: string;
