@@ -24,4 +24,5 @@ export interface Task {
   id: string;
   label: string;
   description: string;
+  is_completed: boolean;
 }

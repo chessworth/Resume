@@ -1,7 +1,7 @@
 // src/features/immigration/ImmigrationDashboard.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { ImmigrationFile } from './types';
-import './Accelerator.css';
+import './immigration.css';
 
 const ImmigrationDashboard: React.FC = () => {
   const [files, setFiles] = useState<ImmigrationFile[]>([]);
