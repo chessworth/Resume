@@ -1,16 +1,22 @@
 // src/features/immigration/ImmigrationDashboard.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { ImmigrationFile } from './types';
+import NewFileModal from './NewFileModal';
+import { useNavigate } from 'react-router-dom';
 import './immigration.css';
 
 const ImmigrationDashboard: React.FC = () => {
   const [files, setFiles] = useState<ImmigrationFile[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFiles();
   }, []);
+
+  const BASEURL = '/immigrationaccelerator';
 
   const fetchFiles = async () => {
   setLoading(true);
@@ -48,6 +54,10 @@ const ImmigrationDashboard: React.FC = () => {
 
   if (loading) return <div className="loading-state">Loading your files...</div>;
 
+  const handleCreationSuccess = () => {
+    navigate(BASEURL); 
+  };
+
   return (
     <div className="immigration-page">
       <header className="dashboard-header">
@@ -62,9 +72,26 @@ const ImmigrationDashboard: React.FC = () => {
           />
           {/* Refresh button is handy for clerical apps */}
           <button onClick={fetchFiles} className="refresh-btn">↻</button>
+          <button 
+            className="btn-primary main-cta" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            + Create New Client File
+          </button>
+          <button 
+            className="btn-secondary" 
+            onClick={() => navigate(BASEURL)}
+          >
+            View All Files
+          </button>
         </div>
       </header>
-
+      {/* The Modal Logic */}
+      <NewFileModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={handleCreationSuccess}
+      />
       <div className="file-list-container">
         {sortedFiles.length > 0 ? (
           sortedFiles.map(file => (
@@ -78,9 +105,11 @@ const ImmigrationDashboard: React.FC = () => {
               </div>
             </div>
           ))
-        ) : (
-          <div className="empty-state">No files found matching "{searchTerm}"</div>
-        )}
+        ) :
+        searchTerm.length > 0 ? <div className="empty-state">No files found matching "{searchTerm}"</div>
+        : (
+          <div></div>
+      )}
       </div>
     </div>
   );

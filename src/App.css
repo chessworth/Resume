@@ -44,6 +44,9 @@
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
+.container:has(.immigration-page){
+  background-image: url(./assets/immtexture.jpeg);
+}
 .pageContainer {
   margin: 10% 1%;
   padding: 5% 10%;

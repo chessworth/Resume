@@ -2,7 +2,7 @@
 :root {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
-  --bg-app: #f8fafc;
+  --bg-app: #f8fafc33;
   --bg-card: #ffffff;
   --text-main: #1e293b;
   --text-muted: #64748b;
@@ -21,9 +21,13 @@
   --bg-pending: #dbeafe;
 }
 
+body input{
+  color: var(--text-main);
+}
+
 .immigration-page {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 5% auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-app);
@@ -37,6 +41,7 @@
   align-items: center;
   margin-bottom: 24px;
   gap: 16px;
+  flex-direction: column;
 }
 
 .search-input {
@@ -496,3 +501,31 @@
 .status-initiated { background: var(--bg-initiated); color: var(--color-initiated); }
 .status-filed { background: var(--bg-filed); color: var(--color-filed); }
 /* etc... */
+
+.header-controls {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.main-cta {
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+  transition: transform 0.2s ease;
+}
+
+.main-cta:hover {
+  transform: scale(1.02);
+}
+
+/* Ensure the hero section centers content for a clean look */
+.hero-section {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  margin-top: 40px;
+}
