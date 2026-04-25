@@ -11,6 +11,7 @@ import {NutritionTracker} from './pages/nutritiontracker/App';
 import { useState } from 'react';
 import LightDark from './components/lightDark/LightDark';
 import { DarkModeContext } from './contexts/DarkModeContext';
+import Accelerator from './pages/immigrationAccelerator/Accelerator';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/teenpatti" element={<PokerTable />} />
                 <Route path='/blog' element={<Blog />} />
                 <Route path='/nutritiontracker' element={<NutritionTracker />} />
+                <Route path="/immigrationaccelerator" element={<Accelerator />} />
                 <Route path="*" /*element={<NoMatch />}*/ />
         </Routes>
       </Container>
