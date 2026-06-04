@@ -1,9 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabase = createClient(process.env.IMM_URL!, process.env.IMM_SECRET!);
 
 const handler = async (event: any) => {
   if (event.httpMethod !== "POST")
