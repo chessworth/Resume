@@ -34,6 +34,7 @@ body input{
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-app);
   min-height: 100vh;
+  min-width: 1000px; /* Prevents extreme narrowness on desktop */
 }
 
 /* --- 2. HEADER & SEARCH --- */
@@ -116,6 +117,10 @@ body input{
   white-space: nowrap;
 }
 
+.status-pill {
+  border-radius: 25px;
+  padding: 0 25px;
+}
 .status-initiated { background: var(--bg-initiated); color: var(--color-initiated); }
 .status-filed { background: var(--bg-filed); color: var(--color-filed); }
 .status-waiting-for-signatures { background: var(--bg-waiting); color: var(--color-waiting); }
@@ -449,7 +454,6 @@ body input{
 
 .detail-view {
   padding-bottom: 100px; /* Space at bottom for scrolling on mobile */
-  min-width: 1000px; /* Prevents extreme narrowness on desktop */
 }
 
 .btn-back {
@@ -475,7 +479,7 @@ body input{
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 1px;
-  color: var(--text-muted);
+  color: var(--text-dark);
   margin-bottom: 16px;
   display: block;
 }
@@ -494,7 +498,7 @@ body input{
   .task-runner-container {
     margin: 20px 0; /* Tighten up space on mobile */
   }
-  .detail-view {
+  .immigration-page {
     min-width: 100%;
   }
 }
@@ -519,11 +523,6 @@ body input{
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-
-/* Ensure these match your previous status badge colors */
-.status-initiated { background: var(--bg-initiated); color: var(--color-initiated); }
-.status-filed { background: var(--bg-filed); color: var(--color-filed); }
-/* etc... */
 
 .header-controls {
   display: flex;
