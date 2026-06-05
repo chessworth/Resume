@@ -4,8 +4,9 @@
   --primary-hover: #1db6d8;
   --bg-app: #f8fafc33;
   --bg-card: #ffffff;
-  --text-main: #1e293b;
+  --text-dark: #1e293b;
   --text-muted: #64748b;
+  --text-main: #a9c7f0;
   --border-color: #e2e8f0;
   --radius: 12px;
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
