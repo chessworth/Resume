@@ -29,7 +29,7 @@ function App() {
                 <Route path='/blog' element={<Blog />} />
                 <Route path='/nutritiontracker' element={<NutritionTracker />} />
                 <Route path="/immigrationaccelerator" element={<Accelerator />} />
-                <Route path="/immigration-file/:id" element={<FileDetail />} />
+                <Route path="/immigrationaccelerator/:id" element={<FileDetail />} />
                 <Route path="*" /*element={<NoMatch />}*/ />
         </Routes>
       </Container>
