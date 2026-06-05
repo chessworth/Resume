@@ -24,7 +24,7 @@
 }
 
 body input{
-  color: var(--text-main);
+  color: var(--text-dark);
 }
 
 .immigration-page {
@@ -136,7 +136,7 @@ body input{
 
 .doc-label {
   margin-left: 12px;
-  color: var(--text-main);
+  color: var(--text-dark);
   font-size: 1rem;
 }
 
@@ -248,7 +248,7 @@ body input{
   margin-left: auto;
   font-size: 0.7rem;
   background: var(--bg-initiated);
-  color: #64748b;
+  color: var(--color-initiated);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -256,8 +256,8 @@ body input{
 .badge-custom {
   margin-left: auto;
   font-size: 0.7rem;
-  background: var(--bg-waiting);
-  color: white;
+  background: var(--bg-initiated);
+  color: var(--color-initiated);
   padding: 2px 8px;
   border-radius: 4px;
 }
