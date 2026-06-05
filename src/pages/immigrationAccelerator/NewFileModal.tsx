@@ -56,6 +56,10 @@ const NewFileModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
           <div className="form-group">
             <label>Application Type</label>
             <select value={type} onChange={(e) => setType(e.target.value as FileType)}>
+              <option value="PGWP">PGWP</option>
+              <option value="Study Permit">Study Permit</option>
+              <option value="Visitor Visa">Visitor Visa</option>
+              <option value="Super Visa">Super Visa</option>
               <option value="Spousal Inland">Spousal Inland</option>
               <option value="Spousal Outland">Spousal Outland</option>
               <option value="Express Entry">Express Entry</option>

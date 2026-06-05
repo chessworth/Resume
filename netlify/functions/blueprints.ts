@@ -12,6 +12,64 @@ export interface FileBlueprint {
 }
 
 export const BLUEPRINTS: Record<string, FileBlueprint> = {
+  'PGWP': {
+    documents: [
+      { label: 'Passport', category: 'required' },
+      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
+      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
+      { label: 'Marriage Certificate', category: 'required' },
+      { label: 'Joint Bank Account Statements', category: 'optional' },
+      { label: 'Letters of Support from Family', category: 'optional' },
+    ],
+    tasks: [
+      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
+      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' },
+    ]
+  },  
+  'Study Permit': {
+    documents: [
+      { label: 'Letter of Acceptance from DLI', category: 'required' },
+      { label: 'Proof of Financial Support', category: 'required' },
+      { label: 'Passport', category: 'required' },
+      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
+      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
+      { label: 'Marriage Certificate', category: 'required' },
+      { label: 'Joint Bank Account Statements', category: 'optional' },
+      { label: 'Letters of Support from Family', category: 'optional' },
+    ],
+    tasks: [
+      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
+      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' }, 
+    ]
+  },
+  'Visitor Visa': {
+      documents: [
+        { label: 'Passport', category: 'required' },
+        { label: 'IMM 1344: Application to Sponsor', category: 'required' },
+        { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
+        { label: 'Marriage Certificate', category: 'required' },
+        { label: 'Joint Bank Account Statements', category: 'optional' },
+        { label: 'Letters of Support from Family', category: 'optional' },
+      ],
+      tasks: [
+        { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
+        { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' },
+      ]
+  },
+  'Super Visa': {
+    documents: [
+      { label: 'Passport', category: 'required' },
+      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
+      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
+      { label: 'Marriage Certificate', category: 'required' },
+      { label: 'Joint Bank Account Statements', category: 'optional' },
+      { label: 'Letters of Support from Family', category: 'optional' },    
+    ],
+    tasks: [
+      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
+      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' }, 
+    ]
+  },
   'Spousal Inland': {
     documents: [
       // REQUIRED (The 20 hard-coded)
@@ -33,5 +91,14 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
   'Spousal Outland': {
     documents: [],
     tasks: []
-  }
+  },
+  'Express Entry': {
+    documents: [],
+    tasks: []
+  },
+  'Other': {
+    documents: [],
+    tasks: []
+  },
+
 };
