@@ -95,7 +95,7 @@ const ImmigrationDashboard: React.FC = () => {
       <div className="file-list-container">
         {sortedFiles.length > 0 ? (
           sortedFiles.map(file => (
-            <div key={file.id} className="file-card">
+            <div key={file.id} className="file-card" onClick={() => navigate(`${BASEURL}/${file.id}`)}>
               <div className="file-info">
                 <span className="file-name">{file.name}</span>
                 <span className="file-type">{file.type}</span>
