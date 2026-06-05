@@ -12,6 +12,7 @@ import { useState } from 'react';
 import LightDark from './components/lightDark/LightDark';
 import { DarkModeContext } from './contexts/DarkModeContext';
 import Accelerator from './pages/immigrationAccelerator/Accelerator';
+import FileDetail from './pages/immigrationAccelerator/FileDetail';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -28,6 +29,7 @@ function App() {
                 <Route path='/blog' element={<Blog />} />
                 <Route path='/nutritiontracker' element={<NutritionTracker />} />
                 <Route path="/immigrationaccelerator" element={<Accelerator />} />
+                <Route path="/immigration-file/:id" element={<FileDetail />} />
                 <Route path="*" /*element={<NoMatch />}*/ />
         </Routes>
       </Container>
