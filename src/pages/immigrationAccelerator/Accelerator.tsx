@@ -4,6 +4,7 @@ import { ImmigrationFile } from './types';
 import NewFileModal from './NewFileModal';
 import { useNavigate } from 'react-router-dom';
 import './immigration.css';
+import { RefreshCwIcon } from 'lucide-react';
 
 const ImmigrationDashboard: React.FC = () => {
   const [files, setFiles] = useState<ImmigrationFile[]>([]);
@@ -71,18 +72,12 @@ const ImmigrationDashboard: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {/* Refresh button is handy for clerical apps */}
-          <button onClick={fetchFiles} className="refresh-btn">↻</button>
+          <button onClick={fetchFiles} className="refresh-btn"><RefreshCwIcon /></button>
           <button 
             className="btn-primary main-cta" 
             onClick={() => setIsModalOpen(true)}
           >
-            + Create New Client File
-          </button>
-          <button 
-            className="btn-secondary" 
-            onClick={() => navigate(BASEURL)}
-          >
-            View All Files
+            + New File
           </button>
         </div>
       </header>

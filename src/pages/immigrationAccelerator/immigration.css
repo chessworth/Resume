@@ -1,7 +1,7 @@
 /* --- 1. GLOBAL VARIABLES & RESET --- */
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #2588eb;
+  --primary-hover: #1db6d8;
   --bg-app: #f8fafc33;
   --bg-card: #ffffff;
   --text-main: #1e293b;
@@ -18,6 +18,7 @@
   --color-waiting: #854d0e;
   --bg-waiting: #fef9c3;
   --color-pending: #1e40af;
+  --color-error: #b91c1c;
   --bg-pending: #dbeafe;
 }
 
@@ -239,14 +240,23 @@ body input{
 
 .doc-item.custom {
   border-left: 4px solid var(--primary);
-  background: #eff6ff;
+  background: var(--bg-card)
 }
 
 .badge-optional {
   margin-left: auto;
   font-size: 0.7rem;
-  background: #f1f5f9;
+  background: var(--bg-initiated);
   color: #64748b;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.badge-custom {
+  margin-left: auto;
+  font-size: 0.7rem;
+  background: var(--bg-waiting);
+  color: white;
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -300,6 +310,15 @@ body input{
   outline-offset: 2px;
 }
 
+.doc-item {
+  border-color: var(--color-error);
+}
+
+.doc-item:has(input[type="checkbox"]:checked) {
+  background: var(--color-filed);
+  border-color: none !important;
+}
+
 .doc-label {
   cursor: pointer;
   flex: 1;
@@ -308,7 +327,6 @@ body input{
 /* Checkbox modernization */
 .doc-item input[type="checkbox"] {
   width: 20px;
-  height: 20px;
   cursor: pointer;
   accent-color: var(--primary);
 }
@@ -430,6 +448,7 @@ body input{
 
 .detail-view {
   padding-bottom: 100px; /* Space at bottom for scrolling on mobile */
+  min-width: 1000px; /* Prevents extreme narrowness on desktop */
 }
 
 .btn-back {
@@ -473,6 +492,9 @@ body input{
   
   .task-runner-container {
     margin: 20px 0; /* Tighten up space on mobile */
+  }
+  .detail-view {
+    min-width: 100%;
   }
 }
 

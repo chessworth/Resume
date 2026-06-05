@@ -62,7 +62,7 @@ const DocumentChecklist: React.FC<Props> = ({ fileId, initialDocs }) => {
             <div className="doc-content">
               <span className="doc-label">{doc.label}</span>
               {doc.category !== 'required' && (
-                <span className={`badge-${doc.category}`}>{doc.category}</span>
+                <span className={`badge-${doc.category}`}>{" (" + doc.category + ")"}</span>
               )}
             </div>
           </label>
