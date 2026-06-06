@@ -56,8 +56,8 @@ const ImmigrationDashboard: React.FC = () => {
 
   if (loading) return <div className="loading-state">Loading your files...</div>;
 
-  const handleCreationSuccess = () => {
-    navigate(BASEURL); 
+  const handleCreationSuccess = (url: string) => {
+    navigate(`${BASEURL}/${url}`);
   };
 
   return (

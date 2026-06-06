@@ -5,7 +5,7 @@ import { FileType, FileStatus } from './types';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (url:string) => void; // Callback to trigger after successful creation, returns new file's URL
 }
 
 const NewFileModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
@@ -26,7 +26,8 @@ const NewFileModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
       });
 
       if (response.ok) {
-        onSuccess();
+        const result = await response.json();
+        onSuccess(result.id);
         onClose();
         setName('');
       }
