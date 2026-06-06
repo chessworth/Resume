@@ -2,103 +2,310 @@
 
 export interface BlueprintItem {
   label: string;
-  category?: 'required' | 'optional';
+  category?: "required" | "optional";
   description?: string;
 }
 
+export type FieldType = "text" | "date" | "select" | "boolean";
+
+export interface FormField {
+  id: string;
+  label: string;
+  type: FieldType;
+  options?: string[]; // For dropdowns
+  answer: string | boolean | null;
+}
+
+export interface FormSection {
+  id: string;
+  title: string;
+  is_active: boolean; // True if included in the client's form
+  fields: FormField[];
+}
+
 export interface FileBlueprint {
-  documents: BlueprintItem[];
-  tasks: BlueprintItem[];
+  documents: any[];
+  tasks: any[];
+  questionnaire: {
+    defaultSections: FormSection[];
+    optionalSections: FormSection[];
+  };
 }
 
 export const BLUEPRINTS: Record<string, FileBlueprint> = {
-  'PGWP': {
+  PGWP: {
     documents: [
-      { label: 'Passport', category: 'required' },
-      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
-      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
-      { label: 'Marriage Certificate', category: 'required' },
-      { label: 'Joint Bank Account Statements', category: 'optional' },
-      { label: 'Letters of Support from Family', category: 'optional' },
+      { label: "Passport", category: "required" },
+      { label: "IMM 1344: Application to Sponsor", category: "required" },
+      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Marriage Certificate", category: "required" },
+      { label: "Joint Bank Account Statements", category: "optional" },
+      { label: "Letters of Support from Family", category: "optional" },
     ],
     tasks: [
-      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
-      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' },
-    ]
-  },  
-  'Study Permit': {
-    documents: [
-      { label: 'Letter of Acceptance from DLI', category: 'required' },
-      { label: 'Proof of Financial Support', category: 'required' },
-      { label: 'Passport', category: 'required' },
-      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
-      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
-      { label: 'Marriage Certificate', category: 'required' },
-      { label: 'Joint Bank Account Statements', category: 'optional' },
-      { label: 'Letters of Support from Family', category: 'optional' },
+      {
+        label: "Review Retainer",
+        description: "Confirm signed copy is uploaded to folder.",
+      },
+      {
+        label: "Order Police Clearances",
+        description: "Advise client on country-specific instructions.",
+      },
     ],
-    tasks: [
-      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
-      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' }, 
-    ]
-  },
-  'Visitor Visa': {
-      documents: [
-        { label: 'Passport', category: 'required' },
-        { label: 'IMM 1344: Application to Sponsor', category: 'required' },
-        { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
-        { label: 'Marriage Certificate', category: 'required' },
-        { label: 'Joint Bank Account Statements', category: 'optional' },
-        { label: 'Letters of Support from Family', category: 'optional' },
+    questionnaire: {
+      defaultSections: [
+        {
+          id: "personal",
+          title: "Personal Information",
+          is_active: true,
+          fields: [
+            {
+              id: "first_name",
+              label: "First Name",
+              type: "text",
+              answer: null,
+            },
+            { id: "last_name", label: "Last Name", type: "text", answer: null },
+            {
+              id: "date_of_birth",
+              label: "Date of Birth",
+              type: "date",
+              answer: null,
+            },
+          ],
+        },
       ],
-      tasks: [
-        { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
-        { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' },
-      ]
+      optionalSections: [],
+    },
   },
-  'Super Visa': {
+  "Study Permit": {
     documents: [
-      { label: 'Passport', category: 'required' },
-      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
-      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
-      { label: 'Marriage Certificate', category: 'required' },
-      { label: 'Joint Bank Account Statements', category: 'optional' },
-      { label: 'Letters of Support from Family', category: 'optional' },    
+      { label: "Letter of Acceptance from DLI", category: "required" },
+      { label: "Proof of Financial Support", category: "required" },
+      { label: "Passport", category: "required" },
+      { label: "IMM 1344: Application to Sponsor", category: "required" },
+      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Marriage Certificate", category: "required" },
+      { label: "Joint Bank Account Statements", category: "optional" },
+      { label: "Letters of Support from Family", category: "optional" },
     ],
     tasks: [
-      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
-      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' }, 
-    ]
+      {
+        label: "Review Retainer",
+        description: "Confirm signed copy is uploaded to folder.",
+      },
+      {
+        label: "Order Police Clearances",
+        description: "Advise client on country-specific instructions.",
+      },
+    ],
+    questionnaire: {
+      defaultSections: [
+        {
+          id: "personal",
+          title: "Personal Information",
+          is_active: true,
+          fields: [
+            {
+              id: "first_name",
+              label: "First Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "last_name",
+              label: "Last Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "date_of_birth",
+              label: "Date of Birth",
+              type: "date",
+              answer: null,
+            },
+          ],
+        },
+      ],
+      optionalSections: [],
+    },
   },
-  'Spousal Inland': {
+  "Visitor Visa": {
+    documents: [
+      { label: "Passport", category: "required" },
+      { label: "IMM 1344: Application to Sponsor", category: "required" },
+      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Marriage Certificate", category: "required" },
+      { label: "Joint Bank Account Statements", category: "optional" },
+      { label: "Letters of Support from Family", category: "optional" },
+    ],
+    tasks: [
+      {
+        label: "Review Retainer",
+        description: "Confirm signed copy is uploaded to folder.",
+      },
+      {
+        label: "Order Police Clearances",
+        description: "Advise client on country-specific instructions.",
+      },
+    ],
+    questionnaire: {
+      defaultSections: [
+        {
+          id: "personal",
+          title: "Personal Information",
+          is_active: true,
+          fields: [
+            {
+              id: "first_name",
+              label: "First Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "last_name",
+              label: "Last Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "date_of_birth",
+              label: "Date of Birth",
+              type: "date",
+              answer: null,
+            },
+          ],
+        },
+      ],
+      optionalSections: [],
+    },
+  },
+  "Super Visa": {
+    documents: [
+      { label: "Passport", category: "required" },
+      { label: "IMM 1344: Application to Sponsor", category: "required" },
+      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Marriage Certificate", category: "required" },
+      { label: "Joint Bank Account Statements", category: "optional" },
+      { label: "Letters of Support from Family", category: "optional" },
+    ],
+    tasks: [
+      {
+        label: "Review Retainer",
+        description: "Confirm signed copy is uploaded to folder.",
+      },
+      {
+        label: "Order Police Clearances",
+        description: "Advise client on country-specific instructions.",
+      },
+    ],
+    questionnaire: {
+      defaultSections: [
+        {
+          id: "personal",
+          title: "Personal Information",
+          is_active: true,
+          fields: [
+            {
+              id: "first_name",
+              label: "First Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "last_name",
+              label: "Last Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "date_of_birth",
+              label: "Date of Birth",
+              type: "date",
+              answer: null,
+            },
+          ],
+        },
+      ],
+      optionalSections: [],
+    },
+  },
+  "Spousal Inland": {
     documents: [
       // REQUIRED (The 20 hard-coded)
-      { label: 'IMM 1344: Application to Sponsor', category: 'required' },
-      { label: 'IMM 5285: Relationship Questionnaire', category: 'required' },
-      { label: 'Marriage Certificate', category: 'required' },
+      { label: "IMM 1344: Application to Sponsor", category: "required" },
+      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Marriage Certificate", category: "required" },
       // ... keep going until 20
-      
+
       // OPTIONAL (The 5 standard extras)
-      { label: 'Joint Bank Account Statements', category: 'optional' },
-      { label: 'Letters of Support from Family', category: 'optional' },
+      { label: "Joint Bank Account Statements", category: "optional" },
+      { label: "Letters of Support from Family", category: "optional" },
     ],
     tasks: [
-      { label: 'Review Retainer', description: 'Confirm signed copy is uploaded to folder.' },
-      { label: 'Order Police Clearances', description: 'Advise client on country-specific instructions.' },
+      {
+        label: "Review Retainer",
+        description: "Confirm signed copy is uploaded to folder.",
+      },
+      {
+        label: "Order Police Clearances",
+        description: "Advise client on country-specific instructions.",
+      },
       // ... keep going until 10
-    ]
+    ],
+    questionnaire: {
+      defaultSections: [
+        {
+          id: "personal",
+          title: "Personal Information",
+          is_active: true,
+          fields: [
+            {
+              id: "first_name",
+              label: "First Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "last_name",
+              label: "Last Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "date_of_birth",
+              label: "Date of Birth",
+              type: "date",
+              answer: null,
+            },
+          ],
+        },
+      ],
+      optionalSections: [],
+    },
   },
-  'Spousal Outland': {
+  "Spousal Outland": {
     documents: [],
-    tasks: []
+    tasks: [],
+    questionnaire: {
+      defaultSections: [],
+      optionalSections: [],
+    },
   },
-  'Express Entry': {
+  "Express Entry": {
     documents: [],
-    tasks: []
+    tasks: [],
+    questionnaire: {
+      defaultSections: [],
+      optionalSections: [],
+    },
   },
-  'Other': {
+  Other: {
     documents: [],
-    tasks: []
+    tasks: [],
+    questionnaire: {
+      defaultSections: [],
+      optionalSections: [],
+    },
   },
-
 };

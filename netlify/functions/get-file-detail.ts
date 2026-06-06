@@ -7,7 +7,7 @@ const handler = async (event: any) => {
   const fileId = event.queryStringParameters?.id;
 
   try {
-    const [fileRes, tasksRes, docsRes] = await Promise.all([
+    const [fileRes, tasksRes, docsRes, formRes] = await Promise.all([
       supabase.from("files").select("*").eq("id", fileId).single(),
       supabase.from("tasks").select("*").eq("file_id", fileId),
       supabase
@@ -15,6 +15,7 @@ const handler = async (event: any) => {
         .select("*")
         .eq("file_id", fileId)
         .order("category", { ascending: false }),
+      supabase.from("client_forms").select("*").eq("file_id", fileId).single(),
     ]);
 
     return {
@@ -23,6 +24,7 @@ const handler = async (event: any) => {
         file: fileRes.data,
         tasks: tasksRes.data,
         documents: docsRes.data,
+        clientForm: formRes.data,
       }),
     };
   } catch (error: any) {
