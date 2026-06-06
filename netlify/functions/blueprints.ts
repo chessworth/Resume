@@ -75,7 +75,33 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           ],
         },
       ],
-      optionalSections: [],
+      optionalSections: [
+        {
+          id: "marriage",
+          title: "Marriage Details",
+          is_active: false,
+          fields: [
+            {
+              id: "spouse_first_name",
+              label: "Spouse's First Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "spouse_last_name",
+              label: "Spouse's Last Name",
+              type: "text",
+              answer: null,
+            },
+            {
+              id: "marriage_date",
+              label: "Date of Marriage",
+              type: "date",
+              answer: null ,
+            },
+          ],
+        },
+      ],
     },
   },
   "Study Permit": {
