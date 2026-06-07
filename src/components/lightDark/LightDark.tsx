@@ -9,7 +9,7 @@ interface LightDarkProps {
 
 const LightDark: React.FC<LightDarkProps> = ({ isDarkMode, toggleTheme }) => {
     // Define paths where the navbar should NOT appear
-    const hideOnRoutes = ['/immigrationaccelerator', '/immigration-file'];
+    const hideOnRoutes = ['/immigrationaccelerator', '/immigration-file', '/intake']; // Add more as needed
 
     // Check if the current URL starts with any of the hidden routes
     const shouldHideNavbar = hideOnRoutes.some(route => 
