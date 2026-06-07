@@ -11,6 +11,7 @@ const ClientIntake: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [isQueueActive, setIsQueueActive] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -47,7 +48,8 @@ const ClientIntake: React.FC = () => {
         method: 'POST',
         body: JSON.stringify({ token, sections })
       });
-      alert('Progress saved successfully!');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (err) {
       alert('Failed to save progress. Please try again.');
     } finally {
@@ -69,7 +71,7 @@ const ClientIntake: React.FC = () => {
     {isQueueActive ? (
       <QuestionnaireRunner 
         sections={sections} 
-        onSaveAnswer={handleInputChange}
+        onSaveAnswer={saveProgress} // Saves after each answer, can be optimized to batch if needed
         onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
       />
     ) : (
@@ -116,7 +118,7 @@ const ClientIntake: React.FC = () => {
           onClick={saveProgress} 
           disabled={saving}
         >
-          {saving ? 'Saving...' : 'Save Progress'}
+          {saving ? 'Saving...' : showSuccess ? 'Saved ✓' : 'Save Progress'}
         </button>
       </div>
     </div>
