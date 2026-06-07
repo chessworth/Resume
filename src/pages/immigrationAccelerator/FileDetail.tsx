@@ -85,35 +85,16 @@ const FileDetail: React.FC = () => {
     }
   };
 
-  const handleTaskComplete = async (taskId: string) => {
+  const handleTaskComplete = async (taskId: string, newStatus: boolean) => {
     // Netlify call to update DB
     await fetch('/.netlify/functions/update-task', {
       method: 'POST',
-      body: JSON.stringify({ id: taskId, is_completed: true })
+      body: JSON.stringify({ id: taskId, is_completed: newStatus })
     });
     // TaskRunner internal state handles the local removal, 
     // but we update parent state to keep it in sync
     setTasks(prev => prev.filter(t => t.id !== taskId));
   };
-  const toggleTaskStatus = async (taskId: string, currentStatus: boolean) => {
-  // 1. Optimistic UI update (feels instant to the user)
-  setTasks(prevTasks => 
-    prevTasks.map(t => 
-      t.id === taskId ? { ...t, is_completed: !currentStatus } : t
-    )
-  );
-
-  // 2. Background database update
-  try {
-    await fetch('/.netlify/functions/update-task', {
-      method: 'POST',
-      body: JSON.stringify({ id: taskId, is_completed: !currentStatus })
-    });
-  } catch (err) {
-    console.error("Failed to update task:", err);
-    // Rollback could go here if needed
-  }
-};
 
   if (loading) return <div className="loading-state">Accessing file...</div>;
   if (!file) return <div>File not found.</div>;
@@ -166,7 +147,7 @@ const FileDetail: React.FC = () => {
         <h3 className="section-label">Active Workflow</h3>
         <TaskRunner initialTasks={tasks} onTaskToggle={handleTaskComplete} />
       </section>
-      
+
       {clientForm && (
         <section className="detail-section form-manager-section">
           <h3 className="section-label">Client Intake Form</h3>

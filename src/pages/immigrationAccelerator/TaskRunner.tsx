@@ -77,7 +77,7 @@ const TaskRunner: React.FC<Props> = ({ initialTasks, onTaskToggle }) => {
     }
 
     try {
-      await onTaskToggle(taskId, currentStatus);
+      await onTaskToggle(taskId, newStatus);
     } catch (err) {
       console.error("Failed to toggle task:", err);
       // Optional: Rollback state here if the fetch fails
