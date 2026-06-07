@@ -111,19 +111,27 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
           </label>
 
           {/* Render the appropriate input based on type */}
-          {field.type === 'text' && (
-            <input
-              id={field.id}
-              type="text"
-              className="runner-input"
-              value={currentValue as string}
-              onChange={(e) => setCurrentValue(e.target.value)}
-              disabled={isProcessing}
-              autoFocus
-              required
-            />
+          {(field.type === 'text' || field.type === 'email') && (
+            <div className="input-group">
+              <input
+                id={field.id}
+                type={field.type}
+                className="runner-input"
+                value={currentValue as string}
+                onChange={(e) => setCurrentValue(e.target.value)}
+                disabled={isProcessing}
+                placeholder={field.placeholder} // <-- Added placeholder
+                pattern={field.validation?.pattern} // <-- Added validation pattern
+                title={field.validation?.message} // <-- Added error message
+                autoFocus
+                required
+              />
+              {/* Optional: Render the requirement as helper text below the input */}
+              {field.validation && (
+                <span className="input-helper-text">{field.validation.message}</span>
+              )}
+            </div>
           )}
-
           {field.type === 'date' && (
             <input
               id={field.id}
@@ -137,6 +145,38 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
           )}
 
           {/* Add select/boolean handling here if needed */}
+          {field.type === 'select' && (
+            <select
+              id={field.id}
+              className="runner-input"
+              value={currentValue as string}
+              onChange={(e) => setCurrentValue(e.target.value)}
+              disabled={isProcessing}
+              required
+            >
+              <option value="">Select an option</option>
+              {field.options?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          )}
+          {field.type === 'boolean' && (
+            <div className="input-group">
+              <label className="form-check-label" htmlFor={field.id}>
+                {field.label}
+              </label>
+              <input
+                id={field.id}
+                type="checkbox"
+                className="runner-input"
+                checked={currentValue as boolean}
+                onChange={(e) => setCurrentValue(e.target.checked)}
+                disabled={isProcessing}
+              />
+            </div>
+          )}
 
           <div className="runner-actions">
             <button 

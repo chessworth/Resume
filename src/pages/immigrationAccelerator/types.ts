@@ -36,14 +36,21 @@ export interface Task {
   is_completed: boolean;
 }
 
-export type FieldType = "text" | "date" | "select" | "boolean";
+export type FieldType = "text" | "date" | "select" | "boolean" | "email";
+
+export interface QuestionValidation {
+  pattern: string; // The regex pattern the HTML input will enforce
+  message: string; // The error message shown if the pattern fails
+}
 
 export interface FormField {
   id: string;
   label: string;
   type: FieldType;
-  options?: string[];
+  options?: string[]; // For dropdowns
   answer: string | boolean | null;
+  placeholder?: string;
+  validation?: QuestionValidation;
 }
 
 export interface FormSection {

@@ -1,4 +1,8 @@
-import { QUESTIONS_REGISTRY, FieldType  } from "./questionsRegistry";
+import {
+  QUESTIONS_REGISTRY,
+  FieldType,
+  QuestionValidation,
+} from "./questionsRegistry";
 export interface BlueprintItem {
   label: string;
   category?: "required" | "optional";
@@ -17,6 +21,8 @@ export interface FormField {
   type: FieldType;
   options?: string[]; // For dropdowns
   answer: string | boolean | null;
+  placeholder?: string;
+  validation?: QuestionValidation;
 }
 
 export interface FormSection {
