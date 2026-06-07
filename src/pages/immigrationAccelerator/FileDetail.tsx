@@ -50,7 +50,7 @@ const FileDetail: React.FC = () => {
         const data = await response.json();
         
         if (data.file) setFile(data.file);
-        if (data.tasks) setTasks(data.tasks.filter((t: Task) => !t.is_completed));
+        if (data.tasks) setTasks(data.tasks);
         if (data.documents) setDocs(data.documents);
         if (data.clientForm) setClientForm(data.clientForm);
       } catch (err) {
@@ -95,6 +95,25 @@ const FileDetail: React.FC = () => {
     // but we update parent state to keep it in sync
     setTasks(prev => prev.filter(t => t.id !== taskId));
   };
+  const toggleTaskStatus = async (taskId: string, currentStatus: boolean) => {
+  // 1. Optimistic UI update (feels instant to the user)
+  setTasks(prevTasks => 
+    prevTasks.map(t => 
+      t.id === taskId ? { ...t, is_completed: !currentStatus } : t
+    )
+  );
+
+  // 2. Background database update
+  try {
+    await fetch('/.netlify/functions/update-task', {
+      method: 'POST',
+      body: JSON.stringify({ id: taskId, is_completed: !currentStatus })
+    });
+  } catch (err) {
+    console.error("Failed to update task:", err);
+    // Rollback could go here if needed
+  }
+};
 
   if (loading) return <div className="loading-state">Accessing file...</div>;
   if (!file) return <div>File not found.</div>;
@@ -145,7 +164,39 @@ const FileDetail: React.FC = () => {
 
       <section className="detail-section">
         <h3 className="section-label">Active Workflow</h3>
-        <TaskRunner initialTasks={tasks} onTaskComplete={handleTaskComplete} />
+        <TaskRunner initialTasks={tasks} onTaskToggle={handleTaskComplete} />
+      </section>
+
+      <section className="detail-section task-list-section">
+        <div className="section-header">
+          <h3 className="section-label">Full Task History</h3>
+          <span className="completion-tracker">
+            {tasks.filter(t => t.is_completed).length} / {tasks.length} Completed
+          </span>
+        </div>
+        
+        <div className="task-list">
+          {tasks.map(task => (
+            <div 
+              key={task.id} 
+              className={`list-item ${task.is_completed ? 'is-completed' : ''}`}
+            >
+              <label className="checkbox-container">
+                <input 
+                  type="checkbox" 
+                  checked={task.is_completed}
+                  onChange={() => toggleTaskStatus(task.id, task.is_completed)}
+                />
+                <span className="checkmark"></span>
+              </label>
+              
+              <div className="item-details">
+                <span className="item-label">{task.label}</span>
+                {task.description && <span className="item-desc">{task.description}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {clientForm && (
