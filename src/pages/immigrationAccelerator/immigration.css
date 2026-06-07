@@ -666,3 +666,108 @@ body input{
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
+/* --- Client Answers View --- */
+.client-answers-view {
+  margin-top: 40px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+}
+
+.answers-title {
+  margin-bottom: 24px;
+  color: var(--text-dark);
+}
+
+.answer-section {
+  margin-bottom: 24px;
+  background: #fdfdfd;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+
+.answer-section h5 {
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 8px;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .answer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.answer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Minimal Copy Button --- */
+.copyable-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.copyable-answer-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  margin-left: -6px; /* Offsets padding so text aligns perfectly with label above it */
+  border-radius: 4px;
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.copyable-answer-btn:hover:not(:disabled) {
+  background-color: rgba(37, 99, 235, 0.08); /* Faint blue highlight */
+  color: var(--primary);
+}
+
+.copyable-answer-btn.empty {
+  color: var(--text-muted);
+  font-style: italic;
+  cursor: default;
+}
+
+/* --- Copied Tooltip Animation --- */
+.copied-tooltip {
+  position: absolute;
+  left: 100%;
+  margin-left: 8px;
+  font-size: 0.85rem;
+  color: #10b981; /* Success Green */
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: slideFadeInOut 1s ease forwards;
+}
+
+@keyframes slideFadeInOut {
+  0% { opacity: 0; transform: translateX(-4px); }
+  15% { opacity: 1; transform: translateX(0); }
+  85% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(4px); }
+}

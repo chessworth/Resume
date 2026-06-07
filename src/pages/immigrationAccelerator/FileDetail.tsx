@@ -6,6 +6,34 @@ import DocumentChecklist from './DocumentChecklist';
 import { ImmigrationFile, Task, Document, FileStatus, ClientForm } from './types';
 import './immigration.css';
 
+const CopyableAnswer: React.FC<{ answer: string | boolean | null }> = ({ answer }) => {
+  const [copied, setCopied] = useState(false);
+  
+  // Format the display text if it's empty
+  const displayValue = !answer ? 'Not answered' : answer.toString();
+
+  const handleCopy = () => {
+    if (!answer) return; // Prevent copying "Not answered"
+    navigator.clipboard.writeText(displayValue);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1000); // Hide after 1 second
+  };
+
+  return (
+    <div className="copyable-wrapper">
+      <button 
+        className={`copyable-answer-btn ${!answer ? 'empty' : ''}`}
+        onClick={handleCopy}
+        disabled={!answer}
+        title={answer ? "Click to copy" : ""}
+      >
+        {displayValue}
+      </button>
+      {copied && <span className="copied-tooltip">(copied)</span>}
+    </div>
+  );
+};
+
 const FileDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -152,6 +180,24 @@ const FileDetail: React.FC = () => {
                   >
                     {section.is_active ? 'Remove' : 'Add Section'}
                   </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="client-answers-view">
+            <h4 className="answers-title">Review Client Answers</h4>
+            
+            {clientForm.sections.filter(s => s.is_active).map(section => (
+              <div key={section.id} className="answer-section">
+                <h5>{section.title}</h5>
+                <div className="answer-grid">
+                  {section.fields.map(field => (
+                    <div key={field.id} className="answer-field">
+                      <span className="field-label">{field.label}</span>
+                      <CopyableAnswer answer={field.answer} />
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
