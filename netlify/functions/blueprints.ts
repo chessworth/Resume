@@ -1,13 +1,16 @@
-// netlify/functions/blueprints.ts
-
+import { QUESTIONS_REGISTRY, FieldType  } from "./questionsRegistry";
 export interface BlueprintItem {
   label: string;
   category?: "required" | "optional";
   description?: string;
 }
 
-export type FieldType = "text" | "date" | "select" | "boolean";
-
+export interface FormSectionBlueprint {
+  id: string;
+  title: string;
+  is_active: boolean; // True if included in the client's form
+  questionKeys: string[]; // References keys in QUESTIONS_REGISTRY
+}
 export interface FormField {
   id: string;
   label: string;
@@ -24,11 +27,11 @@ export interface FormSection {
 }
 
 export interface FileBlueprint {
-  documents: any[];
-  tasks: any[];
+  documents: BlueprintItem[];
+  tasks: BlueprintItem[];
   questionnaire: {
-    defaultSections: FormSection[];
-    optionalSections: FormSection[];
+    defaultSections: FormSectionBlueprint[];
+    optionalSections: FormSectionBlueprint[];
   };
 }
 
@@ -58,21 +61,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "personal",
           title: "Personal Information",
           is_active: true,
-          fields: [
-            {
-              id: "first_name",
-              label: "First Name",
-              type: "text",
-              answer: null,
-            },
-            { id: "last_name", label: "Last Name", type: "text", answer: null },
-            {
-              id: "date_of_birth",
-              label: "Date of Birth",
-              type: "date",
-              answer: null,
-            },
-          ],
+          questionKeys: ["first_name", "last_name", "date_of_birth"],
         },
       ],
       optionalSections: [
@@ -80,25 +69,10 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "marriage",
           title: "Marriage Details",
           is_active: false,
-          fields: [
-            {
-              id: "spouse_first_name",
-              label: "Spouse's First Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "spouse_last_name",
-              label: "Spouse's Last Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "marriage_date",
-              label: "Date of Marriage",
-              type: "date",
-              answer: null ,
-            },
+          questionKeys: [
+            "spouse_first_name",
+            "spouse_last_name",
+            "marriage_date",
           ],
         },
       ],
@@ -131,26 +105,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "personal",
           title: "Personal Information",
           is_active: true,
-          fields: [
-            {
-              id: "first_name",
-              label: "First Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "last_name",
-              label: "Last Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "date_of_birth",
-              label: "Date of Birth",
-              type: "date",
-              answer: null,
-            },
-          ],
+          questionKeys: ["first_name", "last_name", "date_of_birth"],
         },
       ],
       optionalSections: [],
@@ -181,26 +136,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "personal",
           title: "Personal Information",
           is_active: true,
-          fields: [
-            {
-              id: "first_name",
-              label: "First Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "last_name",
-              label: "Last Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "date_of_birth",
-              label: "Date of Birth",
-              type: "date",
-              answer: null,
-            },
-          ],
+          questionKeys: ["first_name", "last_name", "date_of_birth"],
         },
       ],
       optionalSections: [],
@@ -231,26 +167,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "personal",
           title: "Personal Information",
           is_active: true,
-          fields: [
-            {
-              id: "first_name",
-              label: "First Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "last_name",
-              label: "Last Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "date_of_birth",
-              label: "Date of Birth",
-              type: "date",
-              answer: null,
-            },
-          ],
+          questionKeys: ["first_name", "last_name", "date_of_birth"],
         },
       ],
       optionalSections: [],
@@ -285,26 +202,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "personal",
           title: "Personal Information",
           is_active: true,
-          fields: [
-            {
-              id: "first_name",
-              label: "First Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "last_name",
-              label: "Last Name",
-              type: "text",
-              answer: null,
-            },
-            {
-              id: "date_of_birth",
-              label: "Date of Birth",
-              type: "date",
-              answer: null,
-            },
-          ],
+          questionKeys: ["first_name", "last_name", "date_of_birth"],
         },
       ],
       optionalSections: [],
@@ -334,4 +232,34 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
       optionalSections: [],
     },
   },
+};
+
+export const populateSection = (
+  blueprintSection: FormSectionBlueprint,
+): FormSection => {
+  return {
+    id: blueprintSection.id,
+    title: blueprintSection.title,
+    is_active: blueprintSection.is_active,
+    // Map over the string keys and grab the full definition from the registry
+    fields: blueprintSection.questionKeys.map((key) => {
+      const questionDef = QUESTIONS_REGISTRY[key];
+
+      if (!questionDef) {
+        console.error(`Warning: Question key "${key}" not found in registry.`);
+        // Fallback to prevent crashing if a typo occurs
+        return {
+          id: key,
+          label: "Unknown Question",
+          type: "text",
+          answer: null,
+        };
+      }
+
+      return {
+        ...questionDef,
+        answer: null, // Initialize the empty answer state here
+      };
+    }),
+  };
 };

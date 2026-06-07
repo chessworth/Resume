@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { BLUEPRINTS } from "./blueprints";
+import { BLUEPRINTS, populateSection } from "./blueprints";
 
 const supabase = createClient(process.env.IMM_URL!, process.env.IMM_SECRET!);
 
@@ -43,14 +43,8 @@ const handler = async (event: any) => {
 
     // Unify Questionnaire Sections (Defaults go live immediately, Optionals stay hidden)
     const combinedFormSections = [
-      ...blueprint.questionnaire.defaultSections.map((s) => ({
-        ...s,
-        is_active: true,
-      })),
-      ...blueprint.questionnaire.optionalSections.map((s) => ({
-        ...s,
-        is_active: false,
-      })),
+      ...blueprint.questionnaire.defaultSections.map(populateSection),
+      ...blueprint.questionnaire.optionalSections.map(populateSection),
     ];
 
     // 3. Batch insert everything concurrently to save network rounds
