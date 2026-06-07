@@ -3,7 +3,7 @@
   --primary: #2588eb;
   --primary-hover: #1db6d8;
   --bg-app: #f8fafc33;
-  --bg-card: #ffffff;
+  --bg-card: #f2f2f2;
   --text-dark: #1e293b;
   --text-muted: #64748b;
   --text-main: #a9c7f0;
@@ -186,7 +186,7 @@ body input{
 }
 
 .task-card-focus {
-  background: white;
+  background: var(--bg-card);
   padding: 32px;
   border-radius: 20px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
@@ -220,11 +220,12 @@ body input{
 
 .btn-skip {
   flex: 1;
-  background: white;
+  background: var(--accent);
   border: 1px solid var(--border-color);
   padding: 14px;
   border-radius: var(--radius);
   cursor: pointer;
+  color: var(--color-waiting);
 }
 
 /* Mobile: Stack buttons if needed */
@@ -236,7 +237,7 @@ body input{
 
 /* Document List Container */
 .doc-checklist-container {
-  background: white;
+  background: var(--bg-card);
   padding: 24px;
   border-radius: var(--radius);
   border: 1px solid var(--border-color);
@@ -328,8 +329,8 @@ body input{
 }
 
 .doc-item:has(input[type="checkbox"]:checked) {
-  background: var(--color-filed);
-  border-color: none !important;
+  background: var(--bg-filed);
+  border-color: white !important;
 }
 
 .doc-label {
@@ -484,15 +485,19 @@ body input{
 
 .section-label {
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 1.1rem;
   letter-spacing: 1px;
   color: var(--text-dark);
   margin-bottom: 16px;
   display: block;
+  text-align: center;
 }
 
 .detail-section {
-  margin-bottom: 48px;
+  padding: 20px 50px;
+  background: var(--bg-app);
+  margin: 25px;
+  border-radius: 50px;
 }
 
 /* Mobile specific detail adjustments */
@@ -559,4 +564,105 @@ body input{
   border-radius: var(--radius);
   border: 1px solid var(--border-color);
   margin-top: 40px;
+}
+
+.share-link-box, .form-sections-list {
+  background: var(--bg-app);
+  padding: 20px;
+  border-radius: 25px;
+  margin-bottom: 30px;
+}
+
+.form-sections-label {
+  font-size: 1rem;
+}
+.section-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-app);
+  padding: 20px;
+  border-radius: 25px;
+  margin: 10px 0;
+}
+.active .section-info {
+  background: var(--bg-filed);
+  border: 1px solid var(--border-color);
+}
+/* --- Public Client Intake Form --- */
+.public-intake {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.intake-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.intake-section {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.intake-section h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-dark);
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column on mobile */
+  gap: 20px;
+}
+
+/* Switch to 2 columns on larger screens */
+@media (min-width: 600px) {
+  .fields-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.form-group input, 
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.intake-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
 }

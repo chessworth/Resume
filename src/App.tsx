@@ -13,6 +13,7 @@ import LightDark from './components/lightDark/LightDark';
 import { DarkModeContext } from './contexts/DarkModeContext';
 import Accelerator from './pages/immigrationAccelerator/Accelerator';
 import FileDetail from './pages/immigrationAccelerator/FileDetail';
+import ClientIntake from './pages/immigrationAccelerator/ClientIntake';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -30,6 +31,7 @@ function App() {
                 <Route path='/nutritiontracker' element={<NutritionTracker />} />
                 <Route path="/immigrationaccelerator" element={<Accelerator />} />
                 <Route path="/immigrationaccelerator/:id" element={<FileDetail />} />
+                <Route path="/intake/:token" element={<ClientIntake />} />
                 <Route path="*" /*element={<NoMatch />}*/ />
         </Routes>
       </Container>

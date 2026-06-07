@@ -140,19 +140,19 @@ const FileDetail: React.FC = () => {
           </div>
 
           <div className="form-sections-list">
-            <h4>Manage Form Sections</h4>
+            <h4 className="section-label form-sections-label">Manage Form Sections</h4>
             {clientForm.sections.map(section => (
               <div key={section.id} className={`form-section-item ${section.is_active ? 'active' : 'inactive'}`}>
                 <div className="section-info">
                   <strong>{section.title}</strong>
                   <span className="field-count">{section.fields.length} questions</span>
+                  <button 
+                    className={section.is_active ? 'btn-remove' : 'btn-add'}
+                    onClick={() => toggleFormSection(section.id, section.is_active)}
+                  >
+                    {section.is_active ? 'Remove' : 'Add Section'}
+                  </button>
                 </div>
-                <button 
-                  className={section.is_active ? 'btn-remove' : 'btn-add'}
-                  onClick={() => toggleFormSection(section.id, section.is_active)}
-                >
-                  {section.is_active ? 'Remove' : 'Add Section'}
-                </button>
               </div>
             ))}
           </div>
