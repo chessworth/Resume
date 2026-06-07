@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormSection } from './types';
 import './immigration.css';
+import QuestionnaireRunner from './QuestionnaireRunner';
 
 const ClientIntake: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -9,6 +10,7 @@ const ClientIntake: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [isQueueActive, setIsQueueActive] = useState(true);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -63,6 +65,15 @@ const ClientIntake: React.FC = () => {
         <p>Please fill out the sections below. Your data is saved securely.</p>
       </div>
 
+      <div className="client-intake-page">
+    {isQueueActive ? (
+      <QuestionnaireRunner 
+        sections={sections} 
+        onSaveAnswer={handleInputChange}
+        onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
+      />
+    ) : (
+
       <div className="intake-form-container">
         {sections.filter(s => s.is_active).map(section => (
           <div key={section.id} className="intake-section">
@@ -95,6 +106,9 @@ const ClientIntake: React.FC = () => {
           </div>
         ))}
       </div>
+      
+    )}
+  </div>
 
       <div className="intake-footer">
         <button 

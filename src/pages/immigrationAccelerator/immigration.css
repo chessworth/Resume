@@ -901,3 +901,120 @@ body input{
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
+/* --- Questionnaire Runner --- */
+
+.questionnaire-runner-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: var(--bg-color, #f8fafc);
+  min-height: calc(100vh - 80px); /* Adjust based on your header height */
+}
+
+.questionnaire-runner-card {
+  background: white;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.runner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.section-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.queue-count {
+  font-size: 0.85rem;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
+
+.question-label {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark, #0f172a);
+  margin-bottom: 16px;
+}
+
+.runner-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  border: 2px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  margin-bottom: 32px;
+  transition: border-color 0.2s ease;
+}
+
+.runner-input:focus {
+  outline: none;
+  border-color: var(--primary, #3b82f6);
+}
+
+.runner-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.runner-actions button {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+/* --- Mobile Full Screen Override --- */
+@media (max-width: 768px) {
+  .questionnaire-runner-overlay {
+    /* Break out of standard document flow to cover the screen */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: white;
+    padding: 0;
+    align-items: flex-start; /* Push content to top on mobile */
+  }
+
+  .questionnaire-runner-card {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 20px;
+    height: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .runner-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .runner-actions {
+    margin-top: auto; /* Pushes the buttons to the bottom of the screen */
+    padding-bottom: 24px;
+  }
+}
