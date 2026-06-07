@@ -166,39 +166,7 @@ const FileDetail: React.FC = () => {
         <h3 className="section-label">Active Workflow</h3>
         <TaskRunner initialTasks={tasks} onTaskToggle={handleTaskComplete} />
       </section>
-
-      <section className="detail-section task-list-section">
-        <div className="section-header">
-          <h3 className="section-label">Full Task History</h3>
-          <span className="completion-tracker">
-            {tasks.filter(t => t.is_completed).length} / {tasks.length} Completed
-          </span>
-        </div>
-        
-        <div className="task-list">
-          {tasks.map(task => (
-            <div 
-              key={task.id} 
-              className={`list-item ${task.is_completed ? 'is-completed' : ''}`}
-            >
-              <label className="checkbox-container">
-                <input 
-                  type="checkbox" 
-                  checked={task.is_completed}
-                  onChange={() => toggleTaskStatus(task.id, task.is_completed)}
-                />
-                <span className="checkmark"></span>
-              </label>
-              
-              <div className="item-details">
-                <span className="item-label">{task.label}</span>
-                {task.description && <span className="item-desc">{task.description}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      
       {clientForm && (
         <section className="detail-section form-manager-section">
           <h3 className="section-label">Client Intake Form</h3>
