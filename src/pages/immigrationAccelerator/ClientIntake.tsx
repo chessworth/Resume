@@ -30,9 +30,22 @@ const ClientIntake: React.FC = () => {
   }, [token]);
 
   const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean) => {
-    if (!isQueueActive) return;
-    await handleInputChange(sectionId, fieldId, value); // Update local state immediately for responsiveness
-    return await saveProgress(); // Trigger save to parent, which will call the Netlify function to persist
+    // Compute updated sections synchronously, set state with functional update, and pass the updated array to saveProgress
+    let updatedSections: FormSection[] = [];
+    setSections(prev => {
+      updatedSections = prev.map(section => {
+        if (section.id !== sectionId) return section;
+        return {
+          ...section,
+          fields: section.fields.map(field =>
+            field.id === fieldId ? { ...field, answer: value } : field
+          )
+        };
+      });
+      return updatedSections;
+    });
+    console.log(updatedSections);
+    return await saveProgress(updatedSections);
   };
 
   const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean) => {
@@ -47,12 +60,13 @@ const ClientIntake: React.FC = () => {
     }));
   };
 
-  const saveProgress = async () => {
+  const saveProgress = async (sectionsToSave?: FormSection[]) => {
     setSaving(true);
     try {
+      const payloadSections = sectionsToSave ?? sections;
       await fetch('/.netlify/functions/update-public-form', {
         method: 'POST',
-        body: JSON.stringify({ token, sections })
+        body: JSON.stringify({ token, sections: payloadSections })
       });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
