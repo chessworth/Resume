@@ -30,11 +30,12 @@ const ClientIntake: React.FC = () => {
   }, [token]);
 
   const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean) => {
-    handleInputChange(sectionId, fieldId, value); // Update local state immediately for responsiveness
-    saveProgress(); // Trigger save to parent, which will call the Netlify function to persist
+    if (!isQueueActive) return;
+    await handleInputChange(sectionId, fieldId, value); // Update local state immediately for responsiveness
+    return await saveProgress(); // Trigger save to parent, which will call the Netlify function to persist
   };
 
-  const handleInputChange = (sectionId: string, fieldId: string, value: string | boolean) => {
+  const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean) => {
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {
