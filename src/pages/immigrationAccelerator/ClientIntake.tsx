@@ -44,8 +44,7 @@ const ClientIntake: React.FC = () => {
       });
       return updatedSections;
     });
-    console.log(updatedSections);
-    return await saveProgress(updatedSections);
+    return await saveProgress(undefined, updatedSections);
   };
 
   const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean) => {
@@ -60,7 +59,7 @@ const ClientIntake: React.FC = () => {
     }));
   };
 
-  const saveProgress = async (sectionsToSave?: FormSection[]) => {
+  const saveProgress = async (event?: any, sectionsToSave?: FormSection[]) => {
     setSaving(true);
     try {
       const payloadSections = sectionsToSave ?? sections;
