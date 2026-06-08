@@ -29,6 +29,11 @@ const ClientIntake: React.FC = () => {
     if (token) fetchForm();
   }, [token]);
 
+  const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean) => {
+    handleInputChange(sectionId, fieldId, value); // Update local state immediately for responsiveness
+    saveProgress(); // Trigger save to parent, which will call the Netlify function to persist
+  };
+
   const handleInputChange = (sectionId: string, fieldId: string, value: string | boolean) => {
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
@@ -71,7 +76,7 @@ const ClientIntake: React.FC = () => {
     {isQueueActive ? (
       <QuestionnaireRunner 
         sections={sections} 
-        onSaveAnswer={saveProgress} // Saves after each answer, can be optimized to batch if needed
+        onSaveAnswer={handleSaveAnswer} // Saves after each answer, can be optimized to batch if needed
         onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
       />
     ) : (

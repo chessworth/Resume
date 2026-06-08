@@ -10,7 +10,7 @@ interface QueuedField {
 
 interface Props {
   sections: FormSection[];
-  onSaveAnswer: () => Promise<void>; // Should handle saving the current queue's answer to the parent state and database
+  onSaveAnswer: (sectionId: string, fieldId: string, value: string | boolean) => Promise<void>; // Should handle saving the current queue's answer to the parent state and database
   onComplete: () => void; // Called when the queue is entirely empty
 }
 
@@ -73,7 +73,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
 
     try {
       // Send the update to the parent / database
-      onSaveAnswer();
+      await onSaveAnswer(currentItem.sectionId, field.id, currentValue);
       
       // Remove from queue
       const nextQueue = queue.slice(1);
