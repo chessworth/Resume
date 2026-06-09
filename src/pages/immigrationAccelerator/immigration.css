@@ -1028,3 +1028,19 @@ body input{
   background-color: #059669; /* Slightly darker green for success */
   border-color: #059669;
 }
+
+.btn-remove-doc {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-remove-doc:hover {
+  background-color: #fee2e2;
+  color: #ef4444; /* Turns red on hover to indicate a destructive action */
+}

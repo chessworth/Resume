@@ -49,6 +49,34 @@ const DocumentChecklist: React.FC<Props> = ({ fileId, initialDocs }) => {
     }
   };
 
+  const handleRemoveDocument = async (documentIdToRemove: string) => {
+  // Optional: Add a quick confirmation so they don't misclick
+  if (!window.confirm("Are you sure you want to remove this document from the client's checklist?")) {
+    return;
+  }
+
+  // 1. Filter it out of the current state
+  const updatedDocuments = docs.filter(doc => doc.id !== documentIdToRemove);
+
+  // 2. Optimistically update the UI so it feels instant
+  setDocs(prev => ({ ...prev, documents: updatedDocuments }));
+
+  try {
+    // 3. Save the new array to your database (adjust the endpoint/Supabase call as needed)
+    await fetch(`/.netlify/functions/delete-document`, {
+      method: 'POST',
+      body: JSON.stringify({ 
+        id: documentIdToRemove, 
+        is_deleted: true
+      })
+    });
+  } catch (error) {
+    console.error("Failed to remove document:", error);
+    alert("Failed to update the checklist. Please refresh and try again.");
+    // Revert state if needed
+  }
+};
+
   return (
     <div className="doc-checklist-container">
       <div className="doc-section">
@@ -65,7 +93,17 @@ const DocumentChecklist: React.FC<Props> = ({ fileId, initialDocs }) => {
                 <span className={`badge-${doc.category}`}>{" (" + doc.category + ")"}</span>
               )}
             </div>
+            {!doc.is_completed && (
+            <button 
+              className="btn-remove-doc"
+              onClick={() => handleRemoveDocument(doc.id)}
+              title="Remove from checklist"
+              >
+              ✕
+            </button>
+          )}
           </label>
+          
         ))}
       </div>
 

@@ -14,6 +14,7 @@ const handler = async (event: any) => {
         .from("documents")
         .select("*")
         .eq("file_id", fileId)
+        .eq("is_deleted", false)
         .order("category", { ascending: false }),
       supabase.from("client_forms").select("*").eq("file_id", fileId).single(),
     ]);

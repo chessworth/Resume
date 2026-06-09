@@ -87,48 +87,47 @@ const ClientIntake: React.FC = () => {
       </div>
 
       <div className="client-intake-page">
-    {isQueueActive ? (
+    {isQueueActive ?? (
       <QuestionnaireRunner 
         sections={sections} 
         onSaveAnswer={handleSaveAnswer} // Saves after each answer, can be optimized to batch if needed
         onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
       />
-    ) : (
+    )};
 
-      <div className="intake-form-container">
-        {sections.filter(s => s.is_active).map(section => (
-          <div key={section.id} className="intake-section">
-            <h3>{section.title}</h3>
-            <div className="fields-grid">
-              {section.fields.map(field => (
-                <div key={field.id} className="form-group">
-                  <label>{field.label}</label>
-                  
-                  {field.type === 'text' && (
-                    <input 
-                      type="text" 
-                      value={field.answer as string || ''} 
-                      onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                    />
-                  )}
-                  
-                  {field.type === 'date' && (
-                    <input 
-                      type="date" 
-                      value={field.answer as string || ''} 
-                      onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                    />
-                  )}
-                  
-                  {/* Future expandability: Add 'select' and 'boolean' handling here later */}
-                </div>
-              ))}
-            </div>
+    <div className="intake-form-container">
+      {sections.filter(s => s.is_active).map(section => (
+        <div key={section.id} className="intake-section">
+          <h3>{section.title}</h3>
+          <div className="fields-grid">
+            {section.fields.map(field => (
+              <div key={field.id} className="form-group">
+                <label>{field.label}</label>
+                
+                {field.type === 'text' && (
+                  <input 
+                    type="text" 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  />
+                )}
+                
+                {field.type === 'date' && (
+                  <input 
+                    type="date" 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  />
+                )}
+                
+                {/* Future expandability: Add 'select' and 'boolean' handling here later */}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      
-    )}
+        </div>
+      ))}
+    </div>
+    
   </div>
 
       <div className="intake-footer">
