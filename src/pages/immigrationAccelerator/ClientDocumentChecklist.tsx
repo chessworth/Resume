@@ -27,7 +27,7 @@ const ClientDocumentChecklist: React.FC<Props> = ({ initialDocs }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          documentId: docId, 
+          id: docId, 
           is_client_completed: newStatus 
         })
       });
