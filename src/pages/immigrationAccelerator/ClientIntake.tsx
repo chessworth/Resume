@@ -96,7 +96,7 @@ const ClientIntake: React.FC = () => {
         onSaveAnswer={handleSaveAnswer} // Saves after each answer, can be optimized to batch if needed
         onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
       />
-    ) : ""};
+    ) : ""}
 
     <div className="intake-form-container">
       {sections.filter(s => s.is_active).map(section => (
