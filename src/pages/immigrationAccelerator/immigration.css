@@ -1017,6 +1017,13 @@ body input{
     margin-top: auto; /* Pushes the buttons to the bottom of the screen */
     padding-bottom: 24px;
   }
+
+  .detail-section {
+    margin: 10px 0;
+    border-radius: 0;
+    padding: 20px 10px;
+    background: var(--bg-card);
+  }
 }
 .btn-primary {
   transition: all 0.2s ease;
@@ -1044,3 +1051,7 @@ body input{
   background-color: #fee2e2;
   color: #ef4444; /* Turns red on hover to indicate a destructive action */
 }
+.doc-content {
+    flex-grow: 100;
+}
+
