@@ -9,12 +9,24 @@ const handler = async (event: any) => {
   try {
     const { data, error } = await supabase
       .from("client_forms")
-      .select("share_token, sections") // Exclude file_id for security
+      .select("share_token, file_id, sections")
       .eq("share_token", token)
       .single();
 
     if (error) throw error;
-    return { statusCode: 200, body: JSON.stringify(data) };
+    const { data: docs, error: docError } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("file_id", data.file_id)
+      .eq("is_deleted", false)
+      .order("category", { ascending: false });
+
+    if (docError) throw docError;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ form: data.sections, documents: docs }),
+    };
   } catch (error: any) {
     return {
       statusCode: 404,

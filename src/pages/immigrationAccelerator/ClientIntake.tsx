@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormSection } from './types';
+import { FormSection, Document } from './types';
 import './immigration.css';
 import QuestionnaireRunner from './QuestionnaireRunner';
+import ClientDocumentChecklist from './ClientDocumentChecklist';
 
 const ClientIntake: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const [sections, setSections] = useState<FormSection[]>([]);
+  const [initialDocuments, setInitialDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +21,8 @@ const ClientIntake: React.FC = () => {
         const res = await fetch(`/.netlify/functions/get-public-form?token=${token}`);
         if (!res.ok) throw new Error('Invalid or expired link.');
         const data = await res.json();
-        setSections(data.sections);
+        setSections(data.form);
+        setInitialDocuments(data.documents);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -127,6 +130,8 @@ const ClientIntake: React.FC = () => {
         </div>
       ))}
     </div>
+
+    <ClientDocumentChecklist initialDocs={initialDocuments} />
     
   </div>
 

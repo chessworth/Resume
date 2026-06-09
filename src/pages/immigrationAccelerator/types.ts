@@ -26,7 +26,9 @@ export interface Document {
   file_id: string;
   label: string;
   category: "required" | "optional" | "custom";
+  description?: string;
   is_completed: boolean;
+  is_client_completed: boolean;
 }
 
 export interface Task {
