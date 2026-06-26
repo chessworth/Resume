@@ -252,46 +252,169 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
       optionalSections: [],
     },
   },
-  "Spousal Inland": {
+  SPOUSAL_SPONSORSHIP: {
     documents: [
-      // REQUIRED (The 20 hard-coded)
-      { label: "IMM 1344: Application to Sponsor", category: "required" },
-      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
+      { label: "Digital Photo (Principal Applicant)", category: "required" },
+      { label: "Digital Photo (Sponsor)", category: "required" },
+      {
+        label: "Passport copies (Both)",
+        category: "required",
+        description: "All used pages.",
+      },
       { label: "Marriage Certificate", category: "required" },
-      // ... keep going until 20
-
-      // OPTIONAL (The 5 standard extras)
-      { label: "Joint Bank Account Statements", category: "optional" },
-      { label: "Letters of Support from Family", category: "optional" },
+      {
+        label: "Proof of Communication",
+        category: "required",
+        description: "Chat logs, call records, etc.",
+      },
+      {
+        label: "Wedding Photos",
+        category: "required",
+        description: "A selection of photos from various ceremonies.",
+      },
     ],
     tasks: [
       {
-        label: "Review Retainer",
-        description: "Confirm signed copy is uploaded to folder.",
+        label: "Sign IMM 1344",
+        description:
+          "Application to Sponsor, Sponsorship Agreement and Undertaking.",
       },
       {
-        label: "Order Police Clearances",
-        description: "Advise client on country-specific instructions.",
+        label: "Sign IMM 0008",
+        description: "Generic Application Form for Canada.",
       },
-      // ... keep going until 10
     ],
     questionnaire: {
       defaultSections: [
+        // --- PRINCIPAL APPLICANT SECTIONS ---
         {
-          id: "personal",
-          title: "Personal Information",
+          id: "pa_personal_info",
+          title: "Principal Applicant: Personal Information",
           is_active: true,
-          questionKeys: ["first_name", "last_name", "date_of_birth"],
+          questionKeys: [
+            "first_name",
+            "last_name",
+            "height",
+            "eye_color",
+            "nationality",
+            "uci_number",
+            "place_of_birth",
+            "national_identity_number",
+            "native_language",
+          ],
+        },
+        {
+          id: "pa_contact_entry",
+          title: "Principal Applicant: Contact & Entry Details",
+          is_active: true,
+          questionKeys: [
+            "current_address",
+            "phone_number",
+            "email_address",
+            "recent_entry_date",
+            "recent_entry_place",
+          ],
+        },
+        {
+          id: "pa_histories",
+          title: "Principal Applicant: Histories (10 Years)",
+          is_active: true,
+          questionKeys: [
+            "personal_history_10_years_repeater",
+            "address_history_repeater",
+            "travel_history_repeater",
+          ],
+        },
+        {
+          id: "pa_family",
+          title: "Principal Applicant: Family Details",
+          is_active: true,
+          questionKeys: [
+            "family_members_repeater",
+            "relatives_in_canada_repeater",
+          ],
+        },
+        {
+          id: "pa_background",
+          title: "Principal Applicant: Background & Declarations",
+          is_active: true,
+          questionKeys: [
+            "has_visa_rejections",
+            "visa_rejection_details",
+            "bg_overstay_unauth_work",
+            "bg_refused_visa_denied_entry",
+          ],
+        },
+
+        // --- SPONSOR SECTIONS ---
+        {
+          id: "sponsor_personal_info",
+          title: "Sponsor: Personal Information",
+          is_active: true,
+          questionKeys: [
+            "canadian_status",
+            "date_attained_status",
+            "uci_number",
+            "current_address",
+            "phone_number",
+          ],
+        },
+        {
+          id: "sponsor_education_dependents",
+          title: "Sponsor: Education & Dependents",
+          is_active: true,
+          questionKeys: [
+            "sponsor_edu_highest",
+            "sponsor_edu_elementary",
+            "sponsor_edu_highschool",
+            "sponsor_edu_college",
+            "dependents_repeater",
+          ],
+        },
+        {
+          id: "sponsor_histories",
+          title: "Sponsor: Histories",
+          is_active: true,
+          questionKeys: [
+            "sponsor_employment_repeater",
+            "address_history_repeater",
+            "travel_history_repeater",
+          ],
+        },
+
+        // --- SHARED / RELATIONSHIP SECTIONS ---
+        {
+          id: "previous_marriages",
+          title: "Previous Marriages (If applicable)",
+          is_active: true,
+          questionKeys: ["previous_marriages_repeater"],
+        },
+        {
+          id: "relationship_details",
+          title: "Relationship Details & Timeline",
+          is_active: true,
+          questionKeys: [
+            "first_met_date",
+            "first_met_place",
+            "first_met_details",
+            "first_contact_details",
+            "current_contact_methods",
+            "communication_language",
+            "relationship_development",
+            "relationship_love_story",
+          ],
+        },
+        {
+          id: "wedding_ceremonies",
+          title: "Wedding & Ceremonies",
+          is_active: true,
+          questionKeys: [
+            "marriage_type",
+            "parents_present_at_wedding",
+            "ceremonies_repeater",
+          ],
         },
       ],
-      optionalSections: [],
-    },
-  },
-  "Spousal Outland": {
-    documents: [],
-    tasks: [],
-    questionnaire: {
-      defaultSections: [],
       optionalSections: [],
     },
   },
