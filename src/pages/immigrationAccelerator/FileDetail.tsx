@@ -6,7 +6,7 @@ import DocumentChecklist from './DocumentChecklist';
 import { ImmigrationFile, Task, Document, FileStatus, ClientForm } from './types';
 import './immigration.css';
 
-const CopyableAnswer: React.FC<{ answer: string | boolean | null }> = ({ answer }) => {
+const CopyableAnswer: React.FC<{ answer: string | boolean | any[] | null }> = ({ answer }) => {
   const [copied, setCopied] = useState(false);
   
   // Format the display text if it's empty

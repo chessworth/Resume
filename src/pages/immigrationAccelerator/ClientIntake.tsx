@@ -32,7 +32,7 @@ const ClientIntake: React.FC = () => {
     if (token) fetchForm();
   }, [token]);
 
-  const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean) => {
+  const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
     // Compute updated sections synchronously, set state with functional update, and pass the updated array to saveProgress
     let updatedSections: FormSection[] = [];
     setSections(prev => {
@@ -50,7 +50,7 @@ const ClientIntake: React.FC = () => {
     return await saveProgress(undefined, updatedSections);
   };
 
-  const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean) => {
+  const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {

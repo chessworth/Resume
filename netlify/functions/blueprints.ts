@@ -19,10 +19,13 @@ export interface FormField {
   id: string;
   label: string;
   type: FieldType;
-  options?: string[]; // For dropdowns
-  answer: string | boolean | null;
+  options?: string[];
+  answer: string | boolean | null | any[]; // <-- Added any[] for repeater answers
   placeholder?: string;
   validation?: QuestionValidation;
+  // NEW: Holds the full definitions of the nested questions
+  subFields?: FormField[];
+  addButtonLabel?: string;
 }
 
 export interface FormSection {
@@ -44,36 +47,106 @@ export interface FileBlueprint {
 export const BLUEPRINTS: Record<string, FileBlueprint> = {
   PGWP: {
     documents: [
-      { label: "Passport", category: "required" },
-      { label: "IMM 1344: Application to Sponsor", category: "required" },
-      { label: "IMM 5285: Relationship Questionnaire", category: "required" },
-      { label: "Marriage Certificate", category: "required" },
-      { label: "Joint Bank Account Statements", category: "optional" },
-      { label: "Letters of Support from Family", category: "optional" },
+      { label: "Digital Photo", category: "required" },
+      {
+        label: "Passport copy",
+        category: "required",
+        description:
+          "All used pages. Old and new both passport copies if this is an extension due to passport expiry.",
+      },
+      {
+        label: "Official Transcripts",
+        category: "required",
+        description: "All Canadian education.",
+      },
+      {
+        label: "Diploma Certificates",
+        category: "required",
+        description: "All Canadian education.",
+      },
+      {
+        label: "Graduation Letter / Notice of Graduation",
+        category: "required",
+      },
+      { label: "Study Permit or current Work Permit(s)", category: "required" },
+      {
+        label: "Medical Document",
+        category: "optional",
+        description:
+          "Only required if you graduated in health care or are looking to work in the health care stream.",
+      },
+      { label: "IELTS / CELPIP / PTE Test Results", category: "optional" },
     ],
     tasks: [
       {
-        label: "Review Retainer",
-        description: "Confirm signed copy is uploaded to folder.",
+        label: "Secure Payment Details",
+        description:
+          "Ensure debit or credit card information is collected on the day of submission.",
       },
       {
-        label: "Order Police Clearances",
-        description: "Advise client on country-specific instructions.",
+        label: "Sign Retainer & Representative Forms",
+        description:
+          "Confirm Retainer Agreement and IMM 5476 Representative forms are signed.",
       },
     ],
     questionnaire: {
       defaultSections: [
         {
-          id: "personal",
+          id: "personal_info",
           title: "Personal Information",
           is_active: true,
-          questionKeys: ["first_name", "last_name", "date_of_birth"],
+          questionKeys: [
+            "first_name",
+            "last_name",
+            "email_address",
+            "phone_number",
+            "current_address",
+            "marital_status",
+          ],
+        },
+        {
+          id: "immigration_history",
+          title: "Immigration History",
+          is_active: true,
+          questionKeys: [
+            "original_entry_date",
+            "original_entry_place",
+            "recent_entry_date",
+            "recent_entry_place",
+            "has_visa_rejections",
+            "visa_rejection_details",
+          ],
+        },
+        {
+          id: "education_history",
+          title: "Education History",
+          is_active: true,
+          questionKeys: ["education_history_repeater"], // Replaced the 14 individual keys
+        },
+        {
+          id: "employment_history",
+          title: "Employment History",
+          is_active: true,
+          questionKeys: ["employment_history_repeater"], // Replaced the 14 individual keys
+        },
+        {
+          id: "background_declarations",
+          title: "Background Declarations",
+          is_active: true,
+          questionKeys: [
+            "bg_tuberculosis",
+            "bg_overstay_unauth_work",
+            "bg_refused_visa_denied_entry",
+            "bg_previously_applied_canada",
+            "bg_ill_treatment",
+            "bg_explanation",
+          ],
         },
       ],
       optionalSections: [
         {
-          id: "marriage",
-          title: "Marriage Details",
+          id: "marriage_details",
+          title: "Spouse / Common-Law Details",
           is_active: false,
           questionKeys: [
             "spouse_first_name",
@@ -243,29 +316,32 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
 export const populateSection = (
   blueprintSection: FormSectionBlueprint,
 ): FormSection => {
+  // Helper function to resolve a single question (and its sub-questions if it's a repeater)
+  const resolveField = (key: string): FormField => {
+    const questionDef = QUESTIONS_REGISTRY[key];
+
+    if (!questionDef) {
+      console.error(`Warning: Question key "${key}" not found in registry.`);
+      return { id: key, label: "Unknown", type: "text", answer: null };
+    }
+
+    const baseField: FormField = {
+      ...questionDef,
+      answer: questionDef.type === "repeater" ? [] : null, // Repeaters start as empty arrays
+    };
+
+    // If it's a repeater, recursively resolve its subQuestions
+    if (questionDef.type === "repeater" && questionDef.subQuestionKeys) {
+      baseField.subFields = questionDef.subQuestionKeys.map(resolveField);
+    }
+
+    return baseField;
+  };
+
   return {
     id: blueprintSection.id,
     title: blueprintSection.title,
     is_active: blueprintSection.is_active,
-    // Map over the string keys and grab the full definition from the registry
-    fields: blueprintSection.questionKeys.map((key) => {
-      const questionDef = QUESTIONS_REGISTRY[key];
-
-      if (!questionDef) {
-        console.error(`Warning: Question key "${key}" not found in registry.`);
-        // Fallback to prevent crashing if a typo occurs
-        return {
-          id: key,
-          label: "Unknown Question",
-          type: "text",
-          answer: null,
-        };
-      }
-
-      return {
-        ...questionDef,
-        answer: null, // Initialize the empty answer state here
-      };
-    }),
+    fields: blueprintSection.questionKeys.map(resolveField),
   };
 };

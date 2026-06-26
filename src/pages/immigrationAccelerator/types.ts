@@ -38,7 +38,13 @@ export interface Task {
   is_completed: boolean;
 }
 
-export type FieldType = "text" | "date" | "select" | "boolean" | "email";
+export type FieldType =
+  | "text"
+  | "date"
+  | "select"
+  | "boolean"
+  | "email"
+  | "repeater";
 
 export interface QuestionValidation {
   pattern: string; // The regex pattern the HTML input will enforce
@@ -49,10 +55,13 @@ export interface FormField {
   id: string;
   label: string;
   type: FieldType;
-  options?: string[]; // For dropdowns
-  answer: string | boolean | null;
+  options?: string[];
+  answer: string | boolean | null | any[]; // <-- Added any[] for repeater answers
   placeholder?: string;
   validation?: QuestionValidation;
+  // NEW: Holds the full definitions of the nested questions
+  subFields?: FormField[];
+  addButtonLabel?: string;
 }
 
 export interface FormSection {

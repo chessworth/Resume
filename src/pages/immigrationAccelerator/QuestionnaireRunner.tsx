@@ -10,16 +10,17 @@ interface QueuedField {
 
 interface Props {
   sections: FormSection[];
-  onSaveAnswer: (sectionId: string, fieldId: string, value: string | boolean) => Promise<void>; // Should handle saving the current queue's answer to the parent state and database
-  onComplete: () => void; // Called when the queue is entirely empty
+  // UPATED: Added `any[]` to the value signature to support repeater payloads
+  onSaveAnswer: (sectionId: string, fieldId: string, value: string | boolean | any[]) => Promise<void>; 
+  onComplete: () => void; 
 }
 
 const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComplete }) => {
   const [queue, setQueue] = useState<QueuedField[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Local state for the currently displayed input
-  const [currentValue, setCurrentValue] = useState<string | boolean>('');
+  // UPDATED: Added any[] to support our repeater arrays
+  const [currentValue, setCurrentValue] = useState<string | boolean | any[]>('');
 
   // 1. Initialize the Queue
   useEffect(() => {
@@ -27,8 +28,13 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
     
     sections.filter(s => s.is_active).forEach(section => {
       section.fields.forEach(field => {
-        // If the answer is null or an empty string, add it to the queue
-        if (field.answer === null || field.answer === '') {
+        // UPDATED: Now also checks if a repeater array is empty
+        const isAnswerEmpty = 
+          field.answer === null || 
+          field.answer === '' || 
+          (Array.isArray(field.answer) && field.answer.length === 0);
+
+        if (isAnswerEmpty) {
           initialQueue.push({ 
             sectionId: section.id, 
             sectionTitle: section.title, 
@@ -40,28 +46,55 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
 
     setQueue(initialQueue);
     
-    // If there's nothing to answer, immediately trigger the completion callback
     if (initialQueue.length === 0) {
       onComplete();
     }
   }, [sections, onComplete]);
 
-  // 2. Reset the local input whenever the current queued field changes
+  // 2. Reset local input when queued field changes
   useEffect(() => {
     if (queue.length > 0) {
-      const fieldType = queue[0].field.type;
-      setCurrentValue(fieldType === 'boolean' ? false : '');
+      const field = queue[0].field;
+      // UPDATED: Handle initializing arrays for repeaters
+      if (field.type === 'repeater') {
+        setCurrentValue(Array.isArray(field.answer) ? field.answer : []);
+      } else {
+        setCurrentValue(field.type === 'boolean' ? false : '');
+      }
     }
   }, [queue]);
 
-  // 3. Handlers
+  // --- NEW REPEATER STATE HANDLERS ---
+
+  const addRepeaterEntry = () => {
+    setCurrentValue(prev => Array.isArray(prev) ? [...prev, {}] : [{}]);
+  };
+
+  const removeRepeaterEntry = (indexToRemove: number) => {
+    setCurrentValue(prev => {
+      if (!Array.isArray(prev)) return prev;
+      return prev.filter((_, index) => index !== indexToRemove);
+    });
+  };
+
+  const updateRepeaterEntry = (index: number, subFieldId: string, value: string) => {
+    setCurrentValue(prev => {
+      if (!Array.isArray(prev)) return prev;
+      const newArray = [...prev];
+      newArray[index] = { ...newArray[index], [subFieldId]: value };
+      return newArray;
+    });
+  };
+
+  // --- STANDARD HANDLERS ---
+
   const handleSkip = (e: React.MouseEvent) => {
     e.preventDefault();
     if (queue.length <= 1) return;
 
     setQueue(prev => {
       const [current, ...rest] = prev;
-      return [...rest, current]; // Move to the back of the line
+      return [...rest, current]; 
     });
   };
 
@@ -72,10 +105,8 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
     setIsProcessing(true);
 
     try {
-      // Send the update to the parent / database
       await onSaveAnswer(currentItem.sectionId, field.id, currentValue);
       
-      // Remove from queue
       const nextQueue = queue.slice(1);
       setQueue(nextQueue);
       
@@ -89,11 +120,15 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
     }
   };
 
-  // If the queue is empty, render nothing (the parent will handle showing the full form)
   if (queue.length === 0) return null;
 
   const currentItem = queue[0];
   const { field, sectionTitle } = currentItem;
+
+  // UPDATED: Validation to disable the submit button based on field type
+  const isNextDisabled = isProcessing || 
+    (field.type !== 'repeater' && currentValue === '') ||
+    (field.type === 'repeater' && (!Array.isArray(currentValue) || currentValue.length === 0));
 
   return (
     <div className="questionnaire-runner-overlay">
@@ -109,7 +144,6 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             {field.label}
           </label>
 
-          {/* Render the appropriate input based on type */}
           {(field.type === 'text' || field.type === 'email') && (
             <div className="input-group">
               <input
@@ -119,18 +153,18 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
                 value={currentValue as string}
                 onChange={(e) => setCurrentValue(e.target.value)}
                 disabled={isProcessing}
-                placeholder={field.placeholder} // <-- Added placeholder
-                pattern={field.validation?.pattern} // <-- Added validation pattern
-                title={field.validation?.message} // <-- Added error message
+                placeholder={field.placeholder} 
+                pattern={field.validation?.pattern} 
+                title={field.validation?.message} 
                 autoFocus
                 required
               />
-              {/* Optional: Render the requirement as helper text below the input */}
               {field.validation && (
                 <span className="input-helper-text">{field.validation.message}</span>
               )}
             </div>
           )}
+
           {field.type === 'date' && (
             <input
               id={field.id}
@@ -143,7 +177,6 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             />
           )}
 
-          {/* Add select/boolean handling here if needed */}
           {field.type === 'select' && (
             <select
               id={field.id}
@@ -161,6 +194,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
               ))}
             </select>
           )}
+
           {field.type === 'boolean' && (
             <div className="input-group">
               <label className="form-check-label" htmlFor={field.id}>
@@ -177,7 +211,52 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             </div>
           )}
 
-          <div className="runner-actions">
+          {/* --- NEW REPEATER RENDER BLOCK --- */}
+          {field.type === 'repeater' && Array.isArray(currentValue) && (
+            <div className="repeater-container">
+              {currentValue.map((entry, index) => (
+                <div key={index} className="repeater-block" style={{ border: '1px solid #eee', padding: '12px', marginBottom: '16px', borderRadius: '8px' }}>
+                  <div className="repeater-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <h4 style={{ margin: 0 }}>Entry #{index + 1}</h4>
+                    <button 
+                      type="button" 
+                      onClick={() => removeRepeaterEntry(index)}
+                      style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  
+                  {field.subFields?.map(subField => (
+                    <div key={subField.id} className="input-group" style={{ marginBottom: '8px' }}>
+                      <label style={{ display: 'block', fontSize: '0.9em', marginBottom: '4px' }}>
+                        {subField.label}
+                      </label>
+                      <input 
+                        type={subField.type === 'date' ? 'date' : 'text'} 
+                        className="runner-input"
+                        style={{ width: '100%', padding: '8px' }}
+                        value={entry[subField.id] || ''} 
+                        onChange={(e) => updateRepeaterEntry(index, subField.id, e.target.value)}
+                        required
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              <button 
+                type="button"
+                className="btn-add-repeater" 
+                onClick={addRepeaterEntry}
+                style={{ width: '100%', padding: '10px', border: '1px dashed #ccc', background: 'transparent', cursor: 'pointer' }}
+              >
+                {field.addButtonLabel || "+ Add Another"}
+              </button>
+            </div>
+          )}
+
+          <div className="runner-actions" style={{ marginTop: '24px' }}>
             <button 
               type="button" 
               className="btn-skip" 
@@ -189,7 +268,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             <button 
               type="submit" 
               className="btn-primary"
-              disabled={isProcessing || currentValue === ''}
+              disabled={isNextDisabled}
             >
               {isProcessing ? 'Saving...' : 'Next'}
             </button>
