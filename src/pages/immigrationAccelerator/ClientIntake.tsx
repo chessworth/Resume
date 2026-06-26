@@ -122,7 +122,25 @@ const ClientIntake: React.FC = () => {
                     onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
                   />
                 )}
-                
+
+                {field.type === 'boolean' && (
+                  <input 
+                    type="checkbox" 
+                    checked={field.answer as boolean || false} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.checked)}
+                  />
+                )}
+
+                {field.type === 'select' && (
+                  <select 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  >
+                    {field.options?.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                )}
                 {/* Future expandability: Add 'select' and 'boolean' handling here later */}
               </div>
             ))}

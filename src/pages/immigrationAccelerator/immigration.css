@@ -1138,3 +1138,18 @@ body input{
   color: #94a3b8;
   text-decoration: line-through;
 }
+.btn-add-repeater {
+  background: none;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.repeater-block {
+  border: 1px solid rgb(238, 238, 238);
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}

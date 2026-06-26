@@ -127,8 +127,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
 
   // UPDATED: Validation to disable the submit button based on field type
   const isNextDisabled = isProcessing || 
-    (field.type !== 'repeater' && currentValue === '') ||
-    (field.type === 'repeater' && (!Array.isArray(currentValue) || currentValue.length === 0));
+    (field.type !== 'repeater' && currentValue === '');
 
   return (
     <div className="questionnaire-runner-overlay">
@@ -249,7 +248,6 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
                 type="button"
                 className="btn-add-repeater" 
                 onClick={addRepeaterEntry}
-                style={{ width: '100%', padding: '10px', border: '1px dashed #ccc', background: 'transparent', cursor: 'pointer' }}
               >
                 {field.addButtonLabel || "+ Add Another"}
               </button>
