@@ -103,18 +103,13 @@ const FileDetail: React.FC = () => {
           field.answer as any[]
         ).map((item, index) => (
           <div key={index} className="repeater-item">
+            <span className="field-label">{field.label} #{index + 1}</span>
             {field.subFields?.map(subField => (
               <div key={subField.id} className="form-group">
                 <label>{subField.label}</label>
-                <input 
-                  type="text" 
-                  value={item[subField.id] as string || ''} 
-                  readOnly
-                />
+                <CopyableAnswer answer={item[subField.id]} />
               </div>
             ))}
-            <span className="field-label">{field.label} #{index + 1}</span>
-            <CopyableAnswer answer={item} />
           </div>
         ));
       } else {
