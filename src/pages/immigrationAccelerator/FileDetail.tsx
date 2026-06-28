@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TaskRunner from './TaskRunner';
 import DocumentChecklist from './DocumentChecklist';
-import { ImmigrationFile, Task, Document, FileStatus, ClientForm } from './types';
+import { ImmigrationFile, Task, Document, FileStatus, ClientForm, FormField } from './types';
 import './immigration.css';
 
 const CopyableAnswer: React.FC<{ answer: string | boolean | any[] | null }> = ({ answer }) => {
@@ -96,13 +96,23 @@ const FileDetail: React.FC = () => {
     setTasks(prev => prev.filter(t => t.id !== taskId));
   };
 
-   const renderFields = (fields: any[]) => {
+   const renderFields = (fields: FormField[]) => {
     return fields.map((field) => {
       if (field.type === 'repeater') {
         return (
           field.answer as any[]
         ).map((item, index) => (
-          <div key={index} className="answer-field repeater-field">
+          <div key={index} className="repeater-item">
+            {field.subFields?.map(subField => (
+              <div key={subField.id} className="form-group">
+                <label>{subField.label}</label>
+                <input 
+                  type="text" 
+                  value={item[subField.id] as string || ''} 
+                  readOnly
+                />
+              </div>
+            ))}
             <span className="field-label">{field.label} #{index + 1}</span>
             <CopyableAnswer answer={item} />
           </div>
