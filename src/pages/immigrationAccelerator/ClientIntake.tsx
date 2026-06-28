@@ -158,7 +158,7 @@ const ClientIntake: React.FC = () => {
                             {subField.type === 'text' && (
                               <input 
                                 type="text" 
-                                value={subField.answer as string || ''}
+                                value={item[subField.id] as string || ''}
                               />
                             )}
                           </div>
