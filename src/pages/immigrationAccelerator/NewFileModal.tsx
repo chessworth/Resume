@@ -10,7 +10,7 @@ interface Props {
 
 const NewFileModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
   const [name, setName] = useState('');
-  const [type, setType] = useState<FileType>('Spousal Inland');
+  const [type, setType] = useState<FileType>('Spousal Sponsorship');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -61,8 +61,7 @@ const NewFileModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
               <option value="Study Permit">Study Permit</option>
               <option value="Visitor Visa">Visitor Visa</option>
               <option value="Super Visa">Super Visa</option>
-              <option value="Spousal Inland">Spousal Inland</option>
-              <option value="Spousal Outland">Spousal Outland</option>
+              <option value="Spousal Sponsorship">Spousal Sponsorship</option>
               <option value="Express Entry">Express Entry</option>
               <option value="Other">Other</option>
             </select>

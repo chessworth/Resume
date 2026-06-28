@@ -8,8 +8,11 @@ export type FileStatus =
   | "Filed";
 
 export type FileType =
-  | "Spousal Inland"
-  | "Spousal Outland"
+  | "PGWP"
+  | "Study Permit"
+  | "Visitor Visa"
+  | "Super Visa"
+  | "Spousal Sponsorship"
   | "Express Entry"
   | "Other";
 

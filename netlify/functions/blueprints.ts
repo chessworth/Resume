@@ -252,7 +252,7 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
       optionalSections: [],
     },
   },
-  SPOUSAL_SPONSORSHIP: {
+  "Spousal Sponsorship": {
     documents: [
       { label: "Digital Photo (Principal Applicant)", category: "required" },
       { label: "Digital Photo (Sponsor)", category: "required" },
