@@ -101,7 +101,7 @@ const FileDetail: React.FC = () => {
       if (field.type === 'repeater') {
         return (
           field.answer as any[]
-        ).map((item, index) => (
+        ).reverse().map((item, index) => (
           <div key={index} className="repeater-item">
             <span className="field-label">{field.label} #{index + 1}</span>
             {field.subFields?.map(subField => (
