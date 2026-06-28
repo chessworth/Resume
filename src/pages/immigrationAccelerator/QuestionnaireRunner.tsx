@@ -214,13 +214,13 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
           {field.type === 'repeater' && Array.isArray(currentValue) && (
             <div className="repeater-container">
               {currentValue.map((entry, index) => (
-                <div key={index} className="repeater-block" style={{ border: '1px solid #eee', padding: '12px', marginBottom: '16px', borderRadius: '8px' }}>
+                <div key={index} className="repeater-block">
                   <div className="repeater-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <h4 style={{ margin: 0 }}>Entry #{index + 1}</h4>
                     <button 
                       type="button" 
                       onClick={() => removeRepeaterEntry(index)}
-                      style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
+                      className="btn-remove-repeater"
                     >
                       Remove
                     </button>

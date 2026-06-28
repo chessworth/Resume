@@ -141,6 +141,32 @@ const ClientIntake: React.FC = () => {
                     ))}
                   </select>
                 )}
+                {field.type === 'email' && (
+                  <input 
+                    type="email" 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  />
+                )}
+                {field.type === 'repeater' && (
+                  <div className="repeater-container">
+                    {(field.answer as any[] || []).map((item, index) => (
+                      <div key={index} className="repeater-item">
+                        {field.subFields?.map(subField => (
+                          <div key={subField.id} className="form-group">
+                            <label>{subField.label}</label>
+                            {subField.type === 'text' && (
+                              <input 
+                                type="text" 
+                                value={subField.answer as string || ''}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {/* Future expandability: Add 'select' and 'boolean' handling here later */}
               </div>
             ))}

@@ -1153,3 +1153,11 @@ body input{
   margin-bottom: 16px;
   border-radius: 8px;
 }
+
+.btn-remove-repeater {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  font-size: 1.2rem;
+  cursor: pointer;
+}

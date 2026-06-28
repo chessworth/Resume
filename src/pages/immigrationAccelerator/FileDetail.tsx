@@ -96,6 +96,28 @@ const FileDetail: React.FC = () => {
     setTasks(prev => prev.filter(t => t.id !== taskId));
   };
 
+   const renderFields = (fields: any[]) => {
+    return fields.map((field) => {
+      if (field.type === 'repeater') {
+        return (
+          field.answer as any[]
+        ).map((item, index) => (
+          <div key={index} className="answer-field repeater-field">
+            <span className="field-label">{field.label} #{index + 1}</span>
+            <CopyableAnswer answer={item} />
+          </div>
+        ));
+      } else {
+        return (
+          <div key={field.id} className="answer-field">
+            <span className="field-label">{field.label}</span>
+            <CopyableAnswer answer={field.answer} />
+          </div>
+        );
+      }
+    });
+  };
+
   if (loading) return <div className="loading-state">Accessing file...</div>;
   if (!file) return <div>File not found.</div>;
 
@@ -192,12 +214,7 @@ const FileDetail: React.FC = () => {
               <div key={section.id} className="answer-section">
                 <h5>{section.title}</h5>
                 <div className="answer-grid">
-                  {section.fields.map(field => (
-                    <div key={field.id} className="answer-field">
-                      <span className="field-label">{field.label}</span>
-                      <CopyableAnswer answer={field.answer} />
-                    </div>
-                  ))}
+                  {renderFields(section.fields)}
                 </div>
               </div>
             ))}
