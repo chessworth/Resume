@@ -101,7 +101,7 @@ const FileDetail: React.FC = () => {
       if (field.type === 'repeater') {
         return (
           field.answer as any[]
-        ).reverse().map((item, index) => (
+        ).map((item, index) => (
           <div key={index} className="repeater-item">
             <span className="field-label">{field.label} #{index + 1}</span>
             {field.subFields?.map(subField => (
@@ -109,7 +109,7 @@ const FileDetail: React.FC = () => {
                 <label>{subField.label}</label>
                 <CopyableAnswer answer={item[subField.id]} />
               </div>
-            ))}
+            )).reverse()}
           </div>
         ));
       } else {
