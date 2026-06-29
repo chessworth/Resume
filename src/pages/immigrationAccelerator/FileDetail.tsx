@@ -109,9 +109,9 @@ const FileDetail: React.FC = () => {
                 <label>{subField.label}</label>
                 <CopyableAnswer answer={item[subField.id]} />
               </div>
-            )).reverse()}
+            ))}
           </div>
-        ));
+        )).reverse();
       } else {
         return (
           <div key={field.id} className="answer-field">
