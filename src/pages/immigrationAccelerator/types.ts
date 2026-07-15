@@ -47,7 +47,9 @@ export type FieldType =
   | "select"
   | "boolean"
   | "email"
-  | "repeater";
+  | "repeater"
+  | "number"
+  | "textarea";
 
 export interface QuestionValidation {
   pattern: string; // The regex pattern the HTML input will enforce

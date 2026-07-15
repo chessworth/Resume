@@ -165,6 +165,46 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             </div>
           )}
 
+          {field.type === 'number' && (
+            <div className="input-group">
+              <input
+                id={field.id}
+                type="number"
+                className="runner-input"
+                value={currentValue as string}
+                onChange={(e) => setCurrentValue(e.target.value)}
+                disabled={isProcessing}
+                placeholder={field.placeholder} 
+                pattern={field.validation?.pattern} 
+                title={field.validation?.message} 
+                autoFocus
+                required
+              />
+              {field.validation && (
+                <span className="input-helper-text">{field.validation.message}</span>
+              )}
+            </div>
+          )}
+
+          {field.type === 'textarea' && (
+            <div className="input-group">
+              <textarea
+                id={field.id}
+                className="runner-input"
+                value={currentValue as string}
+                onChange={(e) => setCurrentValue(e.target.value)}
+                disabled={isProcessing}
+                placeholder={field.placeholder} 
+                title={field.validation?.message} 
+                autoFocus
+                required
+              />
+              {field.validation && (
+                <span className="input-helper-text">{field.validation.message}</span>
+              )}
+            </div>
+          )}
+
           {field.type === 'date' && (
             <input
               id={field.id}

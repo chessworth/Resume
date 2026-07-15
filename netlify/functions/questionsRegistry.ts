@@ -5,7 +5,9 @@ export type FieldType =
   | "select"
   | "boolean"
   | "email"
-  | "repeater";
+  | "repeater"
+  | "number"
+  | "textarea"; // NEW: Added number type for numeric inputs, and textarea for multi-line text inputs
 
 export interface QuestionValidation {
   pattern: string;
@@ -236,7 +238,7 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
     placeholder: "Leave blank if you answered NO to all",
   },
   // --- SPOUSAL: PERSONAL DETAILS ---
-  height: { id: "height", label: "Height", type: "text" },
+  height: { id: "height", label: "Height (in cm)", type: "number" },
   eye_color: { id: "eye_color", label: "Eye colour", type: "text" },
   nationality: { id: "nationality", label: "Nationality", type: "text" },
   uci_number: {
@@ -330,22 +332,22 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
   sponsor_edu_highest: {
     id: "sponsor_edu_highest",
     label: "Highest level of education",
-    type: "text",
+    type: "number",
   },
   sponsor_edu_elementary: {
     id: "sponsor_edu_elementary",
     label: "Number of years in Elementary",
-    type: "text",
+    type: "number",
   },
   sponsor_edu_highschool: {
     id: "sponsor_edu_highschool",
     label: "Number of years in High School",
-    type: "text",
+    type: "number",
   },
   sponsor_edu_college: {
     id: "sponsor_edu_college",
     label: "Number of years in College or Uni",
-    type: "text",
+    type: "number",
   },
 
   // --- BASE TEMPLATES FOR REPEATERS ---
