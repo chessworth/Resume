@@ -3,6 +3,7 @@ import {
   FieldType,
   QuestionValidation,
 } from "./questionsRegistry";
+
 export interface BlueprintItem {
   label: string;
   category?: "required" | "optional";
@@ -15,15 +16,15 @@ export interface FormSectionBlueprint {
   is_active: boolean; // True if included in the client's form
   questionKeys: string[]; // References keys in QUESTIONS_REGISTRY
 }
+
 export interface FormField {
   id: string;
   label: string;
   type: FieldType;
   options?: string[];
-  answer: string | boolean | null | any[]; // <-- Added any[] for repeater answers
+  answer: string | boolean | null | any[]; // <-- Holds repeater answers
   placeholder?: string;
   validation?: QuestionValidation;
-  // NEW: Holds the full definitions of the nested questions
   subFields?: FormField[];
   addButtonLabel?: string;
 }
@@ -121,13 +122,13 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
           id: "education_history",
           title: "Education History",
           is_active: true,
-          questionKeys: ["education_history_repeater"], // Replaced the 14 individual keys
+          questionKeys: ["education_history_repeater"],
         },
         {
           id: "employment_history",
           title: "Employment History",
           is_active: true,
-          questionKeys: ["employment_history_repeater"], // Replaced the 14 individual keys
+          questionKeys: ["employment_history_repeater"],
         },
         {
           id: "background_declarations",
@@ -286,7 +287,6 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
     ],
     questionnaire: {
       defaultSections: [
-        // --- PRINCIPAL APPLICANT SECTIONS ---
         {
           id: "pa_personal_info",
           title: "Principal Applicant: Personal Information",
@@ -345,8 +345,6 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
             "bg_refused_visa_denied_entry",
           ],
         },
-
-        // --- SPONSOR SECTIONS ---
         {
           id: "sponsor_personal_info",
           title: "Sponsor: Personal Information",
@@ -381,8 +379,6 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
             "travel_history_repeater",
           ],
         },
-
-        // --- SHARED / RELATIONSHIP SECTIONS ---
         {
           id: "previous_marriages",
           title: "Previous Marriages (If applicable)",
@@ -419,11 +415,145 @@ export const BLUEPRINTS: Record<string, FileBlueprint> = {
     },
   },
   "Express Entry": {
-    documents: [],
-    tasks: [],
+    documents: [
+      {
+        label: "Copy of passport",
+        category: "required",
+        description: "Front, all used, and Last page.",
+      },
+      {
+        label: "Current immigration status document",
+        category: "required",
+        description: "Valid Work Permit copy.",
+      },
+      {
+        label: "Government Issued ID",
+        category: "required",
+        description:
+          "Driver’s License, Aadhaar Card, National Identity Card, etc.",
+      },
+      {
+        label: "Job Letter",
+        category: "required",
+        description: "Employment letter to verify your stated details.",
+      },
+      {
+        label: "IELTS or CELPIP Certificate",
+        category: "required",
+        description: "Valid official English language exam results.",
+      },
+      {
+        label: "WES Evaluation Certificate",
+        category: "optional",
+        description: "Required only if study was completed outside of Canada.",
+      },
+      {
+        label: "LMIA Approval",
+        category: "optional",
+        description: "Upload if applicable to your application profile.",
+      },
+      {
+        label: "Marriage Certificate",
+        category: "optional",
+        description: "Required only if you are married.",
+      },
+    ],
+    tasks: [
+      {
+        label: "Review and Sign Retention Authorization",
+        description:
+          "Ensure the client has reviewed their submission data. By submitting, they authorize 6ix City Immigration Inc. to enter their data in their Express Entry file, accepting that the firm is not responsible for errors in user-provided details.",
+      },
+      {
+        label: "Verify Language & ECA Validity",
+        description:
+          "Ensure that the IELTS/CELPIP score certificate is less than 2 years old and that the WES evaluation is valid.",
+      },
+    ],
     questionnaire: {
-      defaultSections: [],
-      optionalSections: [],
+      defaultSections: [
+        {
+          id: "ee_personal_info",
+          title: "Express Entry: Personal Information",
+          is_active: true,
+          questionKeys: [
+            "first_name",
+            "last_name",
+            "any_other_name",
+            "gender",
+            "date_of_birth",
+            "place_of_birth", // Reused "Place of birth" for City of Birth
+            "marital_status",
+            "marriage_date",
+            "passport_num",
+            "passport_issue_date",
+            "passport_expiry_date",
+            "citizenship_country",
+            "proof_of_funds_amount",
+            "biometrics_completed",
+          ],
+        },
+        {
+          id: "ee_contact_details",
+          title: "Express Entry: Contact & Basic Details",
+          is_active: true,
+          questionKeys: [
+            "phone_number",
+            "native_language", // Reused "Native language" for Mother tongue
+            "current_address",
+            "email_address",
+          ],
+        },
+        {
+          id: "ee_language_test",
+          title: "Express Entry: IELTS / CELPIP Language Test",
+          is_active: true,
+          questionKeys: [
+            "lang_test_taken",
+            "lang_test_version",
+            "lang_test_date",
+            "lang_test_result_date",
+            "lang_test_cert_num",
+            "lang_speaking",
+            "lang_reading",
+            "lang_listening",
+            "lang_writing",
+          ],
+        },
+        {
+          id: "ee_education_history",
+          title: "Express Entry: Education History",
+          is_active: true,
+          questionKeys: ["ee_education_repeater"],
+        },
+        {
+          id: "ee_work_history",
+          title: "Express Entry: Work History",
+          is_active: true,
+          questionKeys: ["ee_work_history_repeater"],
+        },
+      ],
+      optionalSections: [
+        {
+          id: "ee_spousal_form",
+          title: "Spousal Details",
+          is_active: false,
+          questionKeys: [
+            "spouse_first_name",
+            "spouse_last_name",
+            "marriage_date",
+          ],
+        },
+        {
+          id: "ee_canadian_relative",
+          title: "Relatives in Canada",
+          is_active: false,
+          questionKeys: [
+            "has_canadian_relative",
+            "relatives_in_canada_repeater",
+          ],
+        },
+      ],
     },
   },
   Other: {

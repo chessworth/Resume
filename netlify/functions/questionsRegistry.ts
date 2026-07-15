@@ -579,4 +579,149 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
       "ceremony_guests",
     ],
   },
+
+  // ==========================================
+  // --- NEW: EXPRESS ENTRY REGISTERED FIELDS ---
+  // ==========================================
+  any_other_name: {
+    id: "any_other_name",
+    label: "Any other name used previously (e.g., maiden name, nickname)",
+    type: "text",
+    placeholder: "N/A if not applicable",
+  },
+  gender: {
+    id: "gender",
+    label: "Gender",
+    type: "select",
+    options: ["Male", "Female", "Other"],
+  },
+  passport_issue_date: {
+    id: "passport_issue_date",
+    label: "Passport Issue Date",
+    type: "date",
+  },
+  passport_expiry_date: {
+    id: "passport_expiry_date",
+    label: "Passport Expiry Date",
+    type: "date",
+  },
+  citizenship_country: {
+    id: "citizenship_country",
+    label: "Country of Citizenship",
+    type: "text",
+    placeholder: "e.g., India, United Kingdom",
+  },
+  proof_of_funds_amount: {
+    id: "proof_of_funds_amount",
+    label: "How many funds do you have in your bank account? (in CAD)",
+    type: "number",
+    placeholder: "e.g., 15000",
+  },
+  biometrics_completed: {
+    id: "biometrics_completed",
+    label: "Have you had your biometrics done before?",
+    type: "boolean",
+  },
+  has_canadian_relative: {
+    id: "has_canadian_relative",
+    label: "Do you have any relative who is a Permanent Resident or Citizen of Canada?",
+    type: "boolean",
+  },
+  
+  // Language Test Block
+  lang_test_taken: {
+    id: "lang_test_taken",
+    label: "Language Test Taken",
+    type: "select",
+    options: ["IELTS", "CELPIP"],
+  },
+  lang_test_version: {
+    id: "lang_test_version",
+    label: "Language Test Version",
+    type: "select",
+    options: ["General"],
+  },
+  lang_test_date: {
+    id: "lang_test_date",
+    label: "Date of Language Test",
+    type: "date",
+  },
+  lang_test_result_date: {
+    id: "lang_test_result_date",
+    label: "Date of Test Results",
+    type: "date",
+  },
+  lang_test_cert_num: {
+    id: "lang_test_cert_num",
+    label: "Language Test Result Certificate Number",
+    type: "text",
+    placeholder: "e.g., 123456-ABCDEF",
+  },
+  lang_speaking: { id: "lang_speaking", label: "Speaking Score", type: "number" },
+  lang_reading: { id: "lang_reading", label: "Reading Score", type: "number" },
+  lang_listening: { id: "lang_listening", label: "Listening Score", type: "number" },
+  lang_writing: { id: "lang_writing", label: "Writing Score", type: "number" },
+
+  // Custom Express Entry Education Subfields
+  ee_field_of_education: {
+    id: "ee_field_of_education",
+    label: "Field of Study (e.g., Arts/Commerce/Medical)",
+    type: "text",
+  },
+  ee_level_of_education: {
+    id: "ee_level_of_education",
+    label: "Level of Education Obtained",
+    type: "select",
+    options: [
+      "Secondary School (High School)",
+      "One-year Post-secondary program",
+      "Two-year Post-secondary program",
+      "Bachelors Degree (Three or more years)",
+      "Two or more certificates/diplomas (One must be 3+ years)",
+      "Masters Degree",
+      "Doctoral Level (PhD)"
+    ],
+  },
+  ee_school_address: {
+    id: "ee_school_address",
+    label: "Complete Address of School/College",
+    type: "text",
+  },
+
+  // Custom Express Entry Work Subfields
+  ee_job_title: { id: "ee_job_title", label: "Title / Position", type: "text" },
+  ee_hours_per_week: { id: "ee_hours_per_week", label: "Hours per week", type: "number" },
+  ee_noc_code: { id: "ee_noc_code", label: "NOC Code (National Occupational Classification)", type: "text" },
+  ee_employer_address: { id: "ee_employer_address", label: "Complete Employer Address", type: "text" },
+
+  // Custom Express Entry Repeaters
+  ee_education_repeater: {
+    id: "ee_education_repeater",
+    label: "Education History",
+    type: "repeater",
+    addButtonLabel: "+ Add Another Education Entry",
+    subQuestionKeys: [
+      "school_name",
+      "ee_field_of_education",
+      "ee_level_of_education",
+      "start_date",
+      "end_date",
+      "ee_school_address",
+    ],
+  },
+  ee_work_history_repeater: {
+    id: "ee_work_history_repeater",
+    label: "Work History",
+    type: "repeater",
+    addButtonLabel: "+ Add Another Work History Entry",
+    subQuestionKeys: [
+      "company_name",
+      "ee_job_title",
+      "ee_hours_per_week",
+      "ee_noc_code",
+      "start_date",
+      "end_date",
+      "ee_employer_address",
+    ],
+  },
 };
