@@ -14,6 +14,12 @@ const ClientIntake: React.FC = () => {
   const [error, setError] = useState('');
   //const [isQueueActive, setIsQueueActive] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
+  const latestSectionsRef = React.useRef(sections);
+    React.useEffect(() => {
+      latestSectionsRef.current = sections;
+    }, [sections]);
+  const [hasBeenFocused, setHasBeenFocused] = React.useState(false);
+  const [isDirty, setIsDirty] = React.useState(false);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -50,6 +56,7 @@ const ClientIntake: React.FC = () => {
   }; */
 
   const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
+    setIsDirty(true);
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {
@@ -64,6 +71,7 @@ const ClientIntake: React.FC = () => {
   // --- REPEATER STATE HANDLERS ---
   
   const handleRepeaterAdd = (sectionId: string, fieldId: string) => {
+    setIsDirty(true);
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {
@@ -78,6 +86,7 @@ const ClientIntake: React.FC = () => {
   };
 
   const handleRepeaterRemove = (sectionId: string, fieldId: string, indexToRemove: number) => {
+    setIsDirty(true);
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {
@@ -92,6 +101,7 @@ const ClientIntake: React.FC = () => {
   };
 
   const handleRepeaterChange = (sectionId: string, fieldId: string, index: number, subFieldId: string, value: string) => {
+    setIsDirty(true);
     setSections(prev => prev.map(section => {
       if (section.id !== sectionId) return section;
       return {
@@ -110,7 +120,7 @@ const ClientIntake: React.FC = () => {
 
   // --- SAVE LOGIC ---
 
-  const saveProgress = async (event?: any, sectionsToSave?: FormSection[]) => {
+  const saveProgress = React.useCallback(async (event?: any, sectionsToSave?: FormSection[]) => {
     setSaving(true);
     try {
       const payloadSections = sectionsToSave ?? sections;
@@ -125,7 +135,38 @@ const ClientIntake: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [sections, token]);
+
+   React.useEffect(() => {
+    const handleGlobalFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+        setHasBeenFocused(true);
+      }
+    };
+    document.addEventListener('focusin', handleGlobalFocus);
+
+    const AUTOSAVE_INTERVAL_MS = 60000; // 1 minute
+
+    const interval = setInterval(async () => {
+      // Only save if the user has interacted AND has unsaved changes
+      if (hasBeenFocused && isDirty) {
+        try {
+          // Pass the absolute latest state to completely bypass stale closures
+          await saveProgress(undefined, latestSectionsRef.current);
+          setIsDirty(false); // Reset dirty flag on success
+        } catch (err) {
+          console.error("Autosave failed:", err);
+        }
+      }
+    }, AUTOSAVE_INTERVAL_MS);
+
+    // 3. Clean up the interval and listener on component unmount
+    return () => {
+      document.removeEventListener('focusin', handleGlobalFocus);
+      clearInterval(interval);
+    };
+  }, [hasBeenFocused, isDirty, saveProgress]);
 
   if (loading) return <div className="immigration-page">Loading your form...</div>;
   if (error) return <div className="immigration-page"><h3>Error</h3><p>{error}</p></div>;
