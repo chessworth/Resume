@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormSection, Document } from './types';
 import './immigration.css';
-import QuestionnaireRunner from './QuestionnaireRunner';
+//import QuestionnaireRunner from './QuestionnaireRunner';
 import ClientDocumentChecklist from './ClientDocumentChecklist';
 
 const ClientIntake: React.FC = () => {
@@ -12,7 +12,7 @@ const ClientIntake: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [isQueueActive, setIsQueueActive] = useState(true);
+  //const [isQueueActive, setIsQueueActive] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ClientIntake: React.FC = () => {
     if (token) fetchForm();
   }, [token]);
 
-  const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
+  /* const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
     let updatedSections: FormSection[] = [];
     setSections(prev => {
       updatedSections = prev.map(section => {
@@ -47,7 +47,7 @@ const ClientIntake: React.FC = () => {
       return updatedSections;
     });
     return await saveProgress(undefined, updatedSections);
-  };
+  }; */
 
   const handleInputChange = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
     setSections(prev => prev.map(section => {
@@ -138,13 +138,13 @@ const ClientIntake: React.FC = () => {
       </div>
 
       <div className="client-intake-page">
-        {isQueueActive ? (
+        {/* {isQueueActive ? (
           <QuestionnaireRunner 
             sections={sections} 
             onSaveAnswer={handleSaveAnswer} 
             onComplete={() => setIsQueueActive(false)} 
           />
-        ) : ""}
+        ) : ""} */}
 
         <div className="intake-form-container">
           {sections.filter(s => s.is_active).map(section => (
