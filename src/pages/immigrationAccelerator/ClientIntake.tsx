@@ -33,7 +33,6 @@ const ClientIntake: React.FC = () => {
   }, [token]);
 
   const handleSaveAnswer = async (sectionId: string, fieldId: string, value: string | boolean | any[]) => {
-    // Compute updated sections synchronously, set state with functional update, and pass the updated array to saveProgress
     let updatedSections: FormSection[] = [];
     setSections(prev => {
       updatedSections = prev.map(section => {
@@ -61,6 +60,55 @@ const ClientIntake: React.FC = () => {
       };
     }));
   };
+
+  // --- REPEATER STATE HANDLERS ---
+  
+  const handleRepeaterAdd = (sectionId: string, fieldId: string) => {
+    setSections(prev => prev.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        fields: section.fields.map(field => {
+          if (field.id !== fieldId) return field;
+          const currentArray = Array.isArray(field.answer) ? field.answer : [];
+          return { ...field, answer: [...currentArray, {}] };
+        })
+      };
+    }));
+  };
+
+  const handleRepeaterRemove = (sectionId: string, fieldId: string, indexToRemove: number) => {
+    setSections(prev => prev.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        fields: section.fields.map(field => {
+          if (field.id !== fieldId) return field;
+          const currentArray = Array.isArray(field.answer) ? field.answer : [];
+          return { ...field, answer: currentArray.filter((_, idx) => idx !== indexToRemove) };
+        })
+      };
+    }));
+  };
+
+  const handleRepeaterChange = (sectionId: string, fieldId: string, index: number, subFieldId: string, value: string) => {
+    setSections(prev => prev.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        fields: section.fields.map(field => {
+          if (field.id !== fieldId) return field;
+          const currentArray = Array.isArray(field.answer) ? [...field.answer] : [];
+          if (currentArray[index]) {
+            currentArray[index] = { ...currentArray[index], [subFieldId]: value };
+          }
+          return { ...field, answer: currentArray };
+        })
+      };
+    }));
+  };
+
+  // --- SAVE LOGIC ---
 
   const saveProgress = async (event?: any, sectionsToSave?: FormSection[]) => {
     setSaving(true);
@@ -90,109 +138,132 @@ const ClientIntake: React.FC = () => {
       </div>
 
       <div className="client-intake-page">
-    {isQueueActive ? (
-      <QuestionnaireRunner 
-        sections={sections} 
-        onSaveAnswer={handleSaveAnswer} // Saves after each answer, can be optimized to batch if needed
-        onComplete={() => setIsQueueActive(false)} // Hides runner, reveals form
-      />
-    ) : ""}
+        {isQueueActive ? (
+          <QuestionnaireRunner 
+            sections={sections} 
+            onSaveAnswer={handleSaveAnswer} 
+            onComplete={() => setIsQueueActive(false)} 
+          />
+        ) : ""}
 
-    <div className="intake-form-container">
-      {sections.filter(s => s.is_active).map(section => (
-        <div key={section.id} className="intake-section">
-          <h3>{section.title}</h3>
-          <div className="fields-grid">
-            {section.fields.map(field => (
-              <div key={field.id} className="form-group">
-                <label>{field.label}</label>
-                
-                {field.type === 'text' && (
-                  <input 
-                    type="text" 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  />
-                )}
+        <div className="intake-form-container">
+          {sections.filter(s => s.is_active).map(section => (
+            <div key={section.id} className="intake-section">
+              <h3>{section.title}</h3>
+              <div className="fields-grid">
+                {section.fields.map(field => (
+                  <div key={field.id} className="form-group">
+                    <label>{field.label}</label>
+                    
+                    {field.type === 'text' && (
+                      <input 
+                        type="text" 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      />
+                    )}
 
-                {field.type === 'number' && (
-                  <input 
-                    type="number" 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  />
-                )}
+                    {field.type === 'number' && (
+                      <input 
+                        type="number" 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      />
+                    )}
 
-                {field.type === 'textarea' && (
-                  <textarea 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  />
-                )}
-                
-                {field.type === 'date' && (
-                  <input 
-                    type="date" 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  />
-                )}
+                    {field.type === 'textarea' && (
+                      <textarea 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      />
+                    )}
+                    
+                    {field.type === 'date' && (
+                      <input 
+                        type="date" 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      />
+                    )}
 
-                {field.type === 'boolean' && (
-                  <input 
-                    type="checkbox" 
-                    checked={field.answer as boolean || false} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.checked)}
-                  />
-                )}
+                    {field.type === 'boolean' && (
+                      <input 
+                        type="checkbox" 
+                        checked={field.answer as boolean || false} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.checked)}
+                      />
+                    )}
 
-                {field.type === 'select' && (
-                  <select 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  >
-                    {field.options?.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                )}
-                {field.type === 'email' && (
-                  <input 
-                    type="email" 
-                    value={field.answer as string || ''} 
-                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
-                  />
-                )}
-                {field.type === 'repeater' && (
-                  <div className="repeater-container">
-                    {(field.answer as any[] || []).map((item, index) => (
-                      <div key={index} className="repeater-item">
-                        {field.subFields?.map(subField => (
-                          <div key={subField.id} className="form-group">
-                            <label>{subField.label}</label>
-                            {subField.type === 'text' && (
-                              <input 
-                                type="text" 
-                                value={item[subField.id] as string || ''}
-                              />
-                            )}
+                    {field.type === 'select' && (
+                      <select 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      >
+                        {field.options?.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    )}
+                    
+                    {field.type === 'email' && (
+                      <input 
+                        type="email" 
+                        value={field.answer as string || ''} 
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                      />
+                    )}
+                    
+                    {field.type === 'repeater' && (
+                      <div className="repeater-container" style={{ padding: '10px 0' }}>
+                        {(field.answer as any[] || []).map((item, index) => (
+                          <div key={index} className="repeater-item" style={{ marginBottom: '15px', padding: '15px', border: '1px solid #eee', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                              <h4 style={{ margin: 0, fontSize: '1rem' }}>Entry #{index + 1}</h4>
+                              <button 
+                                type="button" 
+                                className="btn-remove-repeater"
+                                onClick={() => handleRepeaterRemove(section.id, field.id, index)}
+                                >
+                                Remove
+                              </button>
+                            </div>
+
+                            {field.subFields?.map(subField => (
+                              <div key={subField.id} className="form-group" style={{ marginBottom: '10px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px' }}>{subField.label}</label>
+                                {(subField.type === 'text' || subField.type === 'date') && (
+                                  <input 
+                                    type={subField.type}
+                                    style={{ width: '100%', padding: '8px' }}
+                                    value={item[subField.id] as string || ''}
+                                    onChange={(e) => handleRepeaterChange(section.id, field.id, index, subField.id, e.target.value)}
+                                  />
+                                )}
+                              </div>
+                            ))}
                           </div>
                         ))}
+                        
+                        <button 
+                          type="button"
+                          className="btn-add-repeater"
+                          onClick={() => handleRepeaterAdd(section.id, field.id)}
+                          >
+                          {field.addButtonLabel || "+ Add Another"}
+                        </button>
                       </div>
-                    ))}
+                    )}
+                    
                   </div>
-                )}
-                {/* Future expandability: Add 'select' and 'boolean' handling here later */}
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
 
-    <ClientDocumentChecklist initialDocs={initialDocuments} />
-    
-  </div>
+        <ClientDocumentChecklist initialDocs={initialDocuments} />
+        
+      </div>
 
       <div className="intake-footer">
         <button 
