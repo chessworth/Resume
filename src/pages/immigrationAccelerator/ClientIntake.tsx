@@ -187,11 +187,18 @@ const ClientIntake: React.FC = () => {
                     )}
 
                     {field.type === 'boolean' && (
-                      <input 
-                        type="checkbox" 
-                        checked={field.answer as boolean || false} 
-                        onChange={(e) => handleInputChange(section.id, field.id, e.target.checked)}
-                      />
+                      <select 
+                        className="stylized-select"
+                        required
+                        /* This safely converts true/false/undefined to string values for the select UI */
+                        value={field.answer === true ? 'true' : field.answer === false ? 'false' : ''} 
+                        /* This converts the string back into a strict boolean for your state */
+                        onChange={(e) => handleInputChange(section.id, field.id, e.target.value === 'true')}
+                      >
+                        <option value="" disabled>Select Yes or No</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
                     )}
 
                     {field.type === 'select' && (

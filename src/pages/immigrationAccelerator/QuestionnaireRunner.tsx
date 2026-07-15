@@ -236,21 +236,20 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
           )}
 
           {field.type === 'boolean' && (
-            <div className="input-group">
-              <label className="form-check-label" htmlFor={field.id}>
-                {field.label}
-              </label>
-              <input
-                id={field.id}
-                type="checkbox"
-                className="runner-input"
-                checked={currentValue as boolean}
-                onChange={(e) => setCurrentValue(e.target.checked)}
-                disabled={isProcessing}
-              />
-            </div>
+            <select 
+              className="stylized-select"
+              required
+              value={field.answer === true ? 'true' : field.answer === false ? 'false' : ''} 
+              onChange={(e) => {
+                setCurrentValue(e.target.value === 'true');
+              }}
+              disabled={isProcessing}
+            >
+              <option value="" disabled>Select Yes or No</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
           )}
-
           {field.type === 'repeater' && Array.isArray(currentValue) && (
             <div className="repeater-container">
               {currentValue.map((entry, index) => (

@@ -1205,3 +1205,41 @@ body input{
 .btn-add-repeater:hover {
   background-color: #cfcfcf;
 }
+
+/* Stylized Select Dropdown */
+.stylized-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 1rem;
+  color: #333;
+  /* Removes default browser dropdown styling */
+  appearance: none; 
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Custom modern arrow */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stylized-select:focus {
+  outline: none;
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+/* Gray out the text if they haven't selected an option yet */
+.stylized-select:invalid,
+.stylized-select option[value=""] {
+  color: #999;
+}
+
+.stylized-select option {
+  color: #333; /* Keeps the actual options dark */
+}
