@@ -214,26 +214,26 @@ const ClientIntake: React.FC = () => {
                     )}
                     
                     {field.type === 'repeater' && (
-                      <div className="repeater-container" style={{ padding: '10px 0' }}>
+                      <div className="repeater-container">
                         {(field.answer as any[] || []).map((item, index) => (
-                          <div key={index} className="repeater-item" style={{ marginBottom: '15px', padding: '15px', border: '1px solid #eee', borderRadius: '8px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                              <h4 style={{ margin: 0, fontSize: '1rem' }}>Entry #{index + 1}</h4>
+                          <div key={index} className="repeater-item">
+                            <div className="repeater-header">
+                              <h4>Entry #{index + 1}</h4>
                               <button 
                                 type="button" 
                                 className="btn-remove-repeater"
                                 onClick={() => handleRepeaterRemove(section.id, field.id, index)}
-                                >
+                              >
                                 Remove
                               </button>
                             </div>
-
                             {field.subFields?.map(subField => (
                               <div key={subField.id} className="form-group" style={{ marginBottom: '10px' }}>
                                 <label style={{ display: 'block', marginBottom: '4px' }}>{subField.label}</label>
                                 {(subField.type === 'text' || subField.type === 'date') && (
                                   <input 
                                     type={subField.type}
+                                    className="runner-input" /* Reusing your existing input class */
                                     style={{ width: '100%', padding: '8px' }}
                                     value={item[subField.id] as string || ''}
                                     onChange={(e) => handleRepeaterChange(section.id, field.id, index, subField.id, e.target.value)}
@@ -248,12 +248,11 @@ const ClientIntake: React.FC = () => {
                           type="button"
                           className="btn-add-repeater"
                           onClick={() => handleRepeaterAdd(section.id, field.id)}
-                          >
+                        >
                           {field.addButtonLabel || "+ Add Another"}
                         </button>
                       </div>
                     )}
-                    
                   </div>
                 ))}
               </div>
