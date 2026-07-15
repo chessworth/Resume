@@ -277,7 +277,7 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
   relationship_love_story: {
     id: "relationship_love_story",
     label: "Tell us your complete love story",
-    type: "text",
+    type: "textarea",
   },
   first_met_date: {
     id: "first_met_date",
@@ -291,30 +291,31 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
   },
   first_met_details: {
     id: "first_met_details",
-    label: "Details (how arranged / who introduced you)",
-    type: "text",
+    label:
+      "Details of how you first met (who planned the meeting, what did you do on the day?)",
+    type: "textarea",
   },
   first_contact_details: {
     id: "first_contact_details",
     label:
-      "Did you have contact before meeting in person? (Date/Who initiated)",
+      "Did you have contact before meeting in person? If so, who contacted first, and how (social media, phone, email, etc.)?",
     type: "text",
   },
   current_contact_methods: {
     id: "current_contact_methods",
-    label: "How do you contact each other currently and how often?",
+    label:
+      "How do you contact each other currently (social media, phone, whatsapp etc.) and how often?",
     type: "text",
   },
   communication_language: {
     id: "communication_language",
-    label: "Language in which you talk",
+    label: "Languages in which you talk",
     type: "text",
   },
   marriage_type: {
     id: "marriage_type",
     label: "Is this a Love marriage or Arranged setup?",
-    type: "select",
-    options: ["Love", "Arranged", "Both"],
+    type: "text",
   },
   parents_present_at_wedding: {
     id: "parents_present_at_wedding",
@@ -325,7 +326,7 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
     id: "relationship_development",
     label:
       "Please explain in detail your feelings towards your spouse when you first met, before and after the wedding.",
-    type: "text",
+    type: "textarea",
   },
 
   // --- SPOUSAL: EDUCATION SUMMARY (SPONSOR) ---

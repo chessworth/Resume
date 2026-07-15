@@ -114,6 +114,21 @@ const ClientIntake: React.FC = () => {
                     onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
                   />
                 )}
+
+                {field.type === 'number' && (
+                  <input 
+                    type="number" 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  />
+                )}
+
+                {field.type === 'textarea' && (
+                  <textarea 
+                    value={field.answer as string || ''} 
+                    onChange={(e) => handleInputChange(section.id, field.id, e.target.value)}
+                  />
+                )}
                 
                 {field.type === 'date' && (
                   <input 
