@@ -241,7 +241,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
               required
               value={field.answer === true ? 'true' : field.answer === false ? 'false' : ''} 
               onChange={(e) => {
-                setCurrentValue(e.target.value === 'true');
+                setCurrentValue(e.target.value === 'true' ? true : e.target.value === 'false' ? false : '');
               }}
               disabled={isProcessing}
             >

@@ -50,16 +50,22 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
     label: "Email Address",
     type: "email",
     placeholder: "e.g., client@example.com",
+    validation: {
+      // Basic email regex pattern
+      pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+      message: "Please enter a valid email address (e.g., client@example.com)",
+    },
   },
   uci: {
     id: "uci",
     label: "Unique Client Identifier (UCI)",
     type: "text",
-    placeholder: "e.g., 1111-2222 or 11112222",
+    placeholder: "e.g., 11112222 or 1111222233",
     validation: {
-      // Allows 8 digits with or without a hyphen
-      pattern: "^\\d{4}-?\\d{4}$",
-      message: "UCI must be exactly 8 digits (e.g., 1111-2222 or 11112222)",
+      // Allows 8 to 10 digits, no hyphens or spaces. Adjusted to accept 8-10 digits as per the requirement.
+      pattern: "^\\d{8,10}$",
+      message:
+        "UCI must be between 8 and 10 digits (e.g., 1111-2222 or 11112222)",
     },
   },
   passport_num: {
