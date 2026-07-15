@@ -1,5 +1,5 @@
 // src/features/immigration/QuestionnaireRunner.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FormSection, FormField } from './types';
 
 interface QueuedField {
@@ -10,7 +10,6 @@ interface QueuedField {
 
 interface Props {
   sections: FormSection[];
-  // UPATED: Added `any[]` to the value signature to support repeater payloads
   onSaveAnswer: (sectionId: string, fieldId: string, value: string | boolean | any[]) => Promise<void>; 
   onComplete: () => void; 
 }
@@ -19,20 +18,25 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
   const [queue, setQueue] = useState<QueuedField[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // UPDATED: Added any[] to support our repeater arrays
   const [currentValue, setCurrentValue] = useState<string | boolean | any[]>('');
+
+  // FIX 1: We use a ref to ensure the queue is only built ONCE when the component mounts.
+  // This stops parent state updates from resetting your skipped items.
+  const hasInitialized = useRef(false);
 
   // 1. Initialize the Queue
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
     const initialQueue: QueuedField[] = [];
     
     sections.filter(s => s.is_active).forEach(section => {
       section.fields.forEach(field => {
-        // UPDATED: Now also checks if a repeater array is empty
-        const isAnswerEmpty = 
-          field.answer === null || 
-          field.answer === '' || 
-          (Array.isArray(field.answer) && field.answer.length === 0);
+        // FIX 2: We no longer check if the array length is 0. 
+        // If the user submitted [], we respect that as a completed "No history" answer.
+        // It will only be queued if it is strictly null or undefined.
+        const isAnswerEmpty = field.answer === null || field.answer === undefined || field.answer === '';
 
         if (isAnswerEmpty) {
           initialQueue.push({ 
@@ -55,7 +59,6 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
   useEffect(() => {
     if (queue.length > 0) {
       const field = queue[0].field;
-      // UPDATED: Handle initializing arrays for repeaters
       if (field.type === 'repeater') {
         setCurrentValue(Array.isArray(field.answer) ? field.answer : []);
       } else {
@@ -64,7 +67,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
     }
   }, [queue]);
 
-  // --- NEW REPEATER STATE HANDLERS ---
+  // --- REPEATER STATE HANDLERS ---
 
   const addRepeaterEntry = () => {
     setCurrentValue(prev => Array.isArray(prev) ? [...prev, {}] : [{}]);
@@ -125,9 +128,7 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
   const currentItem = queue[0];
   const { field, sectionTitle } = currentItem;
 
-  // UPDATED: Validation to disable the submit button based on field type
-  const isNextDisabled = isProcessing || 
-    (field.type !== 'repeater' && currentValue === '');
+  const isNextDisabled = isProcessing || (field.type !== 'repeater' && currentValue === '');
 
   return (
     <div className="questionnaire-runner-overlay">
@@ -210,7 +211,6 @@ const QuestionnaireRunner: React.FC<Props> = ({ sections, onSaveAnswer, onComple
             </div>
           )}
 
-          {/* --- NEW REPEATER RENDER BLOCK --- */}
           {field.type === 'repeater' && Array.isArray(currentValue) && (
             <div className="repeater-container">
               {currentValue.map((entry, index) => (

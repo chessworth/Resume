@@ -378,8 +378,8 @@ export const QUESTIONS_REGISTRY: Record<string, QuestionDefinition> = {
   },
 
   // Travel
-  travel_from: { id: "travel_from", label: "From (YY-MM)", type: "text" }, // Using text for YY-MM standard or can use date
-  travel_to: { id: "travel_to", label: "To (YY-MM)", type: "text" },
+  travel_from: { id: "travel_from", label: "From (YYYY-MM)", type: "text" }, // Using text for YYYY-MM standard or can use date
+  travel_to: { id: "travel_to", label: "To (YYYY-MM)", type: "text" },
   travel_country: { id: "travel_country", label: "Country", type: "text" },
   travel_city: { id: "travel_city", label: "City", type: "text" },
   travel_purpose: { id: "travel_purpose", label: "Purpose", type: "text" },

@@ -512,6 +512,7 @@ body input{
   }
   .immigration-page {
     min-width: 100%;
+    position: relative;
   }
 }
 
@@ -981,6 +982,10 @@ body input{
   font-size: 1rem;
 }
 
+.intake-form-container {
+  margin-top: 40px;
+}
+
 /* --- Mobile Full Screen Override --- */
 @media (max-width: 768px) {
   .questionnaire-runner-overlay {
@@ -993,7 +998,15 @@ body input{
     z-index: 1000;
     background: white;
     padding: 0;
+    overflow-y: scroll;
+    height: 100vh;
+    max-height: 100vh;
+    width: 100vw;
     align-items: flex-start; /* Push content to top on mobile */
+  }
+
+  .intake-form-container {
+    margin-top: 100vh; /* Pushes the form below the header on mobile */
   }
 
   .questionnaire-runner-card {
