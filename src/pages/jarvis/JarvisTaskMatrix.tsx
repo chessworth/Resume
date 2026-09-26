@@ -545,7 +545,7 @@ export function App() {
   }, [tasks]);
 
   return (
-    <div className={`relative min-h-screen flex flex-col font-sans transition-colors duration-300 ${
+    <div className={`jarvis-page relative min-h-screen flex flex-col font-sans transition-colors duration-300 ${
       isDark ? 'text-slate-100' : 'text-slate-900'
     }`}>
       {/* Ambient Blurred Light Canvas Background Layer */}

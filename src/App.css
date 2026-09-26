@@ -37,7 +37,7 @@
 .App-link {
   color: #61dafb;
 }
-.container {
+.container:not(:has(.jarvis-page)) {
   display: flex;
   background-image: url(./assets/texture.jpeg);
   background-size: cover;
