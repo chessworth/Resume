@@ -32,3 +32,9 @@ code {
 .jarvis-page li {
   padding: 0;
 }
+
+@media (min-width: 64rem) {
+  .container:has(.jarvis-page) {
+    min-width: 100%;
+  }
+}
