@@ -1,6 +1,6 @@
 [build]
-  command = "react-scripts build"
-  publish = "build"
+  command = "npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/manifest.json"
@@ -20,11 +20,6 @@
 [[redirects]]
   from = "/logo512.png"
   to = "/logo512.png"
-  status = 200
-
-[[redirects]]
-  from = "/static/*"
-  to = "/static/:splat"
   status = 200
 
 [[redirects]]

@@ -14,7 +14,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconName, library } from '@fortawesome/fontawesome-svg-core';
 import { faUserNinja, faUserAstronaut, faUserSecret, faRobot, faGhost, faDragon, faCat, faDog, faHippo, faPizzaSlice } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet-async';
-import nutriTrackerIcon from '../projects/assets/nutritiontrackericon.png';
 
 library.add( 
   faUserNinja, faUserAstronaut, faUserSecret, faRobot, 
@@ -200,7 +199,7 @@ export const NutritionTracker: React.FC = () => {
       <Helmet>
         <title>NutriTracker - Home</title>
         <meta name="description" content="Home Page of NutriTracker, A Nutrition Tracking App" /> 
-        <link rel="icon" href={nutriTrackerIcon} />
+        <link rel="icon" href={'./assets/nutritiontrackericon.png'} />
         <meta property="og:description" content="Home Page of NutriTracker, A Nutrition Tracking App" />
         <meta property="og:title" content="My Awesome Home Page"/>
       </Helmet>

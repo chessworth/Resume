@@ -1,16 +1,23 @@
 [
-    {
-        "id": 1,
-        "name": "Poker Table",
-        "description": "A poker table for playing Three Card Poker with a custom UI using local multiplayer.",
-        "url": "https://resumeg.netlify.app/teenpatti",
-        "iconName": "teenpatti"
-    },
-    {
-        "id": 2,
-        "name": "Nutrition Tracker (AI)",
-        "description": "A Nutrition tracker made with Gemini - Allows manual entry of food items and generates detailed nutritional data using AI.",
-        "url": "https://resumeg.netlify.app/nutritiontracker",
-        "iconName": "NutriTrackerLogo"
-    }
+  {
+    "id": 1,
+    "name": "Poker Table",
+    "description": "A poker table for playing Three Card Poker with a custom UI using local multiplayer.",
+    "url": "https://resumeg.netlify.app/teenpatti",
+    "iconName": "teenpatti"
+  },
+  {
+    "id": 2,
+    "name": "Nutrition Tracker (AI)",
+    "description": "A Nutrition tracker made with Gemini - Allows manual entry of food items and generates detailed nutritional data using AI.",
+    "url": "https://resumeg.netlify.app/nutritiontracker",
+    "iconName": "NutriTrackerLogo"
+  },
+  {
+    "id": 3,
+    "name": "Jarvis Task Matrix",
+    "description": "Intelligent Eisenhower-matrix prioritization system featuring automated urgency calculation, custom guidance tooltips, guest & Supabase persistence.",
+    "url": "/jarvis",
+    "iconName": "robot"
+  }
 ]
