@@ -43,6 +43,8 @@
   background-size: cover;
   background-attachment: fixed;
   background-repeat: no-repeat;
+  min-width: 100vw;
+  margin: 0;
 }
 .container:has(.immigration-page){
   background-image: url(./assets/immtexture.jpeg);
