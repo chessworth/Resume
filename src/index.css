@@ -32,15 +32,3 @@ code {
 .jarvis-page li {
   padding: 0;
 }
-
-.jarvis-page button {
-  all: revert;
-  font-family: revert;
-  font-size: revert;
-  color: revert;
-  background-color: revert;
-  border: revert;
-  padding: revert;
-  margin: revert;
-  cursor: pointer;
-}

@@ -171,14 +171,14 @@
     color: #fff;
   }
 
-  button {
+  .tableContainer button {
     background: #444;
     color: white;
     cursor: pointer;
     transition: background 0.2s ease;
   }
   
-  button:hover {
+  .tableContainer button:hover {
     background: #666;
   }
 
