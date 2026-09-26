@@ -594,7 +594,7 @@ export function App() {
         />
 
         {/* Main Execution Surface */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-6">
+        <main className="flex-1 max-w-full w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-6">
           {/* Tier 1: Critical Top Banners */}
           {criticalTopBanners.length > 0 && (
             <div className="space-y-3">

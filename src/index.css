@@ -12,3 +12,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Jarvis CSS Isolation Shield */
+.jarvis-page h1,
+.jarvis-page h2,
+.jarvis-page h3,
+.jarvis-page h4,
+.jarvis-page h5,
+.jarvis-page h6 {
+  font-size: revert;
+  margin: 0;
+}
+
+.jarvis-page ul,
+.jarvis-page ol {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.jarvis-page li {
+  padding: 0;
+}

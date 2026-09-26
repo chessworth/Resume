@@ -66,7 +66,7 @@ ul.topnav {
   right: 10px;
   z-index: 5;
 }
-li {
+.topnav li {
   padding: 0;
 }
 .topnav .shrink:not(.hover) a:not(.active) {
