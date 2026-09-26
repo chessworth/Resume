@@ -13,5 +13,5 @@
  * @returns {string} Fully resolved asset URL string.
  */
 export const getAssetUrl = (assetPath: string): string => {
-  return new URL(`../assets/${assetPath}.png`, import.meta.url).href;
+  return new URL(`../assets/${assetPath}`, import.meta.url).href;
 };
