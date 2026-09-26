@@ -10,11 +10,11 @@
   transition: color 0.2s ease;
 }
 
-.dark *{
+.listingHeader .listingDescription .dark *{
   color: var(--darkmode-text-primary);
 }
 
-.light *{
+.listingHeader .listingDescription .light *{
   color: var(--lightmode-text-primary);
 }
 
