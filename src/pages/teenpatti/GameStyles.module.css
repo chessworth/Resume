@@ -155,7 +155,7 @@
     margin-bottom: 1rem;
   }
   
-  input, button {
+  .tableContainer input, .tableContainer button {
     margin-top: 4px;
     padding: 5px;
     font-size: 14px;
@@ -163,7 +163,7 @@
     border: none;
   }
   
-  input {
+  .tableContainer input {
     margin: 5px 15px;
     width: 85%;
     border: .08rem solid #979797;
