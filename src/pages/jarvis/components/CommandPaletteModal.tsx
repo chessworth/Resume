@@ -34,7 +34,8 @@ import {
   Calendar,
   ShieldAlert,
   ListTree,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import { calculateRecommendedUrgency, calculateRecommendedEffort } from '../constants/definitions';
 import { useSpeechToText } from '../hooks/useSpeechToText';
@@ -532,10 +533,37 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all text-slate-900 dark:text-slate-100">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-3 sm:pt-20 px-2 sm:px-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn overflow-y-auto"
+    >
+      <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all text-slate-900 dark:text-slate-100 my-auto sm:my-0">
+        {/* Mobile Header Bar with Prominent Exit Control (Active <= 600px) */}
+        <div className="max-[600px]:flex sm:hidden items-center justify-between px-3.5 py-2.5 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            <span className="font-mono text-xs font-extrabold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
+              COMMAND MODULE
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-mono text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
+            aria-label="Exit Command Module"
+          >
+            <X className="w-4 h-4 stroke-[2.5]" />
+            <span>EXIT</span>
+          </button>
+        </div>
+
         {/* Command Input Bar */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80">
+        <div className="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80">
           <Terminal className="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0" />
           <input
             ref={inputRef}
@@ -543,19 +571,21 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type 'ai create ...', 'ai guide ...', 'ai plan', 'ai audit', or speak via mic..."
-            className="w-full bg-transparent text-sm font-mono placeholder:text-slate-500 focus:outline-none text-slate-900 dark:text-white"
+            placeholder="Type 'ai create ...', 'ai guide ...', 'ai plan', or speak..."
+            className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm font-mono placeholder:text-slate-500 focus:outline-none text-slate-900 dark:text-white"
           />
 
           {/* AI Quota Telemetry Badge */}
-          <AiQuotaBadge status={quotaStatus} onClick={() => onOpenQuotaHud?.()} />
+          <div className="hidden sm:block shrink-0">
+            <AiQuotaBadge status={quotaStatus} onClick={() => onOpenQuotaHud?.()} />
+          </div>
 
           {/* Microphone Voice Input Trigger Button */}
           {isMicSupported && (
             <button
               type="button"
               onClick={toggleListening}
-              className={`p-2 rounded-xl border transition-all cursor-pointer relative ${
+              className={`p-2 rounded-xl border transition-all cursor-pointer shrink-0 relative ${
                 isListening
                   ? 'bg-rose-500 text-white border-rose-400 animate-pulse ring-2 ring-rose-500/50'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 border-transparent'
@@ -570,10 +600,21 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           <button
             type="button"
             onClick={() => setShowCheatsheet((prev) => !prev)}
-            className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
             title="Command Syntax Guide"
           >
             <HelpCircle className="w-4 h-4" />
+          </button>
+
+          {/* Explicit Exit / Close Button (High contrast, touch target >= 40px) */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center justify-center min-w-[38px] min-h-[38px] p-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer shrink-0 shadow-xs active:scale-95"
+            title="Exit Command Module"
+            aria-label="Exit Command Module"
+          >
+            <X className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
 
@@ -876,15 +917,29 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           </div>
         )}
 
-        {/* Footer Hotkey Legend */}
-        <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between text-[11px] font-mono text-slate-500">
-          <div className="flex items-center gap-3">
+        {/* Sticky Mobile Bottom Exit Bar (Guarantees thumb exit access on phones <= 600px regardless of scroll depth) */}
+        <div className="max-[600px]:flex sm:hidden sticky bottom-0 z-30 p-2.5 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 items-center justify-between gap-2 shadow-2xl">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-mono text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 border border-slate-700 active:scale-98 cursor-pointer shadow-md"
+          >
+            <X className="w-4 h-4 text-rose-400 stroke-[2.5]" />
+            <span>EXIT COMMAND MODULE</span>
+          </button>
+        </div>
+
+        {/* Footer Hotkey Legend & Desktop Exit Control */}
+        <div className="hidden sm:flex px-4 sm:px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 items-center justify-between text-[11px] font-mono text-slate-500">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Execute</span>
             <span>ESC Close</span>
-            {isMicSupported && <span>Mic: Ctrl+Shift+V</span>}
+            {isMicSupported && <span className="hidden md:inline">Mic: Ctrl+Shift+V</span>}
           </div>
-          <span>PRESS ? OR TYPE /HELP FOR GUIDE</span>
+          <div className="flex items-center gap-2">
+            <span>PRESS ? OR TYPE /HELP FOR GUIDE</span>
+          </div>
         </div>
       </div>
     </div>

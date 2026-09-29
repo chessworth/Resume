@@ -55,7 +55,7 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
   // Unified active view button styling across all 4 views (Rule / Req 2)
   const getButtonClass = (mode: SortingViewMode) => {
     const isActive = viewMode === mode;
-    return `flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono text-xs ${
+    return `flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono text-[11px] sm:text-xs w-full sm:w-auto text-center ${
       isActive
         ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold shadow-md shadow-cyan-600/25 scale-[1.02]'
         : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 font-medium'
@@ -63,17 +63,17 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-full overflow-hidden">
       {/* Top Row: View Mode Selectors + Vibrant Telemetry Cards */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-3.5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all">
-        {/* View Perspective Selector (Unified Colors) */}
-        <div className="flex flex-wrap items-center p-1.5 bg-slate-100/90 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800 gap-1.5 shadow-inner">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-3 sm:p-3.5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all">
+        {/* View Perspective Selector (Unified Colors, 2-column grid on mobile <= 600px) */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center p-1.5 bg-slate-100/90 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800 gap-1.5 shadow-inner w-full xl:w-auto">
           <button
             type="button"
             onClick={() => onViewModeChange('STRATEGIC')}
             className={getButtonClass('STRATEGIC')}
           >
-            <ListOrdered className="w-3.5 h-3.5" />
+            <ListOrdered className="w-3.5 h-3.5 shrink-0" />
             <span>STRATEGIC</span>
           </button>
 
@@ -82,7 +82,7 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
             onClick={() => onViewModeChange('DEADLINE')}
             className={getButtonClass('DEADLINE')}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 shrink-0" />
             <span>DEADLINE</span>
           </button>
 
@@ -91,7 +91,7 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
             onClick={() => onViewModeChange('MATRIX')}
             className={getButtonClass('MATRIX')}
           >
-            <LayoutGrid className="w-3.5 h-3.5" />
+            <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
             <span>EISENHOWER 2X2</span>
           </button>
 
@@ -100,24 +100,24 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
             onClick={() => onViewModeChange('IMPACT_EFFORT')}
             className={getButtonClass('IMPACT_EFFORT')}
           >
-            <Target className="w-3.5 h-3.5" />
+            <Target className="w-3.5 h-3.5 shrink-0" />
             <span>IMPACT-EFFORT 2X2</span>
           </button>
         </div>
 
         {/* High-Contrast Telemetry Counters */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-          <div className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
-            <span className="text-slate-600 dark:text-slate-400 font-semibold">TOTAL:</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-mono w-full xl:w-auto">
+          <div className="flex-1 sm:flex-initial justify-center px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
+            <span className="text-slate-600 dark:text-slate-400 font-semibold text-[10px] sm:text-xs">TOTAL:</span>
             <strong className="text-slate-950 dark:text-white font-extrabold">{totalCount}</strong>
           </div>
-          <div className="px-3.5 py-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            <span className="font-semibold">CRITICAL (Q1):</span>
+          <div className="flex-1 sm:flex-initial justify-center px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0" />
+            <span className="font-semibold text-[10px] sm:text-xs">CRITICAL:</span>
             <strong className="text-rose-900 dark:text-rose-100 font-extrabold">{criticalCount}</strong>
           </div>
-          <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
-            <span className="font-semibold">RESOLVED:</span>
+          <div className="flex-1 sm:flex-initial justify-center px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-200 flex items-center gap-2 shadow-xs transition-transform hover:scale-105">
+            <span className="font-semibold text-[10px] sm:text-xs">RESOLVED:</span>
             <strong className="text-emerald-950 dark:text-emerald-100 font-extrabold">{completedCount}</strong>
           </div>
         </div>
@@ -164,7 +164,7 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
       </div>
 
       {/* Third Row: Category Filter Badges */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 scrollbar-none w-full max-w-full">
         <span className="text-xs font-mono text-slate-800 dark:text-slate-200 flex items-center gap-1.5 pr-1 shrink-0 font-bold">
           <Filter className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" /> CATEGORIES:
         </span>

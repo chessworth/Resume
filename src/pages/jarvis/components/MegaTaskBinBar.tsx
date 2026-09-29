@@ -72,11 +72,11 @@ export const MegaTaskBinBar: React.FC<MegaTaskBinBarProps> = ({
   };
 
   return (
-    <div className="p-3.5 sm:p-4 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm backdrop-blur-xl transition-all">
+    <div className="p-3 sm:p-4 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm backdrop-blur-xl transition-all w-full max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-200 dark:border-slate-800 text-xs font-mono">
-        <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider">
-          <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span>MEGA TASK BINS // MISSION STREAM CLUSTERS</span>
+        <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider min-w-0">
+          <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <span className="truncate">MEGA TASK BINS // MISSIONS</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium hidden md:inline">
@@ -97,7 +97,7 @@ export const MegaTaskBinBar: React.FC<MegaTaskBinBarProps> = ({
       </div>
 
       {/* Horizontal Scrollable Bin Tabs */}
-      <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-thin">
+      <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-thin w-full max-w-full">
         {/* ALL MISSIONS TAB */}
         <button
           type="button"

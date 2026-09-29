@@ -1,11 +1,12 @@
 /**
  * @fileoverview Main navigation and status telemetry bar for the Jarvis interface.
  * Exposes account status, Supabase cloud sync status, dark/light theme toggle,
- * Command Palette (Cmd+K) trigger, and Command Spotlight Deep Work trigger.
+ * Command Palette (Cmd+K) trigger, Command Spotlight Deep Work trigger, and
+ * a responsive mobile navigation drawer that prevents horizontal overflow on phone viewports.
  * @packageDocumentation
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Cpu,
   Plus,
@@ -20,7 +21,10 @@ import {
   Target,
   Command,
   Layers,
-  Sparkles
+  Sparkles,
+  Menu,
+  X,
+  Zap
 } from 'lucide-react';
 import { UserSession } from '../types/task';
 import { isSupabaseConfigured } from '../services/supabaseClient';
@@ -59,22 +63,23 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenQuotaHud
 }) => {
   const isCloudAuthReady = isSupabaseConfigured();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/85 dark:bg-slate-950/80 backdrop-blur-xl shadow-xs transition-colors">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
-        {/* Brand & Telemetry */}
-        <div className="flex items-center gap-3.5">
-          <div className="relative p-2.5 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shadow-md shadow-cyan-950/5">
-            <Cpu className="w-5 h-5 animate-pulse" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+    <header className="sticky top-0 z-40 w-full max-w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/85 dark:bg-slate-950/80 backdrop-blur-xl shadow-xs transition-colors overflow-x-clip">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3">
+        {/* Brand & Telemetry (Responsive: compact on mobile) */}
+        <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+          <div className="relative p-2 sm:p-2.5 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shadow-md shadow-cyan-950/5 shrink-0">
+            <Cpu className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 sm:h-2.5 w-2 sm:w-2.5">
               <span
                 className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                   isOnline ? 'bg-cyan-400' : 'bg-amber-400'
                 }`}
               />
               <span
-                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                className={`relative inline-flex rounded-full h-2 sm:h-2.5 w-2 sm:w-2.5 ${
                   isOnline ? 'bg-cyan-500' : 'bg-amber-500'
                 }`}
               />
@@ -82,15 +87,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-extrabold font-mono tracking-wider text-slate-950 dark:text-white">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h1 className="text-sm sm:text-base font-extrabold font-mono tracking-wider text-slate-950 dark:text-white">
                 JARVIS
               </h1>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/20 font-bold">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/20 font-bold hidden sm:inline-block">
                 TASK MATRIX
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">
+            <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">
               <span className="flex items-center gap-1">
                 {isOnline ? (
                   <>
@@ -105,15 +110,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </span>
               <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="hidden sm:inline">
+              <span>
                 {isCloudAuthReady ? 'SUPABASE CLOUD READY' : 'LOCAL CACHE READY'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Action Controls & Session Profile */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Desktop Controls (Rendered on md screens and above, 768px+) */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-2.5 shrink-0">
           {/* Global Command Palette Trigger */}
           <button
             type="button"
@@ -246,7 +251,178 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
         </div>
+
+        {/* Mobile Action Controls (Active on all screens up to 768px, guaranteeing safety for <= 600px) */}
+        <div className="flex md:hidden items-center gap-1.5 shrink-0">
+          {/* Primary Quick Add Button */}
+          <button
+            type="button"
+            onClick={onOpenNewTask}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-mono font-bold text-xs shadow-md shadow-cyan-600/25 active:scale-95 cursor-pointer"
+            title="Add Task"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span className="text-[11px]">Add</span>
+          </button>
+
+          {/* Quick AI & Command Palette Trigger */}
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="p-2 rounded-xl border border-cyan-400 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 active:scale-95 cursor-pointer"
+            title="Open Command Palette & AI"
+            aria-label="Open Command Palette"
+          >
+            <Terminal className="w-4 h-4" />
+          </button>
+
+          {/* Theme Mode Toggle on Mobile */}
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="p-2 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 active:scale-95 cursor-pointer"
+            aria-label="Toggle visual theme"
+          >
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-800" />}
+          </button>
+
+          {/* Mobile Menu Drawer Toggle (Hamburger / Close) */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className={`p-2 rounded-xl border transition-all active:scale-95 cursor-pointer ${
+              isMobileMenuOpen
+                ? 'bg-cyan-600 text-white border-cyan-500 shadow-xs'
+                : 'border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300'
+            }`}
+            title="More Options"
+            aria-label="Toggle mobile menu"
+          >
+            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
+
+      {/* Expandable Mobile Navigation Drawer (Revealed below top bar on screens < 768px) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl px-4 py-3.5 space-y-3 shadow-xl animate-fadeIn">
+          {/* Quick Action Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            {/* Focus Mode Chronometer */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenSpotlight();
+              }}
+              className="flex items-center gap-2 p-2.5 rounded-xl border border-cyan-300 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 font-bold active:scale-95 cursor-pointer"
+            >
+              <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse" />
+              <span>Focus Mode</span>
+            </button>
+
+            {/* Mission Bins Workstation */}
+            {onOpenBinSorting && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenBinSorting();
+                }}
+                className="flex items-center gap-2 p-2.5 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold active:scale-95 cursor-pointer"
+              >
+                <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span>Mission Bins</span>
+              </button>
+            )}
+
+            {/* Jarvis AI Direct Trigger */}
+            {onOpenAiPrompt && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenAiPrompt();
+                }}
+                className="flex items-center gap-2 p-2.5 rounded-xl border border-cyan-400 dark:border-cyan-700 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 text-cyan-800 dark:text-cyan-300 font-bold active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse" />
+                <span>Jarvis AI</span>
+              </button>
+            )}
+
+            {/* AI Quota HUD Telemetry */}
+            {quotaStatus && onOpenQuotaHud && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenQuotaHud();
+                }}
+                className="flex items-center gap-2 p-2.5 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-bold active:scale-95 cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Quota: {quotaStatus.requestCount}/{quotaStatus.dailyLimit}</span>
+              </button>
+            )}
+          </div>
+
+          {/* Account Profile & Sync Telemetry on Mobile */}
+          <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800">
+            {session ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <div className="text-left">
+                    <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
+                      {session.isGuest ? 'GUEST SANDBOX' : session.name}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-500">
+                      {isCloudAuthReady ? 'Cloud Synced' : 'Local Sandbox Mode'}
+                    </div>
+                  </div>
+                </div>
+
+                {session.isGuest ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onOpenAuth();
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-900 dark:text-amber-300 font-mono text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Save & Sync
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onLogout();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-mono text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-mono text-xs font-bold cursor-pointer"
+              >
+                Sign In / Register
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 };

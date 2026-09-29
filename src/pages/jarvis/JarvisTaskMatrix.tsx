@@ -54,7 +54,7 @@ import { isSupabaseConfigured } from './services/supabaseClient';
 import { sortTasks, classifyQuadrant } from './services/priorityEngine';
 import { calculateWorkloadDistribution } from './constants/definitions';
 import { generateUUID } from './utils/uuid';
-import { PlusCircle, ShieldAlert, Cpu, Sparkles, Activity } from 'lucide-react';
+import { PlusCircle, ShieldAlert, Cpu, Sparkles, Activity, Layers, Target } from 'lucide-react';
 
 export function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -892,7 +892,7 @@ export function App() {
   }, [tasks]);
 
   return (
-    <div className={`jarvis-page relative min-h-screen flex flex-col font-sans transition-colors duration-300 ${
+    <div className={`relative min-h-screen flex flex-col font-sans transition-colors duration-300 w-full max-w-full overflow-x-hidden ${
       isDark ? 'text-slate-100' : 'text-slate-900'
     }`}>
       {/* Ambient Blurred Light Canvas Background Layer */}
@@ -919,7 +919,7 @@ export function App() {
       )}
 
       {/* Main App Content Stack */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
         {/* Primary Navigation & Telemetry */}
         <Navbar
           session={session}
@@ -946,7 +946,7 @@ export function App() {
         />
 
         {/* Main Execution Surface */}
-        <main className="flex-1 max-w-full w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-24 sm:pb-7 space-y-6">
           {/* Daily AI Free Quota Exhaustion Alert Banner */}
           {quotaStatus.isExhausted && !isQuotaAlertDismissed && (
             <AiQuotaAlertBanner
@@ -1259,8 +1259,83 @@ export function App() {
           canClose={Boolean(session)}
         />
 
+        {/* Mobile Persistent Bottom Taskbar (Thumb-Accessible Dock for Phone Screens up to 600px) */}
+        <nav
+          aria-label="Mobile Navigation Dock"
+          className="max-[600px]:flex sm:hidden fixed bottom-0 inset-x-0 w-full max-w-full z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200/90 dark:border-slate-800/90 px-1.5 sm:px-3 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-between shadow-2xl overflow-x-clip box-border"
+        >
+          {/* 1. Perspective View Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const modes: SortingViewMode[] = ['STRATEGIC', 'DEADLINE', 'MATRIX', 'IMPACT_EFFORT'];
+              const nextIdx = (modes.indexOf(viewMode) + 1) % modes.length;
+              setViewMode(modes[nextIdx]);
+            }}
+            className="flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 p-1 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 font-mono text-[10px] active:scale-95 cursor-pointer"
+            title="Cycle View Perspective"
+          >
+            <Activity className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+            <span className="font-bold truncate max-w-full text-center">
+              {viewMode === 'STRATEGIC' ? 'Strategic' : viewMode === 'DEADLINE' ? 'Deadline' : viewMode === 'MATRIX' ? 'Matrix' : 'Impact'}
+            </span>
+          </button>
+
+          {/* 2. Mission Bins */}
+          <button
+            type="button"
+            onClick={() => setIsBinSortingOpen(true)}
+            className="flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 p-1 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-mono text-[10px] active:scale-95 cursor-pointer"
+            title="Mission Bins"
+          >
+            <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span className="font-bold truncate max-w-full text-center">Bins</span>
+          </button>
+
+          {/* 3. Add Task (Prominent Center Button) */}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingTask(null);
+              setAiTaskProposal(null);
+              setIsAiProposalOpen(false);
+              setIsTaskModalOpen(true);
+            }}
+            className="shrink-0 -mt-5 flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-600/35 active:scale-90 transition-transform cursor-pointer border-2 border-white dark:border-slate-900 mx-1"
+            title="Create New Task"
+            aria-label="Add Task"
+          >
+            <PlusCircle className="w-6 h-6 stroke-[2.5]" />
+          </button>
+
+          {/* 4. Command & AI Palette */}
+          <button
+            type="button"
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className="flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 p-1 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 font-mono text-[10px] active:scale-95 cursor-pointer"
+            title="Command Palette & AI"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse shrink-0" />
+            <span className="font-bold truncate max-w-full text-center">AI / Cmd</span>
+          </button>
+
+          {/* 5. Focus Mode */}
+          <button
+            type="button"
+            onClick={() => {
+              setSpotlightTaskId(null);
+              setIsSpotlightOpen(true);
+            }}
+            className="flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 p-1 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 font-mono text-[10px] active:scale-95 cursor-pointer"
+            title="Focus Chronometer"
+          >
+            <Target className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+            <span className="font-bold truncate max-w-full text-center">Focus</span>
+          </button>
+        </nav>
+
         {/* Persistent System Footer */}
-        <footer className="border-t border-slate-200/90 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md py-4 text-center text-xs font-mono text-slate-700 dark:text-slate-400 font-medium">
+        <footer className="border-t border-slate-200/90 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md py-4 text-center text-xs font-mono text-slate-700 dark:text-slate-400 font-medium max-[600px]:pb-20">
           <p>JARVIS TASK ENGINE // MULTI-CRITERIA PRIORITIZATION // HIGH PRODUCTIVITY AMBIENT CANVAS & DEEP SLATE</p>
         </footer>
       </div>

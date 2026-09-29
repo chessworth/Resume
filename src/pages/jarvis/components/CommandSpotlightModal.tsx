@@ -188,24 +188,24 @@ export const CommandSpotlightModal: React.FC<CommandSpotlightModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-2xl overflow-y-auto animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/85 backdrop-blur-2xl overflow-y-auto animate-fadeIn">
       {/* Container Card */}
-      <div className="relative w-full max-w-2xl rounded-3xl bg-slate-900 border border-slate-700/80 shadow-2xl text-slate-100 p-6 sm:p-8 space-y-6 overflow-hidden my-auto">
+      <div className="relative w-full max-w-2xl rounded-3xl bg-slate-900 border border-slate-700/80 shadow-2xl text-slate-100 p-4 sm:p-8 space-y-4 sm:space-y-6 overflow-hidden my-auto">
         {/* Glow ambient background aura */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-cyan-500/15 blur-3xl pointer-events-none" />
 
         {/* Header Strip */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-              <Target className="w-5 h-5 animate-pulse-subtle" />
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3.5 relative z-10 gap-2">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+            <div className="p-2 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse-subtle" />
             </div>
-            <div>
-              <span className="text-[11px] font-mono font-extrabold uppercase tracking-widest text-cyan-400 block">
-                COMMAND SPOTLIGHT // DEEP WORK MODE
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] font-mono font-extrabold uppercase tracking-widest text-cyan-400 block truncate">
+                COMMAND SPOTLIGHT // FOCUS
               </span>
-              <span className="text-xs text-slate-400 font-mono">
-                Ultradian Chronometer • Single-Point Execution HUD
+              <span className="text-xs text-slate-400 font-mono block truncate">
+                Ultradian Chronometer • Execution HUD
               </span>
             </div>
           </div>
@@ -213,9 +213,12 @@ export const CommandSpotlightModal: React.FC<CommandSpotlightModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-rose-950/70 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-800/80 transition-all cursor-pointer shrink-0 font-mono text-xs font-bold active:scale-95"
+            title="Exit Focus Mode"
+            aria-label="Exit Focus Mode"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 stroke-[2.5]" />
+            <span className="text-xs">Exit</span>
           </button>
         </div>
 
@@ -408,7 +411,7 @@ export const CommandSpotlightModal: React.FC<CommandSpotlightModalProps> = ({
         </div>
 
         {/* Action: Resolve Task with Velocity Burst */}
-        <div className="pt-2">
+        <div className="pt-2 space-y-2">
           <button
             type="button"
             onClick={handleCompleteCurrentTask}
@@ -416,6 +419,16 @@ export const CommandSpotlightModal: React.FC<CommandSpotlightModalProps> = ({
           >
             <CheckCircle2 className="w-4 h-4" />
             MARK COMPLETE // TRIGGER VELOCITY BURST
+          </button>
+
+          {/* Explicit Mobile Exit Button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="max-[600px]:flex sm:hidden w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-mono text-xs font-bold items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-700 active:scale-98"
+          >
+            <X className="w-4 h-4 text-rose-400 stroke-[2.5]" />
+            <span>EXIT FOCUS MODE</span>
           </button>
         </div>
       </div>
