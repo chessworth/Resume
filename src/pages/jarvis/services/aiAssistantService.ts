@@ -7,8 +7,15 @@
  * @packageDocumentation
  */
 
-import { TaskItem, ImportanceLevel, UrgencyLevel, ImpactLevel, EffortLevel, CognitiveStrainLevel } from '../types/task';
-import { aiQuotaService, QuotaStatus } from './aiQuotaService';
+import {
+  TaskItem,
+  ImportanceLevel,
+  UrgencyLevel,
+  ImpactLevel,
+  EffortLevel,
+  CognitiveStrainLevel,
+} from "../types/task";
+import { aiQuotaService, QuotaStatus } from "./aiQuotaService";
 
 export interface GeneratedTaskProposal {
   title: string;
@@ -58,7 +65,7 @@ export interface DailyPlanResponse {
 export interface AuditFinding {
   taskId: string;
   title: string;
-  severity: 'HIGH' | 'MEDIUM' | 'LOW';
+  severity: "HIGH" | "MEDIUM" | "LOW";
   issueDescription: string;
   recommendedAdjustment: string;
   suggestedImportance?: ImportanceLevel;
@@ -82,9 +89,13 @@ export class AiQuotaExhaustedError extends Error {
   public readonly resetTimeIso: string;
   public readonly resetsInFormatted: string;
 
-  constructor(message: string, resetTimeIso: string, resetsInFormatted: string) {
+  constructor(
+    message: string,
+    resetTimeIso: string,
+    resetsInFormatted: string,
+  ) {
     super(message);
-    this.name = 'AiQuotaExhaustedError';
+    this.name = "AiQuotaExhaustedError";
     this.resetTimeIso = resetTimeIso;
     this.resetsInFormatted = resetsInFormatted;
   }
@@ -104,17 +115,21 @@ async function handleResponseError(res: Response): Promise<never> {
   if (res.status === 429 || errorData.isRateLimit || errorData.exhausted) {
     const updatedStatus = aiQuotaService.markExhausted(
       errorData.resetTime,
-      errorData.message || errorData.error
+      errorData.message || errorData.error,
     );
 
     throw new AiQuotaExhaustedError(
-      errorData.message || errorData.error || 'Daily free AI token/request quota exhausted.',
+      errorData.message ||
+        errorData.error ||
+        "Daily free AI token/request quota exhausted.",
       updatedStatus.resetTimeIso,
-      updatedStatus.resetsInFormatted
+      updatedStatus.resetsInFormatted,
     );
   }
 
-  throw new Error(errorData.error || `Request failed with HTTP status ${res.status}`);
+  throw new Error(
+    errorData.error || `Request failed with HTTP status ${res.status}`,
+  );
 }
 
 /**
@@ -125,9 +140,9 @@ function assertQuotaAvailable(): void {
   if (!gate.allowed) {
     const status = aiQuotaService.getQuotaStatus();
     throw new AiQuotaExhaustedError(
-      gate.reason || 'Daily free AI token/request quota exhausted.',
+      gate.reason || "Daily free AI token/request quota exhausted.",
       status.resetTimeIso,
-      status.resetsInFormatted
+      status.resetsInFormatted,
     );
   }
 }
@@ -136,13 +151,16 @@ export const aiAssistantService = {
   /**
    * Generates a calibrated task proposal from natural language prompt using Gemini 3.8 Flash.
    */
-  async generateTaskProposal(prompt: string, availableBuckets: string[] = []): Promise<GeneratedTaskProposal> {
+  async generateTaskProposal(
+    prompt: string,
+    availableBuckets: string[] = [],
+  ): Promise<GeneratedTaskProposal> {
     assertQuotaAvailable();
 
-    const res = await fetch('/api/gemini/create-task', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, availableBuckets }),
+    const res = await fetch("/api/gemini/create-task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "create-task", prompt, availableBuckets }),
     });
 
     if (!res.ok) {
@@ -151,7 +169,9 @@ export const aiAssistantService = {
 
     const json = await res.json();
     if (!json.success) {
-      throw new Error(json.error || 'Failed to synthesize task proposal from prompt.');
+      throw new Error(
+        json.error || "Failed to synthesize task proposal from prompt.",
+      );
     }
 
     aiQuotaService.recordRequest(600);
@@ -161,13 +181,16 @@ export const aiAssistantService = {
   /**
    * Generates a step-by-step execution roadmap for an existing task.
    */
-  async generateTaskGuide(task: TaskItem, breakIntoMicrotasks = false): Promise<TaskGuideResponse> {
+  async generateTaskGuide(
+    task: TaskItem,
+    breakIntoMicrotasks = false,
+  ): Promise<TaskGuideResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch('/api/gemini/guide-task', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task, breakIntoMicrotasks }),
+    const res = await fetch("/api/gemini/guide-task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "guide-task", task, breakIntoMicrotasks }),
     });
 
     if (!res.ok) {
@@ -176,7 +199,7 @@ export const aiAssistantService = {
 
     const json = await res.json();
     if (!json.success) {
-      throw new Error(json.error || 'Failed to generate task execution guide.');
+      throw new Error(json.error || "Failed to generate task execution guide.");
     }
 
     aiQuotaService.recordRequest(850);
@@ -189,10 +212,10 @@ export const aiAssistantService = {
   async generateDailyPlan(tasks: TaskItem[]): Promise<DailyPlanResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch('/api/gemini/daily-plan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tasks }),
+    const res = await fetch("/api/gemini/daily-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "daily-plan", tasks }),
     });
 
     if (!res.ok) {
@@ -201,7 +224,7 @@ export const aiAssistantService = {
 
     const json = await res.json();
     if (!json.success) {
-      throw new Error(json.error || 'Failed to generate daily execution plan.');
+      throw new Error(json.error || "Failed to generate daily execution plan.");
     }
 
     aiQuotaService.recordRequest(900);
@@ -214,10 +237,10 @@ export const aiAssistantService = {
   async auditTaskPriorities(tasks: TaskItem[]): Promise<PriorityAuditResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch('/api/gemini/priority-audit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tasks }),
+    const res = await fetch("/api/gemini/priority-audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "priority-audit", tasks }),
     });
 
     if (!res.ok) {
@@ -226,7 +249,9 @@ export const aiAssistantService = {
 
     const json = await res.json();
     if (!json.success) {
-      throw new Error(json.error || 'Failed to run priority calibration audit.');
+      throw new Error(
+        json.error || "Failed to run priority calibration audit.",
+      );
     }
 
     aiQuotaService.recordRequest(750);

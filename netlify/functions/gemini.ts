@@ -67,7 +67,13 @@ export const handler = async (event: any) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { action, prompt, task, tasks, availableBuckets = [], breakIntoMicrotasks = false } = body;
+
+    // Robust action resolution: from payload body, query params, or URL path suffix
+    const pathAction = event.path ? event.path.split('/').filter(Boolean).pop() : '';
+    const queryAction = event.queryStringParameters?.action;
+    const action = body.action || queryAction || (pathAction !== 'gemini' ? pathAction : '');
+
+    const { prompt, task, tasks, availableBuckets = [], breakIntoMicrotasks = false } = body;
 
     if (action === 'create-task') {
       const response = await ai.models.generateContent({

@@ -1,6 +1,11 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/manifest.json"
@@ -21,6 +26,12 @@
   from = "/logo512.png"
   to = "/logo512.png"
   status = 200
+
+[[redirects]]
+  from = "/api/gemini/quota-status"
+  to = "/.netlify/functions/gemini"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/api/gemini/*"
