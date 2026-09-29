@@ -18,6 +18,7 @@ interface EisenhowerMatrixViewProps {
   onEdit: (task: TaskItem) => void;
   onDelete: (id: string) => void;
   onFocusTask?: (task: TaskItem) => void;
+  onAiGuide?: (task: TaskItem) => void;
   onTriggerBurst?: (x: number, y: number) => void;
   onUpdateTaskCoords?: (taskId: string, coords: { x: number; y: number }) => void;
 }
@@ -28,6 +29,7 @@ export const EisenhowerMatrixView: React.FC<EisenhowerMatrixViewProps> = ({
   onEdit,
   onDelete,
   onFocusTask,
+  onAiGuide,
   onTriggerBurst,
   onUpdateTaskCoords
 }) => {
@@ -179,6 +181,7 @@ export const EisenhowerMatrixView: React.FC<EisenhowerMatrixViewProps> = ({
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onFocusTask={onFocusTask}
+                        onAiGuide={onAiGuide}
                         onTriggerBurst={onTriggerBurst}
                       />
                     ))

@@ -27,6 +27,20 @@ import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { BinSortingModal } from './components/BinSortingModal';
 import { CompletionParticleBurst } from './components/CompletionParticleBurst';
 import { CriticalAlertBanner, TransientToast } from './components/GuidanceBubble';
+import { AiTaskGuideModal } from './components/AiTaskGuideModal';
+import { AiPlanModal } from './components/AiPlanModal';
+import { AiAuditModal } from './components/AiAuditModal';
+import { AiQuotaAlertBanner, AiQuotaModal } from './components/AiQuotaAlert';
+import { aiQuotaService, QuotaStatus } from './services/aiQuotaService';
+import {
+  aiAssistantService,
+  AiQuotaExhaustedError,
+  GeneratedTaskProposal,
+  TaskGuideResponse,
+  DailyPlanResponse,
+  PriorityAuditResponse,
+  AuditFinding
+} from './services/aiAssistantService';
 import {
   TaskItem,
   UserSession,
@@ -48,6 +62,42 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
+
+  // Gemini AI Assistant States
+  const [aiTaskProposal, setAiTaskProposal] = useState<Partial<TaskItem> | null>(null);
+  const [isAiProposalOpen, setIsAiProposalOpen] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // AI Step-by-Step Task Guide
+  const [guideTask, setGuideTask] = useState<TaskItem | null>(null);
+  const [guideData, setGuideData] = useState<TaskGuideResponse | null>(null);
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isGuideLoading, setIsGuideLoading] = useState(false);
+
+  // AI Daily Plan (Suggestion 4)
+  const [planData, setPlanData] = useState<DailyPlanResponse | null>(null);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isPlanLoading, setIsPlanLoading] = useState(false);
+
+  // AI Calibration Audit (Suggestion 5)
+  const [auditData, setAuditData] = useState<PriorityAuditResponse | null>(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isAuditLoading, setIsAuditLoading] = useState(false);
+
+  // Gemini AI Free Tier Quota & Rate Limit State
+  const [quotaStatus, setQuotaStatus] = useState<QuotaStatus>(() => aiQuotaService.getQuotaStatus());
+  const [isQuotaAlertDismissed, setIsQuotaAlertDismissed] = useState(false);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+
+  // Live Quota Subscription
+  useEffect(() => {
+    return aiQuotaService.subscribe((newStatus) => {
+      setQuotaStatus(newStatus);
+      if (!newStatus.isExhausted) {
+        setIsQuotaAlertDismissed(false);
+      }
+    });
+  }, []);
 
   // Command Spotlight & Focus Chronometer
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
@@ -120,6 +170,13 @@ export function App() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      // Cmd+Shift+V or Ctrl+Shift+V triggers Command Palette with microphone voice search
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
         return;
       }
 
@@ -478,6 +535,296 @@ export function App() {
     [handleUpdateTask, pushTransientToast]
   );
 
+  // Gemini AI Assistant Execution Handlers
+
+  const handleAiError = useCallback(
+    (err: any, fallbackTitle: string, fallbackMsg: string) => {
+      if (err instanceof AiQuotaExhaustedError || err?.isRateLimit) {
+        setIsQuotaAlertDismissed(false);
+        setIsQuotaModalOpen(true);
+        pushTransientToast({
+          id: 'toast-quota-exhausted-' + Date.now(),
+          title: 'DAILY AI QUOTA EXHAUSTED',
+          message:
+            err.message ||
+            `Free personal quota reached. Resets in ${quotaStatus.resetsInFormatted}. Offline task matrix remains 100% operational.`,
+          variant: 'warning',
+          autoDismissMs: 8000,
+        });
+        return;
+      }
+
+      pushTransientToast({
+        id: 'toast-ai-err-' + Date.now(),
+        title: fallbackTitle,
+        message: err?.message || fallbackMsg,
+        variant: 'warning',
+        autoDismissMs: 6000,
+      });
+    },
+    [pushTransientToast, quotaStatus.resetsInFormatted]
+  );
+
+  /**
+   * Option A: Synthesizes task parameters with Gemini 3.8 Flash and pre-populates
+   * the TaskInputModal for operator review and manual calibration before saving.
+   */
+  const handleAiCreateTask = useCallback(
+    async (prompt: string) => {
+      setIsAiLoading(true);
+      try {
+        const proposal = await aiAssistantService.generateTaskProposal(prompt, availableBuckets);
+        let notesText = proposal.notes || '';
+        if (proposal.microtasks && proposal.microtasks.length > 0) {
+          notesText +=
+            (notesText ? '\n\n' : '') +
+            '## Micro-Tasks Breakdown:\n' +
+            proposal.microtasks.map((m) => `[ ] ${m}`).join('\n');
+        }
+
+        const taskDraft: Partial<TaskItem> = {
+          title: proposal.title,
+          notes: notesText,
+          category: proposal.category || 'Work',
+          importance: proposal.importance,
+          urgency: proposal.urgency,
+          impact: proposal.impact,
+          effort: proposal.effort,
+          dueDate: proposal.dueDate || null,
+          estimatedDurationMinutes: proposal.estimatedDurationMinutes || 45,
+          cognitiveStrain: proposal.cognitiveStrain || 'MODERATE',
+          megaBucket: proposal.megaBucket || null,
+        };
+
+        setEditingTask(null);
+        setAiTaskProposal(taskDraft);
+        setIsAiProposalOpen(true);
+        setIsTaskModalOpen(true);
+
+        pushTransientToast({
+          id: 'toast-ai-create-' + Date.now(),
+          title: 'GEMINI AI SYNTHESIS COMPLETE',
+          message: 'Option A: Review & calibrate proposed task parameters before confirming.',
+          variant: 'tip',
+          autoDismissMs: 5000,
+        });
+      } catch (err: any) {
+        handleAiError(err, 'AI SYNTHESIS NOTICE', 'Failed to synthesize task proposal with Gemini AI.');
+      } finally {
+        setIsAiLoading(false);
+      }
+    },
+    [availableBuckets, pushTransientToast, handleAiError]
+  );
+
+  /**
+   * Generates a surgical step-by-step roadmap for an existing task.
+   */
+  const handleAiGuideTask = useCallback(
+    async (taskOrTitle: TaskItem | string) => {
+      let target: TaskItem | undefined;
+      if (typeof taskOrTitle === 'string') {
+        const q = taskOrTitle.toLowerCase().trim();
+        target =
+          tasks.find((t) => t.title.toLowerCase().includes(q) && !t.isCompleted) ||
+          tasks.find((t) => !t.isCompleted) ||
+          tasks[0];
+      } else {
+        target = taskOrTitle;
+      }
+
+      if (!target) {
+        pushTransientToast({
+          id: 'toast-guide-no-task-' + Date.now(),
+          title: 'NO TARGET TASK IDENTIFIED',
+          message: 'Please create a task first to generate a tactical execution roadmap.',
+          variant: 'warning',
+          autoDismissMs: 4000,
+        });
+        return;
+      }
+
+      setGuideTask(target);
+      setGuideData(null);
+      setIsGuideModalOpen(true);
+      setIsGuideLoading(true);
+
+      try {
+        const guide = await aiAssistantService.generateTaskGuide(target, true);
+        setGuideData(guide);
+      } catch (err: any) {
+        handleAiError(err, 'AI ROADMAP ERROR', 'Failed to generate execution guide with Gemini AI.');
+      } finally {
+        setIsGuideLoading(false);
+      }
+    },
+    [tasks, pushTransientToast, handleAiError]
+  );
+
+  /**
+   * Ingests selected micro-tasks generated by the AI Guide as distinct child tasks in Jarvis.
+   */
+  const handleApplyMicrotasksAsTasks = useCallback(
+    async (microtasks: string[], parentTask: TaskItem) => {
+      for (const micro of microtasks) {
+        await handleSaveTask({
+          title: micro,
+          notes: `Micro-task derived from: "${parentTask.title}"`,
+          category: parentTask.category,
+          importance: Math.max(1, parentTask.importance - 1) as any,
+          urgency: parentTask.urgency,
+          recommendedUrgency: parentTask.recommendedUrgency,
+          impact: Math.max(1, (parentTask.impact || 3) - 1) as any,
+          effort: 1,
+          dueDate: parentTask.dueDate,
+          megaBucket: parentTask.megaBucket,
+          estimatedDurationMinutes: 15,
+          actualDurationSeconds: 0,
+          cognitiveStrain: 'LOW',
+        });
+      }
+      pushTransientToast({
+        id: 'toast-microtasks-added-' + Date.now(),
+        title: 'MICRO-TASKS INGESTED',
+        message: `Added ${microtasks.length} subtasks to task matrix.`,
+        variant: 'tip',
+        autoDismissMs: 4000,
+      });
+    },
+    [handleSaveTask, pushTransientToast]
+  );
+
+  /**
+   * Appends micro-tasks as a markdown checklist to the task notes.
+   */
+  const handleAppendMicrotasksToNotes = useCallback(
+    async (microtasks: string[], parentTask: TaskItem) => {
+      const existingNotes = parentTask.notes || '';
+      const checklistStr =
+        (existingNotes ? existingNotes + '\n\n' : '') +
+        '## Micro-Tasks Checklist:\n' +
+        microtasks.map((m) => `[ ] ${m}`).join('\n');
+      await handleUpdateTask(parentTask.id, { notes: checklistStr });
+      pushTransientToast({
+        id: 'toast-notes-updated-' + Date.now(),
+        title: 'TASK NOTES UPDATED',
+        message: `Checklist with ${microtasks.length} micro-tasks appended to task.`,
+        variant: 'info',
+        autoDismissMs: 3000,
+      });
+    },
+    [handleUpdateTask, pushTransientToast]
+  );
+
+  /**
+   * Suggestion 4: Evaluates active tasks and generates an optimal daily cadence.
+   */
+  const handleAiPlan = useCallback(async () => {
+    const active = tasks.filter((t) => !t.isCompleted);
+    if (active.length === 0) {
+      pushTransientToast({
+        id: 'toast-no-tasks-plan-' + Date.now(),
+        title: 'ZERO ACTIVE TASKS',
+        message: 'Add active tasks before generating a daily execution plan.',
+        variant: 'warning',
+        autoDismissMs: 4000,
+      });
+      return;
+    }
+
+    setPlanData(null);
+    setIsPlanModalOpen(true);
+    setIsPlanLoading(true);
+
+    try {
+      const plan = await aiAssistantService.generateDailyPlan(active);
+      setPlanData(plan);
+    } catch (err: any) {
+      handleAiError(err, 'SCHEDULE GENERATION NOTICE', 'Failed to generate schedule with Gemini AI.');
+    } finally {
+      setIsPlanLoading(false);
+    }
+  }, [tasks, pushTransientToast, handleAiError]);
+
+  /**
+   * Suggestion 5: Priority Calibration Audit - detects misclassifications and deadline conflicts.
+   */
+  const handleAiAudit = useCallback(async () => {
+    const active = tasks.filter((t) => !t.isCompleted);
+    if (active.length === 0) {
+      pushTransientToast({
+        id: 'toast-no-tasks-audit-' + Date.now(),
+        title: 'ZERO ACTIVE TASKS',
+        message: 'Add active tasks before auditing priority calibration.',
+        variant: 'warning',
+        autoDismissMs: 4000,
+      });
+      return;
+    }
+
+    setAuditData(null);
+    setIsAuditModalOpen(true);
+    setIsAuditLoading(true);
+
+    try {
+      const audit = await aiAssistantService.auditTaskPriorities(active);
+      setAuditData(audit);
+    } catch (err: any) {
+      handleAiError(err, 'CALIBRATION AUDIT NOTICE', 'Failed to conduct audit with Gemini AI.');
+    } finally {
+      setIsAuditLoading(false);
+    }
+  }, [tasks, pushTransientToast, handleAiError]);
+
+  /**
+   * Applies recommended single calibration from audit finding.
+   */
+  const handleApplySingleCalibration = useCallback(
+    async (taskId: string, updates: Partial<TaskItem>) => {
+      await handleUpdateTask(taskId, updates);
+      pushTransientToast({
+        id: 'toast-calibrated-' + Date.now(),
+        title: 'TASK CALIBRATED',
+        message: 'Priority parameters updated to recommended alignment.',
+        variant: 'tip',
+        autoDismissMs: 2500,
+      });
+    },
+    [handleUpdateTask, pushTransientToast]
+  );
+
+  /**
+   * Applies all recommended calibrations in batch.
+   */
+  const handleApplyBatchCalibration = useCallback(
+    async (findings: AuditFinding[]) => {
+      for (const finding of findings) {
+        const updates: Partial<TaskItem> = {};
+        if (finding.suggestedImportance !== undefined && finding.suggestedImportance !== null) {
+          updates.importance = finding.suggestedImportance;
+        }
+        if (finding.suggestedUrgency !== undefined && finding.suggestedUrgency !== null) {
+          updates.urgency = finding.suggestedUrgency;
+        }
+        if (finding.suggestedImpact !== undefined && finding.suggestedImpact !== null) {
+          updates.impact = finding.suggestedImpact;
+        }
+        if (finding.suggestedEffort !== undefined && finding.suggestedEffort !== null) {
+          updates.effort = finding.suggestedEffort;
+        }
+        await handleUpdateTask(finding.taskId, updates);
+      }
+      pushTransientToast({
+        id: 'toast-batch-calibrated-' + Date.now(),
+        title: 'BATCH CALIBRATION COMPLETE',
+        message: `Successfully recalibrated ${findings.length} tasks.`,
+        variant: 'tip',
+        autoDismissMs: 3500,
+      });
+    },
+    [handleUpdateTask, pushTransientToast]
+  );
+
   const criticalTopBanners = useMemo<GuidanceBubble[]>(() => {
     const list: GuidanceBubble[] = [];
     if (!isOnline && !dismissedBubbleIds.includes('offline-top-banner')) {
@@ -579,6 +926,8 @@ export function App() {
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenNewTask={() => {
             setEditingTask(null);
+            setAiTaskProposal(null);
+            setIsAiProposalOpen(false);
             setIsTaskModalOpen(true);
           }}
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
@@ -587,14 +936,26 @@ export function App() {
             setIsSpotlightOpen(true);
           }}
           onOpenBinSorting={() => setIsBinSortingOpen(true)}
+          onOpenAiPrompt={() => setIsCommandPaletteOpen(true)}
           isDark={isDark}
           onToggleTheme={() => setIsDark((prev) => !prev)}
           isOnline={isOnline}
           onLogout={handleLogout}
+          quotaStatus={quotaStatus}
+          onOpenQuotaHud={() => setIsQuotaModalOpen(true)}
         />
 
         {/* Main Execution Surface */}
         <main className="flex-1 max-w-full w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-6">
+          {/* Daily AI Free Quota Exhaustion Alert Banner */}
+          {quotaStatus.isExhausted && !isQuotaAlertDismissed && (
+            <AiQuotaAlertBanner
+              status={quotaStatus}
+              onDismiss={() => setIsQuotaAlertDismissed(true)}
+              onOpenSettings={() => setIsQuotaModalOpen(true)}
+            />
+          )}
+
           {/* Tier 1: Critical Top Banners */}
           {criticalTopBanners.length > 0 && (
             <div className="space-y-3">
@@ -720,6 +1081,7 @@ export function App() {
               onEdit={handleEditClick}
               onDelete={handleDeleteTask}
               onFocusTask={handleFocusClick}
+              onAiGuide={handleAiGuideTask}
               onTriggerBurst={handleTriggerBurst}
               onUpdateTaskCoords={handleUpdateTaskCoords}
             />
@@ -730,6 +1092,7 @@ export function App() {
               onEdit={handleEditClick}
               onDelete={handleDeleteTask}
               onFocusTask={handleFocusClick}
+              onAiGuide={handleAiGuideTask}
               onTriggerBurst={handleTriggerBurst}
               onUpdateTaskCoords={handleUpdateTaskCoords}
             />
@@ -741,6 +1104,7 @@ export function App() {
               onEdit={handleEditClick}
               onDelete={handleDeleteTask}
               onFocusTask={handleFocusClick}
+              onAiGuide={handleAiGuideTask}
               onTriggerBurst={handleTriggerBurst}
             />
           )}
@@ -760,15 +1124,19 @@ export function App() {
           </div>
         )}
 
-        {/* Task Creation & Calibration Modal */}
+        {/* Task Creation & Calibration Modal (with Option A AI Pre-population) */}
         <TaskInputModal
           isOpen={isTaskModalOpen}
           onClose={() => {
             setIsTaskModalOpen(false);
             setEditingTask(null);
+            setAiTaskProposal(null);
+            setIsAiProposalOpen(false);
           }}
           onSubmit={handleSaveTask}
           initialTask={editingTask}
+          initialValues={aiTaskProposal}
+          isAiProposal={isAiProposalOpen}
           availableBuckets={availableBuckets}
           onCreateBucket={handleCreateBucket}
         />
@@ -805,8 +1173,62 @@ export function App() {
           }}
           onOpenNewTaskModal={() => {
             setEditingTask(null);
+            setAiTaskProposal(null);
+            setIsAiProposalOpen(false);
             setIsTaskModalOpen(true);
           }}
+          onAiCreateTask={handleAiCreateTask}
+          onAiGuideTask={(title) => handleAiGuideTask(title)}
+          onAiPlan={handleAiPlan}
+          onAiAudit={handleAiAudit}
+          isAiLoading={isAiLoading}
+          onOpenQuotaHud={() => setIsQuotaModalOpen(true)}
+        />
+
+        {/* Gemini AI Step-by-Step Task Execution Guide Modal */}
+        <AiTaskGuideModal
+          isOpen={isGuideModalOpen}
+          onClose={() => {
+            setIsGuideModalOpen(false);
+            setGuideTask(null);
+            setGuideData(null);
+          }}
+          task={guideTask}
+          guideData={guideData}
+          isLoading={isGuideLoading}
+          onApplyMicrotasksAsTasks={handleApplyMicrotasksAsTasks}
+          onAppendMicrotasksToNotes={handleAppendMicrotasksToNotes}
+          onRequestBreakdownAgain={() => {
+            if (guideTask) handleAiGuideTask(guideTask);
+          }}
+        />
+
+        {/* Gemini AI Strategic Daily Cadence Plan Modal (Suggestion 4) */}
+        <AiPlanModal
+          isOpen={isPlanModalOpen}
+          onClose={() => {
+            setIsPlanModalOpen(false);
+            setPlanData(null);
+          }}
+          planData={planData}
+          isLoading={isPlanLoading}
+          onEngageFocusBlock={(taskId) => {
+            setSpotlightTaskId(taskId);
+            setIsSpotlightOpen(true);
+          }}
+        />
+
+        {/* Gemini AI Priority Calibration & Alignment Audit Modal (Suggestion 5) */}
+        <AiAuditModal
+          isOpen={isAuditModalOpen}
+          onClose={() => {
+            setIsAuditModalOpen(false);
+            setAuditData(null);
+          }}
+          auditData={auditData}
+          isLoading={isAuditLoading}
+          onApplySingleCalibration={handleApplySingleCalibration}
+          onApplyBatchCalibration={handleApplyBatchCalibration}
         />
 
         {/* Dedicated Bin Sorting & Mission Allocation Screen */}
@@ -817,6 +1239,15 @@ export function App() {
           availableBuckets={availableBuckets}
           onCreateBucket={handleCreateBucket}
           onAssignTaskToBucket={handleAssignTaskToBucket}
+        />
+
+        {/* Gemini AI Daily Quota HUD & Rate Limit Governance Modal */}
+        <AiQuotaModal
+          isOpen={isQuotaModalOpen}
+          onClose={() => setIsQuotaModalOpen(false)}
+          status={quotaStatus}
+          onUpdateLimit={(newLimit) => aiQuotaService.setDailyLimit(newLimit)}
+          onResetQuota={() => aiQuotaService.resetQuota()}
         />
 
         {/* Authentication & Guest Gate Modal */}

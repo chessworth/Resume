@@ -1,7 +1,9 @@
 /**
  * @fileoverview Universal Global Command Palette & Natural Language Parser (`Cmd+K` / `Ctrl+K`).
  * Allows instant natural language task ingestion, rapid navigation across views,
- * focused task search, and hotkey execution (`j`/`k`, `x` complete, `f` focus).
+ * focused task search, hotkey execution, Gemini AI assistant commands (`ai create`, `ai guide`, `ai plan`, `ai audit`),
+ * and microphone audio transcription (`Cmd+Shift+V` / `Ctrl+Shift+V`).
+ * Adheres to rule: "when using voice, don't default to AI, let the user specify it as well."
  * @packageDocumentation
  */
 
@@ -26,9 +28,18 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  BookOpen
+  BookOpen,
+  Mic,
+  MicOff,
+  Calendar,
+  ShieldAlert,
+  ListTree,
+  Loader2
 } from 'lucide-react';
 import { calculateRecommendedUrgency, calculateRecommendedEffort } from '../constants/definitions';
+import { useSpeechToText } from '../hooks/useSpeechToText';
+import { aiQuotaService, QuotaStatus } from '../services/aiQuotaService';
+import { AiQuotaBadge } from './AiQuotaAlert';
 
 interface CommandPaletteModalProps {
   isOpen: boolean;
@@ -43,6 +54,12 @@ interface CommandPaletteModalProps {
   onChangeViewMode: (mode: SortingViewMode) => void;
   onOpenFocusMode: (taskId?: string) => void;
   onOpenNewTaskModal: () => void;
+  onAiCreateTask: (prompt: string) => void;
+  onAiGuideTask: (taskTitle: string) => void;
+  onAiPlan: () => void;
+  onAiAudit: () => void;
+  isAiLoading?: boolean;
+  onOpenQuotaHud?: () => void;
 }
 
 type ParsedCommand =
@@ -51,6 +68,10 @@ type ParsedCommand =
   | { type: 'NEW_MODAL'; label: string }
   | { type: 'HELP'; label: string }
   | { type: 'BUCKET_FILTER'; bucketName: string; isNew: boolean; label: string }
+  | { type: 'AI_CREATE'; prompt: string; label: string; requestsMicrotasks: boolean }
+  | { type: 'AI_GUIDE'; targetTaskTitle: string; label: string; requestsMicrotasks: boolean }
+  | { type: 'AI_PLAN'; label: string }
+  | { type: 'AI_AUDIT'; label: string }
   | {
       type: 'CREATE_TASK';
       title: string;
@@ -75,12 +96,35 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   onCompleteTask,
   onChangeViewMode,
   onOpenFocusMode,
-  onOpenNewTaskModal
+  onOpenNewTaskModal,
+  onAiCreateTask,
+  onAiGuideTask,
+  onAiPlan,
+  onAiAudit,
+  isAiLoading = false,
+  onOpenQuotaHud
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showCheatsheet, setShowCheatsheet] = useState(false);
+  const [quotaStatus, setQuotaStatus] = useState<QuotaStatus>(() => aiQuotaService.getQuotaStatus());
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Subscribe to live quota status
+  useEffect(() => {
+    return aiQuotaService.subscribe(setQuotaStatus);
+  }, []);
+
+  // Microphone Voice-to-Text hook
+  // Rule: When using voice, don't default to AI, let the user specify it as well.
+  const { isListening, isSupported: isMicSupported, toggleListening, stopListening } = useSpeechToText({
+    onTranscriptChange: (spokenText) => {
+      setQuery(spokenText);
+    },
+    onFinalTranscript: (finalSpoken) => {
+      setQuery(finalSpoken);
+    }
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -89,13 +133,84 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     } else {
       setQuery('');
       setShowCheatsheet(false);
+      stopListening();
     }
-  }, [isOpen]);
+  }, [isOpen, stopListening]);
 
-  // Natural Language Parser Helper
+  // Keyboard shortcut listener for voice toggle inside palette: Ctrl+Shift+V or Cmd+Shift+V
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        toggleListening();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyShortcut);
+    return () => window.removeEventListener('keydown', handleKeyShortcut);
+  }, [isOpen, toggleListening]);
+
+  // Natural Language & AI Command Parser Helper
   const parsedCommand = useMemo<ParsedCommand | null>(() => {
     const raw = query.trim();
     if (!raw) return null;
+
+    // AI COMMANDS: Base is prefix command with "ai"
+    if (raw.toLowerCase().startsWith('ai ') || raw.toLowerCase() === 'ai') {
+      const aiPrompt = raw.slice(2).trim();
+      const lowerAi = aiPrompt.toLowerCase();
+
+      // Check if user specifically requested micro-tasks breakdown
+      const requestsMicrotasks = /\b(micro[\s-]?task|subtask|steps?|breakdown|break down)\b/i.test(aiPrompt);
+
+      // 1. ai plan / ai schedule (Suggestion 4)
+      if (lowerAi === 'plan' || lowerAi === 'schedule' || lowerAi.startsWith('plan ') || lowerAi.startsWith('schedule ')) {
+        return {
+          type: 'AI_PLAN',
+          label: 'Generate Strategic Daily Cadence & Execution Plan (Gemini 3.8 Flash)'
+        };
+      }
+
+      // 2. ai audit / ai check (Suggestion 5)
+      if (lowerAi === 'audit' || lowerAi === 'check' || lowerAi.startsWith('audit ') || lowerAi.startsWith('check ')) {
+        return {
+          type: 'AI_AUDIT',
+          label: 'Execute Priority Calibration & Deadline Alignment Audit'
+        };
+      }
+
+      // 3. ai guide [task title] / ai break [task title] / ai step [task title]
+      if (
+        lowerAi.startsWith('guide ') ||
+        lowerAi.startsWith('step ') ||
+        lowerAi.startsWith('steps ') ||
+        lowerAi.startsWith('break ') ||
+        lowerAi.startsWith('breakdown ')
+      ) {
+        const targetTitle = aiPrompt.replace(/^(?:guide|step|steps|break|breakdown)\s+/i, '').trim();
+        return {
+          type: 'AI_GUIDE',
+          targetTaskTitle: targetTitle,
+          requestsMicrotasks,
+          label: `Generate Step-by-Step Tactical Roadmap for: "${targetTitle || 'Selected Task'}"`
+        };
+      }
+
+      // 4. ai create [prompt] or general ai [prompt]
+      let cleanCreatePrompt = aiPrompt;
+      if (lowerAi.startsWith('create ') || lowerAi.startsWith('add ') || lowerAi.startsWith('new ')) {
+        cleanCreatePrompt = aiPrompt.slice(aiPrompt.indexOf(' ') + 1).trim();
+      }
+
+      return {
+        type: 'AI_CREATE',
+        prompt: cleanCreatePrompt || 'New high priority task',
+        requestsMicrotasks,
+        label: `Synthesize Calibrated Task Specification (Option A Review): "${cleanCreatePrompt || '...'}"`
+      };
+    }
 
     // Direct View or Slash Commands
     if (raw.startsWith('/')) {
@@ -147,7 +262,6 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
     // Natural Task Ingestion:
     // Prefixes: add, task, create, new, q1, q2, q3, q4, qw, quickwin, mp, majorproject, fi, fillin, ts, timesink
-    // Or auto-detected if inline flags exist (imp, urg, impact, effort, bucket:, bin:, due)
     const lower = raw.toLowerCase();
     const isExplicitAdd = lower.startsWith('add ') || lower.startsWith('task ') || lower.startsWith('create ') || lower.startsWith('new ');
     const isQ1 = lower.startsWith('q1 ');
@@ -226,7 +340,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         urgency = 1;
       }
 
-      // 1. Extract Impact: impact 4, impact: 4, impct: 4, impac 4, impact=4
+      // 1. Extract Impact
       const impactMatch = content.match(/\b(impact|impct|impac)\s*[:=]?\s*([1-5])\b/i);
       if (impactMatch) {
         const val = parseInt(impactMatch[2], 10);
@@ -234,7 +348,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         content = content.replace(impactMatch[0], '').trim();
       }
 
-      // 2. Extract Effort: effort 2, effort: 2, eff: 2, eff 2, effort=2
+      // 2. Extract Effort
       const effortMatch = content.match(/\b(effort|eff)\s*[:=]?\s*([1-5])\b/i);
       if (effortMatch) {
         const val = parseInt(effortMatch[2], 10);
@@ -242,7 +356,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         content = content.replace(effortMatch[0], '').trim();
       }
 
-      // 3. Extract Importance: imp 5, imp: 5, importance: 5, importance 5
+      // 3. Extract Importance
       const impMatch = content.match(/\b(importance|imp)\s*[:=]?\s*([1-5])\b/i);
       if (impMatch) {
         const val = parseInt(impMatch[2], 10);
@@ -250,7 +364,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         content = content.replace(impMatch[0], '').trim();
       }
 
-      // 4. Extract Urgency: urg 4, urg: 4, urgency: 4, urgency 4
+      // 4. Extract Urgency
       const urgMatch = content.match(/\b(urgency|urg)\s*[:=]?\s*([1-5])\b/i);
       if (urgMatch) {
         const val = parseInt(urgMatch[2], 10);
@@ -258,7 +372,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         content = content.replace(urgMatch[0], '').trim();
       }
 
-      // 5. Extract Bucket / Bin: bucket: "Dev Ops", bucket: Dev, bin: Design, b: Core, bucket Marketing
+      // 5. Extract Bucket / Bin
       let dueDate: string | null = null;
       let megaBucket: string | null = null;
 
@@ -268,7 +382,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         content = content.replace(bucketMatch[0], '').trim();
       }
 
-      // 6. Extract Due: due tomorrow, due today, due: tomorrow, due: today
+      // 6. Extract Due
       if (/\bdue\s*[:=]?\s*tomorrow\b/i.test(content)) {
         dueDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
         content = content.replace(/\bdue\s*[:=]?\s*tomorrow\b/i, '').trim();
@@ -346,6 +460,34 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           onSelectBucket(bucketName);
         }
         onClose();
+      } else if (parsedCommand.type === 'AI_CREATE') {
+        if (quotaStatus.isExhausted) {
+          onOpenQuotaHud?.();
+          return;
+        }
+        onAiCreateTask(parsedCommand.prompt);
+        onClose();
+      } else if (parsedCommand.type === 'AI_GUIDE') {
+        if (quotaStatus.isExhausted) {
+          onOpenQuotaHud?.();
+          return;
+        }
+        onAiGuideTask(parsedCommand.targetTaskTitle);
+        onClose();
+      } else if (parsedCommand.type === 'AI_PLAN') {
+        if (quotaStatus.isExhausted) {
+          onOpenQuotaHud?.();
+          return;
+        }
+        onAiPlan();
+        onClose();
+      } else if (parsedCommand.type === 'AI_AUDIT') {
+        if (quotaStatus.isExhausted) {
+          onOpenQuotaHud?.();
+          return;
+        }
+        onAiAudit();
+        onClose();
       } else if (parsedCommand.type === 'CREATE_TASK') {
         const bucketToAssign = parsedCommand.megaBucket ? parsedCommand.megaBucket.trim() : null;
         if (bucketToAssign && onCreateBucket && !availableBuckets.includes(bucketToAssign)) {
@@ -377,6 +519,18 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     }
   };
 
+  const isAiParsedCommand = (
+    cmd: ParsedCommand | null
+  ): cmd is Extract<ParsedCommand, { type: 'AI_CREATE' | 'AI_GUIDE' | 'AI_PLAN' | 'AI_AUDIT' }> => {
+    return (
+      cmd !== null &&
+      (cmd.type === 'AI_CREATE' ||
+        cmd.type === 'AI_GUIDE' ||
+        cmd.type === 'AI_PLAN' ||
+        cmd.type === 'AI_AUDIT')
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all text-slate-900 dark:text-slate-100">
@@ -389,9 +543,30 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command (/matrix, /bucket Ops), or task (q1 Fix bug impact 5 effort 1 bucket: Infra)..."
+            placeholder="Type 'ai create ...', 'ai guide ...', 'ai plan', 'ai audit', or speak via mic..."
             className="w-full bg-transparent text-sm font-mono placeholder:text-slate-500 focus:outline-none text-slate-900 dark:text-white"
           />
+
+          {/* AI Quota Telemetry Badge */}
+          <AiQuotaBadge status={quotaStatus} onClick={() => onOpenQuotaHud?.()} />
+
+          {/* Microphone Voice Input Trigger Button */}
+          {isMicSupported && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`p-2 rounded-xl border transition-all cursor-pointer relative ${
+                isListening
+                  ? 'bg-rose-500 text-white border-rose-400 animate-pulse ring-2 ring-rose-500/50'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 border-transparent'
+              }`}
+              title={isListening ? 'Stop Listening' : 'Voice Input (Shortcut: Ctrl+Shift+V / Cmd+Shift+V)'}
+            >
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+          )}
+
+          {/* Syntax Help Guide Button */}
           <button
             type="button"
             onClick={() => setShowCheatsheet((prev) => !prev)}
@@ -402,8 +577,101 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           </button>
         </div>
 
-        {/* Natural Language Ingestion Action Banner */}
-        {parsedCommand && (
+        {/* Voice Listening Active Notification Strip */}
+        {isListening && (
+          <div className="px-5 py-2.5 bg-rose-500/10 border-b border-rose-500/20 flex items-center justify-between text-xs font-mono text-rose-600 dark:text-rose-400">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              <span className="font-extrabold uppercase">MICROPHONE ACTIVE // LISTENING...</span>
+              <span className="text-slate-600 dark:text-slate-400 text-[11px]">
+                (Transcribing speech directly; speak 'ai ...' if you want AI assistance)
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={stopListening}
+              className="text-[11px] underline font-bold cursor-pointer"
+            >
+              Stop
+            </button>
+          </div>
+        )}
+
+        {/* AI Action Execution Banner */}
+        {isAiParsedCommand(parsedCommand) && (
+          <div
+            className={`px-5 py-3.5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+              quotaStatus.isExhausted
+                ? 'bg-amber-500/15 border-amber-500/30'
+                : 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/15 border-cyan-500/30'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 text-xs font-mono">
+              {quotaStatus.isExhausted ? (
+                <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
+              ) : (
+                <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0 animate-pulse" />
+              )}
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`font-extrabold uppercase ${
+                      quotaStatus.isExhausted
+                        ? 'text-amber-800 dark:text-amber-400'
+                        : 'text-cyan-800 dark:text-cyan-300'
+                    }`}
+                  >
+                    {quotaStatus.isExhausted ? 'DAILY AI QUOTA EXHAUSTED:' : 'GEMINI AI ACTION:'}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {parsedCommand.label}
+                  </span>
+                </div>
+                {quotaStatus.isExhausted ? (
+                  <span className="text-[10px] text-amber-800 dark:text-amber-300 font-bold block mt-0.5">
+                    Free quota limit reached ({quotaStatus.dailyLimit} requests/day). Resets in{' '}
+                    <strong>{quotaStatus.resetsInFormatted}</strong> at{' '}
+                    <strong>{quotaStatus.resetsAtFormattedUtc}</strong> ({quotaStatus.resetsAtFormattedLocal}).
+                  </span>
+                ) : parsedCommand.type === 'AI_CREATE' && parsedCommand.requestsMicrotasks ? (
+                  <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold block mt-0.5">
+                    + Micro-tasks breakdown requested by user (will be populated in Option A review)
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={executeSelection}
+              disabled={isAiLoading || quotaStatus.isExhausted}
+              title={
+                quotaStatus.isExhausted
+                  ? `Daily free quota exhausted. Resets in ${quotaStatus.resetsInFormatted} at ${quotaStatus.resetsAtFormattedUtc}`
+                  : undefined
+              }
+              className={`px-3 py-1.5 rounded-xl font-mono text-[11px] font-bold uppercase transition-all shrink-0 ml-2 shadow-sm flex items-center gap-1.5 ${
+                quotaStatus.isExhausted
+                  ? 'bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 cursor-not-allowed'
+                  : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+              }`}
+            >
+              {isAiLoading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Synthesizing...
+                </>
+              ) : quotaStatus.isExhausted ? (
+                `Resets in ${quotaStatus.resetsInFormatted}`
+              ) : (
+                'Press Enter ↵'
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Standard Natural Language Ingestion Action Banner */}
+        {parsedCommand && !isAiParsedCommand(parsedCommand) && (
           <div className="px-5 py-3.5 bg-cyan-500/10 border-b border-cyan-500/20 flex items-center justify-between">
             <div className="flex items-center gap-2.5 text-xs font-mono">
               <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
@@ -438,7 +706,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                             : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
                         }`}
                       >
-                        📁 {parsedCommand.megaBucket} {parsedCommand.isNewBucket ? '(NEW BIN - AUTO CREATE)' : ''}
+                        📁 {parsedCommand.megaBucket} {parsedCommand.isNewBucket ? '(NEW BIN)' : ''}
                       </span>
                     )}
                     {parsedCommand.dueDate && (
@@ -469,8 +737,41 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           </div>
         )}
 
+        {/* Quick Suggestion Chips for AI & Navigation */}
+        <div className="px-5 py-2.5 bg-slate-100/60 dark:bg-slate-950/40 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono">
+          <span className="text-slate-500 shrink-0 font-bold">Try AI:</span>
+          <button
+            type="button"
+            onClick={() => setQuery('ai create ')}
+            className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 text-slate-700 dark:text-slate-300 transition-colors shrink-0 cursor-pointer"
+          >
+            ✨ ai create &lt;task&gt;
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuery('ai plan')}
+            className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 text-slate-700 dark:text-slate-300 transition-colors shrink-0 cursor-pointer"
+          >
+            📅 ai plan
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuery('ai audit')}
+            className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500 text-slate-700 dark:text-slate-300 transition-colors shrink-0 cursor-pointer"
+          >
+            🛡️ ai audit
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuery('ai guide ')}
+            className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 text-slate-700 dark:text-slate-300 transition-colors shrink-0 cursor-pointer"
+          >
+            🗺️ ai guide &lt;task&gt;
+          </button>
+        </div>
+
         {/* Search Results List */}
-        <div className="max-h-80 overflow-y-auto p-3 space-y-1">
+        <div className="max-h-72 overflow-y-auto p-3 space-y-1">
           <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
             {matchingTasks.length > 0 ? 'MATCHING TASKS' : 'NO TASKS MATCH QUERY'}
           </div>
@@ -509,9 +810,19 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
               </div>
 
               <div className="flex items-center gap-2 shrink-0 ml-3">
-                <span className="text-[10px] text-slate-500">
-                  IMP:{t.importance} • URG:{t.urgency}
-                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAiGuideTask(t.title);
+                    onClose();
+                  }}
+                  className="px-2 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-950/70 hover:bg-indigo-600 hover:text-white text-[10px] text-indigo-700 dark:text-indigo-300 transition-colors flex items-center gap-1"
+                  title="Generate Step-by-Step AI Guide"
+                >
+                  <Sparkles className="w-2.5 h-2.5" />
+                  AI Guide
+                </button>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -533,7 +844,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           <div className="p-4 bg-slate-100 dark:bg-slate-950/90 border-t border-slate-200 dark:border-slate-800 text-xs font-mono space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-extrabold uppercase text-cyan-700 dark:text-cyan-400">
-                COMMAND PALETTE SYNTAX CHEATSHEET
+                COMMAND PALETTE & AI SYNTAX GUIDE
               </span>
               <button
                 type="button"
@@ -543,23 +854,23 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                 Hide
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-700 dark:text-slate-300">
-              <div>
-                <strong>Natural Task Entry (with Impact & Effort):</strong>
-                <p className="text-slate-500 dark:text-slate-400">`add Title impact 4 effort 2 imp 5 urg 3 due tomorrow`</p>
-                <p className="text-slate-500 dark:text-slate-400">`add Title bucket: "New Bin"` (creates bin if non-existent!)</p>
-                <p className="text-slate-500 dark:text-slate-400">`qw Fast index` (Quick Win: Impact 5, Effort 1)</p>
-                <p className="text-slate-500 dark:text-slate-400">`mp Big project` (Major Project: Impact 5, Effort 5)</p>
-                <p className="text-slate-500 dark:text-slate-400">`fi Tidy desk` (Fill-In: Impact 2, Effort 2)</p>
-                <p className="text-slate-500 dark:text-slate-400">`ts Casual browsing` (Time Sink: Impact 1, Effort 5)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-slate-700 dark:text-slate-300">
+              <div className="space-y-1">
+                <strong className="text-cyan-600 dark:text-cyan-400">AI Assistant Commands:</strong>
+                <p>`ai create [prompt]` → Synthesize task + Option A modal review</p>
+                <p>`ai create [prompt] microtasks` → Synthesize + generate atomic subtasks</p>
+                <p>`ai guide [task]` → Surgical step-by-step roadmap + break down option</p>
+                <p>`ai plan` → Suggestion 4: Smart Schedule / Daily Execution Sequence</p>
+                <p>`ai audit` → Suggestion 5: Priority Calibration Alignment Audit</p>
+                <p>`Cmd+Shift+V` / `Ctrl+Shift+V` → Toggle microphone voice dictation</p>
               </div>
-              <div>
-                <strong>View & Mission Bin Commands:</strong>
-                <p className="text-slate-500 dark:text-slate-400">`/bucket [name]` → Select or Auto-Create Mission Bin</p>
-                <p className="text-slate-500 dark:text-slate-400">`/impact` or `/effort` → Action Priority 2x2</p>
-                <p className="text-slate-500 dark:text-slate-400">`/matrix` → Eisenhower 2x2 Matrix</p>
-                <p className="text-slate-500 dark:text-slate-400">`/strategic` → Strategic Priority List</p>
-                <p className="text-slate-500 dark:text-slate-400">`/focus` or `/spotlight` → Deep Work Focus</p>
+              <div className="space-y-1">
+                <strong className="text-indigo-600 dark:text-indigo-400">Direct Shortcuts & Ingestion:</strong>
+                <p>`add [title] impact 4 effort 2 imp 5 urg 3 due tomorrow`</p>
+                <p>`qw [title]` (Quick Win), `mp [title]` (Major Project)</p>
+                <p>`/bucket [name]` → Select or Auto-Create Mission Bin</p>
+                <p>`/matrix` → Eisenhower 2x2, `/impact` → Action Priority</p>
+                <p>`/focus` or `/pomo` → Ultradian Deep Work Chronometer</p>
               </div>
             </div>
           </div>
@@ -569,8 +880,9 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between text-[11px] font-mono text-slate-500">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
-            <span>↵ Select/Run</span>
+            <span>↵ Execute</span>
             <span>ESC Close</span>
+            {isMicSupported && <span>Mic: Ctrl+Shift+V</span>}
           </div>
           <span>PRESS ? OR TYPE /HELP FOR GUIDE</span>
         </div>

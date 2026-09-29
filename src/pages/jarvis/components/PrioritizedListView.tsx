@@ -17,6 +17,7 @@ interface PrioritizedListViewProps {
   onEdit: (task: TaskItem) => void;
   onDelete: (id: string) => void;
   onFocusTask?: (task: TaskItem) => void;
+  onAiGuide?: (task: TaskItem) => void;
   onTriggerBurst?: (x: number, y: number) => void;
 }
 
@@ -38,6 +39,7 @@ export const PrioritizedListView: React.FC<PrioritizedListViewProps> = ({
   onEdit,
   onDelete,
   onFocusTask,
+  onAiGuide,
   onTriggerBurst
 }) => {
   const getSections = (): SectionDescriptor[] => {
@@ -183,6 +185,7 @@ export const PrioritizedListView: React.FC<PrioritizedListViewProps> = ({
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onFocusTask={onFocusTask}
+                    onAiGuide={onAiGuide}
                     onTriggerBurst={onTriggerBurst}
                   />
                 ))

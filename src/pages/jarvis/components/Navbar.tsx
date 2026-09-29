@@ -19,10 +19,13 @@ import {
   Terminal,
   Target,
   Command,
-  Layers
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { UserSession } from '../types/task';
 import { isSupabaseConfigured } from '../services/supabaseClient';
+import { QuotaStatus } from '../services/aiQuotaService';
+import { AiQuotaBadge } from './AiQuotaAlert';
 
 interface NavbarProps {
   session: UserSession | null;
@@ -31,10 +34,13 @@ interface NavbarProps {
   onOpenCommandPalette: () => void;
   onOpenSpotlight: () => void;
   onOpenBinSorting?: () => void;
+  onOpenAiPrompt?: () => void;
   isDark: boolean;
   onToggleTheme: () => void;
   isOnline: boolean;
   onLogout: () => void;
+  quotaStatus?: QuotaStatus;
+  onOpenQuotaHud?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -44,16 +50,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCommandPalette,
   onOpenSpotlight,
   onOpenBinSorting,
+  onOpenAiPrompt,
   isDark,
   onToggleTheme,
   isOnline,
-  onLogout
+  onLogout,
+  quotaStatus,
+  onOpenQuotaHud
 }) => {
   const isCloudAuthReady = isSupabaseConfigured();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/85 dark:bg-slate-950/80 backdrop-blur-xl shadow-xs transition-colors">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         {/* Brand & Telemetry */}
         <div className="flex items-center gap-3.5">
           <div className="relative p-2.5 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shadow-md shadow-cyan-950/5">
@@ -130,6 +139,27 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span className="hidden sm:inline">Mission Bins</span>
             </button>
+          )}
+
+          {/* Gemini AI Assistant Trigger & Quota Badge */}
+          {onOpenAiPrompt && (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onOpenAiPrompt}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-cyan-400 dark:border-cyan-700/80 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 hover:from-cyan-500/20 hover:to-indigo-500/20 text-cyan-800 dark:text-cyan-300 text-xs font-mono font-extrabold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Engage Gemini 3.8 Flash AI Assistant (ai create, ai guide, ai plan, ai audit)"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 animate-pulse" />
+                <span className="hidden sm:inline">Jarvis AI</span>
+              </button>
+
+              {quotaStatus && onOpenQuotaHud && (
+                <div className="hidden lg:block">
+                  <AiQuotaBadge status={quotaStatus} onClick={onOpenQuotaHud} />
+                </div>
+              )}
+            </div>
           )}
 
           {/* Command Spotlight & Pomodoro Focus Mode Trigger */}

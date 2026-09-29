@@ -47,6 +47,7 @@ interface TaskCardProps {
   onEdit: (task: TaskItem) => void;
   onDelete: (id: string) => void;
   onFocusTask?: (task: TaskItem) => void;
+  onAiGuide?: (task: TaskItem) => void;
   onTriggerBurst?: (x: number, y: number) => void;
 }
 
@@ -88,6 +89,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onEdit,
   onDelete,
   onFocusTask,
+  onAiGuide,
   onTriggerBurst
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -204,8 +206,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </span>
           </div>
 
-          {/* Quick Actions (Focus, Edit, Delete) */}
+          {/* Quick Actions (Focus, AI Guide, Edit, Delete) */}
           <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition-opacity">
+            {onAiGuide && !task.isCompleted && (
+              <button
+                type="button"
+                onClick={() => onAiGuide(task)}
+                className="flex items-center gap-1 px-2 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[11px] font-mono font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Generate Gemini AI Step-by-Step Tactical Guide"
+              >
+                <Sparkles className="w-3 h-3 text-indigo-500 hover:text-white" />
+                <span className="hidden sm:inline">AI Guide</span>
+              </button>
+            )}
+
             {onFocusTask && !task.isCompleted && (
               <button
                 type="button"

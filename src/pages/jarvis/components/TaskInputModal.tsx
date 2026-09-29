@@ -50,6 +50,8 @@ interface TaskInputModalProps {
   onClose: () => void;
   onSubmit: (task: Omit<TaskItem, 'id' | 'createdAt' | 'updatedAt' | 'isCompleted' | 'completedAt'>) => void;
   initialTask?: TaskItem | null;
+  initialValues?: Partial<TaskItem> | null;
+  isAiProposal?: boolean;
   availableBuckets?: string[];
   onCreateBucket?: (bucketName: string) => void;
 }
@@ -59,6 +61,8 @@ export const TaskInputModal: React.FC<TaskInputModalProps> = ({
   onClose,
   onSubmit,
   initialTask,
+  initialValues,
+  isAiProposal = false,
   availableBuckets = [],
   onCreateBucket
 }) => {
@@ -103,10 +107,24 @@ export const TaskInputModal: React.FC<TaskInputModalProps> = ({
       setEffort(initialTask.effort ?? 3);
       setHasManuallyOverriddenUrgency(initialTask.urgency !== initialTask.recommendedUrgency);
       setHasManuallyOverriddenEffort(false);
+    } else if (initialValues) {
+      setTitle(initialValues.title || '');
+      setNotes(initialValues.notes || '');
+      setCategory(initialValues.category || 'Work');
+      setMegaBucket(initialValues.megaBucket || 'NONE');
+      setDueDate(initialValues.dueDate ? initialValues.dueDate.slice(0, 16) : '');
+      setEstimatedDurationMinutes(initialValues.estimatedDurationMinutes || 45);
+      setCognitiveStrain(initialValues.cognitiveStrain || 'MODERATE');
+      setImportance(initialValues.importance || 3);
+      setUrgency(initialValues.urgency || 3);
+      setImpact(initialValues.impact ?? 3);
+      setEffort(initialValues.effort ?? 3);
+      setHasManuallyOverriddenUrgency(true);
+      setHasManuallyOverriddenEffort(true);
     } else {
       resetForm();
     }
-  }, [initialTask, isOpen]);
+  }, [initialTask, initialValues, isOpen]);
 
   // Dynamic urgency auto-update
   useEffect(() => {
@@ -198,10 +216,16 @@ export const TaskInputModal: React.FC<TaskInputModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold font-mono text-slate-900 dark:text-white tracking-wide">
-                {initialTask ? 'CALIBRATE TASK PARAMETERS' : 'NEW TASK SPECIFICATION'}
+                {isAiProposal
+                  ? 'GEMINI AI TASK SPECIFICATION (OPTION A REVIEW)'
+                  : initialTask
+                  ? 'CALIBRATE TASK PARAMETERS'
+                  : 'NEW TASK SPECIFICATION'}
               </h2>
               <p className="text-xs text-slate-600 dark:text-slate-400 font-mono">
-                AUTONOMOUS MATRIX & MISSION ALLOCATION
+                {isAiProposal
+                  ? 'AI PROPOSAL SYNTHESIZED — CALIBRATE & CONFIRM PRIOR TO INGESTION'
+                  : 'AUTONOMOUS MATRIX & MISSION ALLOCATION'}
               </p>
             </div>
           </div>
@@ -217,6 +241,20 @@ export const TaskInputModal: React.FC<TaskInputModalProps> = ({
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+          {isAiProposal && (
+            <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
+              <div className="text-xs font-mono">
+                <span className="font-extrabold text-cyan-800 dark:text-cyan-300 uppercase block">
+                  Option A: Pre-populated AI Proposal Active
+                </span>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Gemini analyzed your request and suggested these parameters. Adjust importance, urgency, impact, effort, or notes below, then submit to save.
+                </span>
+              </div>
+            </div>
+          )}
+
           {validationError && (
             <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-mono">
               {validationError}
