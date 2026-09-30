@@ -24,7 +24,8 @@ import {
   Sparkles,
   Menu,
   X,
-  Zap
+  Zap,
+  Repeat
 } from 'lucide-react';
 import { UserSession } from '../types/task';
 import { isSupabaseConfigured } from '../services/supabaseClient';
@@ -45,6 +46,9 @@ interface NavbarProps {
   onLogout: () => void;
   quotaStatus?: QuotaStatus;
   onOpenQuotaHud?: () => void;
+  activePage?: 'TASKS' | 'HABITS';
+  onPageChange?: (page: 'TASKS' | 'HABITS') => void;
+  pendingHabitsCount?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -60,7 +64,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   isOnline,
   onLogout,
   quotaStatus,
-  onOpenQuotaHud
+  onOpenQuotaHud,
+  activePage = 'TASKS',
+  onPageChange,
+  pendingHabitsCount = 0
 }) => {
   const isCloudAuthReady = isSupabaseConfigured();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -116,6 +123,40 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Primary Page Switcher: Task Matrix vs Recurring Habits */}
+        {onPageChange && (
+          <div className="hidden sm:flex items-center p-1 bg-slate-100/90 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 font-mono text-xs shadow-inner shrink-0">
+            <button
+              type="button"
+              onClick={() => onPageChange('TASKS')}
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer font-bold ${
+                activePage === 'TASKS'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+              }`}
+            >
+              TASKS
+            </button>
+            <button
+              type="button"
+              onClick={() => onPageChange('HABITS')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer font-bold ${
+                activePage === 'HABITS'
+                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+              }`}
+            >
+              <Repeat className="w-3.5 h-3.5" />
+              <span>HABITS</span>
+              {typeof pendingHabitsCount === 'number' && pendingHabitsCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-extrabold shadow-2xs">
+                  {pendingHabitsCount}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Desktop Controls (Rendered on md screens and above, 768px+) */}
         <div className="hidden md:flex items-center gap-2 sm:gap-2.5 shrink-0">
@@ -306,6 +347,46 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Expandable Mobile Navigation Drawer (Revealed below top bar on screens < 768px) */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl px-4 py-3.5 space-y-3 shadow-xl animate-fadeIn">
+          {/* Page Switcher in Mobile Drawer */}
+          {onPageChange && (
+            <div className="grid grid-cols-2 gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  onPageChange('TASKS');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`py-2 rounded-xl text-center font-bold transition-all cursor-pointer ${
+                  activePage === 'TASKS'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-850 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                TASK MATRIX
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onPageChange('HABITS');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`py-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  activePage === 'HABITS'
+                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-850 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                <span>HABITS</span>
+                {typeof pendingHabitsCount === 'number' && pendingHabitsCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[9px] font-extrabold">
+                    {pendingHabitsCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Quick Action Grid */}
           <div className="grid grid-cols-2 gap-2 text-xs font-mono">
             {/* Focus Mode Chronometer */}

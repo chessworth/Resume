@@ -24,7 +24,9 @@ import {
   BrainCircuit,
   Target,
   Flame,
-  Layers
+  Layers,
+  RotateCw,
+  Repeat
 } from 'lucide-react';
 import { TaskItem } from '../types/task';
 import {
@@ -154,21 +156,40 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       }}
       className={`group relative rounded-3xl transition-all duration-300 ${accent.hoverBorder} ${accent.hoverGlow} ${
         task.isCompleted
-          ? 'bg-slate-100/70 dark:bg-slate-900/40 opacity-70 border border-slate-200 dark:border-slate-800/80'
+          ? task.isHabit
+            ? 'bg-violet-50/40 dark:bg-violet-950/20 opacity-80 border border-violet-300/60 dark:border-violet-800/60 ring-1 ring-violet-500/20'
+            : 'bg-slate-100/70 dark:bg-slate-900/40 opacity-70 border border-slate-200 dark:border-slate-800/80'
+          : task.isHabit
+          ? 'bg-gradient-to-r from-violet-500/[0.04] to-transparent bg-white/95 dark:bg-slate-900/90 shadow-sm hover:shadow-xl hover:-translate-y-0.5 border border-violet-400/50 dark:border-violet-500/50 ring-1 ring-violet-500/20'
           : task.isEscalated
           ? 'bg-white/95 dark:bg-slate-900/90 shadow-md border-2 border-amber-500/80 ring-2 ring-amber-500/20'
           : 'bg-white/95 dark:bg-slate-900/90 shadow-sm hover:shadow-xl hover:-translate-y-0.5 border border-slate-200/90 dark:border-slate-800'
       }`}
     >
-      {/* Dynamic Left Edge Indicator Bar */}
+      {/* Dynamic Left Edge Indicator Bar (Distinct dual-tone for Habits) */}
       <div
-        className={`absolute left-0 top-3 bottom-3 w-1.5 rounded-r-full shadow-sm transition-all duration-300 ${accent.bar}`}
+        className={`absolute left-0 top-3 bottom-3 w-1.5 rounded-r-full shadow-sm transition-all duration-300 ${
+          task.isHabit ? 'bg-gradient-to-b from-violet-500 to-indigo-600 shadow-violet-500/40' : accent.bar
+        }`}
       />
 
       <div className="p-4 sm:p-5 pl-5 sm:pl-6 space-y-3">
         {/* Top Badges & Taxonomy Row */}
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
+            {/* Recurring Habit Indicator Badge */}
+            {task.isHabit && (
+              <span className="font-mono text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/40 flex items-center gap-1.5 shadow-2xs">
+                <Repeat className="w-3 h-3 text-violet-600 dark:text-violet-400 shrink-0" />
+                <span className="uppercase">HABIT • {task.habitFrequency || 'RECURRING'}</span>
+                {typeof task.habitStreak === 'number' && task.habitStreak > 0 && (
+                  <span className="ml-0.5 px-1 py-0.2 rounded bg-violet-500/25 text-violet-900 dark:text-violet-200 font-extrabold">
+                    🔥 {task.habitStreak}
+                  </span>
+                )}
+              </span>
+            )}
+
             {/* Category */}
             <span className="font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
               <Tag className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />

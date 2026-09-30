@@ -27,42 +27,47 @@ export type EffortLevel = 1 | 2 | 3 | 4 | 5;
 /**
  * Cognitive strain classification evaluating mental bandwidth requirements.
  */
-export type CognitiveStrainLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME';
+export type CognitiveStrainLevel = "LOW" | "MODERATE" | "HIGH" | "EXTREME";
 
 /**
  * Organizational priority categories according to the Eisenhower distribution.
  */
-export type PriorityQuadrant = 
-  | 'DO_FIRST'       // Urgent & Important (Q1)
-  | 'SCHEDULE'       // Not Urgent, but Important (Q2)
-  | 'DELEGATE_RUSH'  // Urgent, but Low Importance (Q3)
-  | 'DE_PRIORITIZE'; // Neither Urgent nor Important (Q4)
+export type PriorityQuadrant =
+  | "DO_FIRST" // Urgent & Important (Q1)
+  | "SCHEDULE" // Not Urgent, but Important (Q2)
+  | "DELEGATE_RUSH" // Urgent, but Low Importance (Q3)
+  | "DE_PRIORITIZE"; // Neither Urgent nor Important (Q4)
 
 /**
  * Action Priority quadrants according to the Impact-Effort matrix.
  */
 export type ImpactEffortQuadrant =
-  | 'QUICK_WINS'     // High Impact, Low Effort (Priority 1)
-  | 'MAJOR_PROJECTS' // High Impact, High Effort (Priority 2)
-  | 'FILL_INS'       // Low Impact, Low Effort (Priority 3)
-  | 'TIME_SINKS';    // Low Impact, High Effort (Priority 4 - Avoid)
+  | "QUICK_WINS" // High Impact, Low Effort (Priority 1)
+  | "MAJOR_PROJECTS" // High Impact, High Effort (Priority 2)
+  | "FILL_INS" // Low Impact, Low Effort (Priority 3)
+  | "TIME_SINKS"; // Low Impact, High Effort (Priority 4 - Avoid)
 
 /**
  * View perspective for list sorting and matrix calculation.
  */
-export type SortingViewMode = 'STRATEGIC' | 'DEADLINE' | 'MATRIX' | 'IMPACT_EFFORT';
+export type SortingViewMode =
+  | "STRATEGIC"
+  | "DEADLINE"
+  | "MATRIX"
+  | "IMPACT_EFFORT"
+  | "HABITS";
 
 /**
  * Predefined task categories with associated metadata.
  */
-export type TaskCategory = 
-  | 'Work'
-  | 'Personal'
-  | 'Strategic Life'
-  | 'Health'
-  | 'Finance'
-  | 'Operations'
-  | 'Education';
+export type TaskCategory =
+  | "Work"
+  | "Personal"
+  | "Strategic Life"
+  | "Health"
+  | "Finance"
+  | "Operations"
+  | "Education";
 
 /**
  * User authentication and profile state representation.
@@ -124,6 +129,18 @@ export interface TaskItem {
   createdAt: string;
   /** Last updated timestamp in ISO 8601 */
   updatedAt: string;
+  /** Flag denoting whether this task originates from an active recurring habit */
+  isHabit?: boolean;
+  /** Originating habit UUID if this is a recurring habit */
+  habitId?: string;
+  /** Current active recurrence period key (e.g. "2026-09-29") */
+  habitPeriodKey?: string;
+  /** Habit recurrence frequency definition */
+  habitFrequency?: "DAILY" | "WEEKDAYS" | "WEEKLY" | "MONTHLY" | "CUSTOM_DAYS";
+  /** Current streak count inherited from the parent habit */
+  habitStreak?: number;
+  /** Total lifetime completions of the parent habit */
+  habitTotalCompletions?: number;
 }
 
 /**
@@ -171,7 +188,7 @@ export interface EffortDefinition {
 /**
  * Alert priority classification tier.
  */
-export type AlertTier = 'CRITICAL' | 'TRANSIENT' | 'INLINE';
+export type AlertTier = "CRITICAL" | "TRANSIENT" | "INLINE";
 
 /**
  * System guidance tooltip message definition.
@@ -180,7 +197,7 @@ export interface GuidanceBubble {
   id: string;
   title: string;
   message: string;
-  variant: 'info' | 'warning' | 'tip' | 'offline';
+  variant: "info" | "warning" | "tip" | "offline";
   tier?: AlertTier;
   /** Auto-dismiss duration in milliseconds (if applicable) */
   autoDismissMs?: number;
@@ -200,6 +217,6 @@ export interface WorkloadDistribution {
   highEffortCount: number;
   estimatedHoursRemaining: number;
   cognitiveCapacityRatio: number; // 0 to 1
-  overloadState: 'OPTIMAL' | 'FOCUSED' | 'ELEVATED' | 'HIGH_CAPACITY';
+  overloadState: "OPTIMAL" | "FOCUSED" | "ELEVATED" | "HIGH_CAPACITY";
   advisoryMessage: string;
 }

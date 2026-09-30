@@ -20,6 +20,8 @@ import { WorkloadDistributionMeter } from './components/WorkloadDistributionMete
 import { PrioritizedListView } from './components/PrioritizedListView';
 import { EisenhowerMatrixView } from './components/EisenhowerMatrixView';
 import { ImpactEffortMatrixView } from './components/ImpactEffortMatrixView';
+import { HabitsPageView } from './components/HabitsPageView';
+import { HabitInputModal } from './components/HabitInputModal';
 import { TaskInputModal } from './components/TaskInputModal';
 import { AuthModal } from './components/AuthModal';
 import { CommandSpotlightModal } from './components/CommandSpotlightModal';
@@ -47,6 +49,14 @@ import {
   SortingViewMode,
   GuidanceBubble
 } from './types/task';
+import { HabitItem } from './types/habit';
+import {
+  habitRepository,
+  syncHabitsToTasks,
+  toggleHabitCompletion,
+  evaluateHabitPeriodStatus,
+  getHabitPeriodKey
+} from './services/habitEngine';
 import { storageAdapter } from './services/storageAdapter';
 import { authService } from './services/authService';
 import { supabaseRepository } from './services/supabaseRepository';
@@ -54,7 +64,7 @@ import { isSupabaseConfigured } from './services/supabaseClient';
 import { sortTasks, classifyQuadrant } from './services/priorityEngine';
 import { calculateWorkloadDistribution } from './constants/definitions';
 import { generateUUID } from './utils/uuid';
-import { PlusCircle, ShieldAlert, Cpu, Sparkles, Activity, Layers, Target } from 'lucide-react';
+import { PlusCircle, ShieldAlert, Cpu, Sparkles, Activity, Layers, Target, Repeat } from 'lucide-react';
 
 export function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -62,6 +72,14 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
+
+  // Active Navigation Page (Task Matrix vs Recurring Habits Page)
+  const [activePage, setActivePage] = useState<'TASKS' | 'HABITS'>('TASKS');
+
+  // Recurring Habit Disciplines State
+  const [habits, setHabits] = useState<HabitItem[]>(() => habitRepository.fetchHabits());
+  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<HabitItem | null>(null);
 
   // Gemini AI Assistant States
   const [aiTaskProposal, setAiTaskProposal] = useState<Partial<TaskItem> | null>(null);
@@ -269,6 +287,16 @@ export function App() {
     };
   }, [pushTransientToast]);
 
+  // Phase 4.5: Synchronize recurring habits with the task list on habit updates or task hydration
+  useEffect(() => {
+    if (tasks.length === 0 && habits.length === 0) return;
+    const syncResult = syncHabitsToTasks(habits, tasks);
+    if (syncResult.hasChanges) {
+      setTasks(syncResult.updatedTasks);
+      syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
+    }
+  }, [habits]);
+
   // Phase 4: Supabase Realtime Subscription Listener
   useEffect(() => {
     if (!session || session.isGuest || !isSupabaseConfigured()) {
@@ -430,15 +458,112 @@ export function App() {
     });
     setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
 
+    // If this is a recurring habit, synchronize with Habit entity and update streak
+    if (updated.isHabit && updated.habitId && updated.habitPeriodKey) {
+      setHabits((prevHabits) => {
+        const habit = prevHabits.find((h) => h.id === updated.habitId);
+        if (!habit) return prevHabits;
+
+        const updatedHabit = toggleHabitCompletion(habit, updated.habitPeriodKey!);
+        const newHabits = prevHabits.map((h) => (h.id === updated.habitId ? updatedHabit : h));
+        habitRepository.saveHabits(newHabits);
+        return newHabits;
+      });
+    }
+
     if (isCompleted) {
       pushTransientToast({
         id: 'toast-completed-' + Date.now(),
-        title: 'TASK RESOLVED // VELOCITY LOGGED',
-        message: `Task marked complete. Workload updated.`,
+        title: updated.isHabit ? 'HABIT DISCIPLINE VERIFIED // STREAK LOGGED' : 'TASK RESOLVED // VELOCITY LOGGED',
+        message: updated.isHabit ? `Habit verified for current cadence.` : `Task marked complete. Workload updated.`,
         variant: 'tip',
         autoDismissMs: 3000
       });
     }
+  }, [pushTransientToast]);
+
+  const handleToggleHabitFromPage = useCallback((habitId: string) => {
+    setHabits((prevHabits) => {
+      const habit = prevHabits.find((h) => h.id === habitId);
+      if (!habit) return prevHabits;
+
+      const periodKey = getHabitPeriodKey(habit);
+      const updatedHabit = toggleHabitCompletion(habit, periodKey);
+      const newHabits = prevHabits.map((h) => (h.id === habitId ? updatedHabit : h));
+      habitRepository.saveHabits(newHabits);
+
+      // Re-sync corresponding task
+      setTasks((prevTasks) => {
+        const syncResult = syncHabitsToTasks(newHabits, prevTasks);
+        if (syncResult.hasChanges) {
+          syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
+          return syncResult.updatedTasks;
+        }
+        return prevTasks;
+      });
+
+      const isNowCompleted = updatedHabit.streak > habit.streak;
+      pushTransientToast({
+        id: 'toast-habit-toggle-' + Date.now(),
+        title: isNowCompleted ? 'HABIT CADENCE VERIFIED' : 'HABIT CADENCE REOPENED',
+        message: isNowCompleted
+          ? `"${updatedHabit.title}" completed for current period. Streak: ${updatedHabit.streak} cycles.`
+          : `"${updatedHabit.title}" marked incomplete for current period.`,
+        variant: 'tip',
+        autoDismissMs: 3000
+      });
+
+      return newHabits;
+    });
+  }, [pushTransientToast]);
+
+  const handleSaveHabit = useCallback((habit: HabitItem) => {
+    setHabits((prev) => {
+      const exists = prev.some((h) => h.id === habit.id);
+      const updated = exists ? prev.map((h) => (h.id === habit.id ? habit : h)) : [habit, ...prev];
+      habitRepository.saveHabits(updated);
+
+      setTasks((prevTasks) => {
+        const syncResult = syncHabitsToTasks(updated, prevTasks);
+        if (syncResult.hasChanges) {
+          syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
+          return syncResult.updatedTasks;
+        }
+        return prevTasks;
+      });
+
+      return updated;
+    });
+
+    pushTransientToast({
+      id: 'toast-habit-saved-' + Date.now(),
+      title: 'HABIT DISCIPLINE SAVED',
+      message: `"${habit.title}" initialized into cadence schedule.`,
+      variant: 'tip',
+      autoDismissMs: 3500
+    });
+  }, [pushTransientToast]);
+
+  const handleDeleteHabit = useCallback((id: string) => {
+    setHabits((prev) => {
+      const updated = prev.filter((h) => h.id !== id);
+      habitRepository.saveHabits(updated);
+      return updated;
+    });
+
+    setTasks((prevTasks) => {
+      const toDelete = prevTasks.filter((t) => t.habitId === id);
+      toDelete.forEach((t) => storageAdapter.deleteTask(t.id));
+      return prevTasks.filter((t) => t.habitId !== id);
+    });
+
+    pushTransientToast({
+      id: 'toast-habit-deleted-' + Date.now(),
+      title: 'HABIT DISCIPLINE PURGED',
+      message: 'Habit definition and associated active cadence tasks removed.',
+      variant: 'info',
+      autoDismissMs: 3000
+    });
   }, [pushTransientToast]);
 
   const handleDeleteTask = useCallback(async (id: string) => {
@@ -870,6 +995,11 @@ export function App() {
       filtered = filtered.filter((t) => !t.isCompleted);
     }
 
+    // Separate view for habit tasks: if viewMode is HABITS, isolate habit tasks
+    if (viewMode === 'HABITS') {
+      filtered = filtered.filter((t: TaskItem) => t.isHabit === true);
+    }
+
     return sortTasks(filtered, viewMode);
   }, [tasks, searchQuery, selectedCategory, selectedBucket, showCompleted, viewMode]);
 
@@ -879,13 +1009,17 @@ export function App() {
   ).length;
   const completedCount = tasks.filter((t) => t.isCompleted).length;
 
+  const pendingHabitsCount = useMemo(() => {
+    return habits.filter((h: HabitItem) => !h.archived && !evaluateHabitPeriodStatus(h).isCompletedInPeriod).length;
+  }, [habits]);
+
   const workloadDistribution = useMemo(() => {
     return calculateWorkloadDistribution(tasks);
   }, [tasks]);
 
   const availableCategories = useMemo(() => {
     const set = new Set<string>();
-    tasks.forEach((t) => {
+    tasks.forEach((t: TaskItem) => {
       if (t.category) set.add(t.category);
     });
     return Array.from(set);
@@ -943,6 +1077,9 @@ export function App() {
           onLogout={handleLogout}
           quotaStatus={quotaStatus}
           onOpenQuotaHud={() => setIsQuotaModalOpen(true)}
+          activePage={activePage}
+          onPageChange={setActivePage}
+          pendingHabitsCount={pendingHabitsCount}
         />
 
         {/* Main Execution Surface */}
@@ -969,144 +1106,193 @@ export function App() {
             </div>
           )}
 
-          {/* Welcoming Status & Orientation Hero Strip */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-600/25 shrink-0 animate-pulse-subtle">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-extrabold uppercase tracking-wider text-cyan-800 dark:text-cyan-400">
-                    SYSTEM DIRECTIVE:
-                  </span>
-                  <span className="text-base font-bold text-slate-950 dark:text-white">
-                    Welcome, {session?.name || 'Operator'}.
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 mt-0.5 leading-relaxed font-medium">
-                  Task matrix active. <strong className="text-rose-700 dark:text-rose-400 font-extrabold">{criticalCount} Critical Q1 items</strong> require immediate focus.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono text-cyan-950 dark:text-cyan-200 bg-cyan-50 dark:bg-cyan-950/60 px-4 py-2 rounded-2xl border border-cyan-200 dark:border-cyan-800/80 shadow-xs">
-              <Activity className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400 animate-pulse" />
-              <span className="font-bold tracking-wide">JARVIS TELEMETRY ACTIVE</span>
-            </div>
-          </div>
-
-          {/* Mindful Cognitive Workload Distribution Meter */}
-          <WorkloadDistributionMeter distribution={workloadDistribution} />
-
-          {/* Interactive Mega Task Bins / Mission Clusters Bar */}
-          <MegaTaskBinBar
-            tasks={tasks}
-            availableBuckets={availableBuckets}
-            selectedBucket={selectedBucket}
-            onSelectBucket={setSelectedBucket}
-            onCreateBucket={handleCreateBucket}
-            onAssignTaskToBucket={handleAssignTaskToBucket}
-            onOpenBinSorting={() => setIsBinSortingOpen(true)}
-          />
-
-          {/* View Mode & Filter Controls */}
-          <ControlsToolbar
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            availableCategories={availableCategories}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            showCompleted={showCompleted}
-            onToggleShowCompleted={() => setShowCompleted((prev) => !prev)}
-            totalCount={totalCount}
-            criticalCount={criticalCount}
-            completedCount={completedCount}
-          />
-
-          {/* View Mode Context Descriptor */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-white/90 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-300 gap-2 shadow-xs backdrop-blur-md">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-cyan-700 dark:text-cyan-400 shrink-0" />
-              <span>
-                ACTIVE PERSPECTIVE:{' '}
-                <strong className="text-slate-950 dark:text-white font-extrabold">
-                  {viewMode === 'STRATEGIC'
-                    ? 'STRATEGIC PRIORITY (HIGH IMPORTANCE FIRST)'
-                    : viewMode === 'DEADLINE'
-                    ? 'DEADLINE ACCELERATION (URGENT & IMPORTANT -> URGENT -> IMPORTANT -> LOW BOTH)'
-                    : viewMode === 'MATRIX'
-                    ? 'EISENHOWER 2X2 (URGENCY VS IMPORTANCE)'
-                    : 'IMPACT-EFFORT 2X2 (QUICK WINS -> MAJOR PROJECTS -> FILL-INS -> TIME SINKS)'}
-                </strong>
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">
-              SECONDARY: DUE DATE ASC • TERTIARY: CREATED AT ASC
-            </span>
-          </div>
-
-          {/* Main Content Area */}
-          {filteredAndSortedTasks.length === 0 ? (
-            <div className="py-20 text-center border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl bg-white/80 dark:bg-slate-900/40 p-8 space-y-4 shadow-xs backdrop-blur-sm">
-              <div className="w-14 h-14 mx-auto rounded-3xl bg-cyan-50 dark:bg-slate-800 border border-cyan-200 dark:border-slate-700 flex items-center justify-center text-cyan-700 dark:text-cyan-400 shadow-sm">
-                <ShieldAlert className="w-7 h-7" />
-              </div>
-              <div>
-                <h3 className="font-mono text-sm font-bold text-slate-950 dark:text-white uppercase tracking-wider">
-                  NO TASKS MATCH QUERY CRITERIA
-                </h3>
-                <p className="text-xs text-slate-700 dark:text-slate-300 max-w-sm mx-auto mt-1 leading-relaxed font-medium">
-                  Zero tasks detected matching the current category, mission bin, or completion filter.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingTask(null);
-                  setIsTaskModalOpen(true);
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-mono font-bold uppercase rounded-2xl transition-all shadow-md shadow-cyan-600/25 cursor-pointer active:scale-95"
-              >
-                <PlusCircle className="w-4 h-4" />
-                Ingest New Task
-              </button>
-            </div>
-          ) : viewMode === 'MATRIX' ? (
-            <EisenhowerMatrixView
-              tasks={filteredAndSortedTasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteTask}
-              onFocusTask={handleFocusClick}
-              onAiGuide={handleAiGuideTask}
-              onTriggerBurst={handleTriggerBurst}
-              onUpdateTaskCoords={handleUpdateTaskCoords}
-            />
-          ) : viewMode === 'IMPACT_EFFORT' ? (
-            <ImpactEffortMatrixView
-              tasks={filteredAndSortedTasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteTask}
-              onFocusTask={handleFocusClick}
-              onAiGuide={handleAiGuideTask}
-              onTriggerBurst={handleTriggerBurst}
-              onUpdateTaskCoords={handleUpdateTaskCoords}
+          {activePage === 'HABITS' ? (
+            /* Dedicated Habit Disciplines Page Surface */
+            <HabitsPageView
+              habits={habits}
+              onOpenAddHabit={() => {
+                setEditingHabit(null);
+                setIsHabitModalOpen(true);
+              }}
+              onEditHabit={(h: HabitItem) => {
+                setEditingHabit(h);
+                setIsHabitModalOpen(true);
+              }}
+              onDeleteHabit={handleDeleteHabit}
+              onToggleHabitCompletion={handleToggleHabitFromPage}
             />
           ) : (
-            <PrioritizedListView
-              tasks={filteredAndSortedTasks}
-              viewMode={viewMode}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteTask}
-              onFocusTask={handleFocusClick}
-              onAiGuide={handleAiGuideTask}
-              onTriggerBurst={handleTriggerBurst}
-            />
+            /* Standard Prioritized Task Matrix Execution Workspace */
+            <>
+              {/* Welcoming Status & Orientation Hero Strip */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-sm backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-600/25 shrink-0 animate-pulse-subtle">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-extrabold uppercase tracking-wider text-cyan-800 dark:text-cyan-400">
+                        SYSTEM DIRECTIVE:
+                      </span>
+                      <span className="text-base font-bold text-slate-950 dark:text-white">
+                        Welcome, {session?.name || 'Operator'}.
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 mt-0.5 leading-relaxed font-medium">
+                      Task matrix active. <strong className="text-rose-700 dark:text-rose-400 font-extrabold">{criticalCount} Critical Q1 items</strong> require immediate focus.
+                      {pendingHabitsCount > 0 && (
+                        <span className="ml-2 font-mono text-xs text-violet-700 dark:text-violet-300 font-bold">
+                          • {pendingHabitsCount} recurring habit{pendingHabitsCount > 1 ? 's' : ''} pending today
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono text-cyan-950 dark:text-cyan-200 bg-cyan-50 dark:bg-cyan-950/60 px-4 py-2 rounded-2xl border border-cyan-200 dark:border-cyan-800/80 shadow-xs">
+                  <Activity className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400 animate-pulse" />
+                  <span className="font-bold tracking-wide">JARVIS TELEMETRY ACTIVE</span>
+                </div>
+              </div>
+
+              {/* Mindful Cognitive Workload Distribution Meter */}
+              <WorkloadDistributionMeter distribution={workloadDistribution} />
+
+              {/* Interactive Mega Task Bins / Mission Clusters Bar */}
+              <MegaTaskBinBar
+                tasks={tasks}
+                availableBuckets={availableBuckets}
+                selectedBucket={selectedBucket}
+                onSelectBucket={setSelectedBucket}
+                onCreateBucket={handleCreateBucket}
+                onAssignTaskToBucket={handleAssignTaskToBucket}
+                onOpenBinSorting={() => setIsBinSortingOpen(true)}
+              />
+
+              {/* View Mode & Filter Controls */}
+              <ControlsToolbar
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                availableCategories={availableCategories}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                showCompleted={showCompleted}
+                onToggleShowCompleted={() => setShowCompleted((prev) => !prev)}
+                totalCount={totalCount}
+                criticalCount={criticalCount}
+                completedCount={completedCount}
+              />
+
+              {/* View Mode Context Descriptor */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-white/90 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-300 gap-2 shadow-xs backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-cyan-700 dark:text-cyan-400 shrink-0" />
+                  <span>
+                    ACTIVE PERSPECTIVE:{' '}
+                    <strong className="text-slate-950 dark:text-white font-extrabold">
+                      {viewMode === 'STRATEGIC'
+                        ? 'STRATEGIC PRIORITY (HIGH IMPORTANCE FIRST)'
+                        : viewMode === 'DEADLINE'
+                        ? 'DEADLINE ACCELERATION (URGENT & IMPORTANT -> URGENT -> IMPORTANT -> LOW BOTH)'
+                        : viewMode === 'MATRIX'
+                        ? 'EISENHOWER 2X2 (URGENCY VS IMPORTANCE)'
+                        : viewMode === 'IMPACT_EFFORT'
+                        ? 'IMPACT-EFFORT 2X2 (QUICK WINS -> MAJOR PROJECTS -> FILL-INS -> TIME SINKS)'
+                        : 'HABIT CADENCE STREAM (PENDING RECURRENCES -> COMPLETED RECURRENCES)'}
+                    </strong>
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">
+                  {viewMode === 'HABITS'
+                    ? 'CADENCE VERIFIED IN REAL-TIME'
+                    : 'SECONDARY: DUE DATE ASC • TERTIARY: CREATED AT ASC'}
+                </span>
+              </div>
+
+              {/* Main Content Area */}
+              {filteredAndSortedTasks.length === 0 ? (
+                <div className="py-20 text-center border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl bg-white/80 dark:bg-slate-900/40 p-8 space-y-4 shadow-xs backdrop-blur-sm">
+                  <div className="w-14 h-14 mx-auto rounded-3xl bg-cyan-50 dark:bg-slate-800 border border-cyan-200 dark:border-slate-700 flex items-center justify-center text-cyan-700 dark:text-cyan-400 shadow-sm">
+                    {viewMode === 'HABITS' ? (
+                      <Repeat className="w-7 h-7 text-violet-500" />
+                    ) : (
+                      <ShieldAlert className="w-7 h-7" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-mono text-sm font-bold text-slate-950 dark:text-white uppercase tracking-wider">
+                      {viewMode === 'HABITS' ? 'NO HABIT TASKS FOUND' : 'NO TASKS MATCH QUERY CRITERIA'}
+                    </h3>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 max-w-sm mx-auto mt-1 leading-relaxed font-medium">
+                      {viewMode === 'HABITS'
+                        ? 'No active recurring habit disciplines match this filter. Register a new habit on the Habits page or check the completed filter.'
+                        : 'Zero tasks detected matching the current category, mission bin, or completion filter.'}
+                    </p>
+                  </div>
+                  {viewMode === 'HABITS' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingHabit(null);
+                        setIsHabitModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-mono font-bold uppercase rounded-2xl transition-all shadow-md shadow-violet-600/25 cursor-pointer active:scale-95"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      Add Habit Discipline
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingTask(null);
+                        setIsTaskModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-mono font-bold uppercase rounded-2xl transition-all shadow-md shadow-cyan-600/25 cursor-pointer active:scale-95"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      Ingest New Task
+                    </button>
+                  )}
+                </div>
+              ) : viewMode === 'MATRIX' ? (
+                <EisenhowerMatrixView
+                  tasks={filteredAndSortedTasks}
+                  onToggleComplete={handleToggleComplete}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteTask}
+                  onFocusTask={handleFocusClick}
+                  onAiGuide={handleAiGuideTask}
+                  onTriggerBurst={handleTriggerBurst}
+                  onUpdateTaskCoords={handleUpdateTaskCoords}
+                />
+              ) : viewMode === 'IMPACT_EFFORT' ? (
+                <ImpactEffortMatrixView
+                  tasks={filteredAndSortedTasks}
+                  onToggleComplete={handleToggleComplete}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteTask}
+                  onFocusTask={handleFocusClick}
+                  onAiGuide={handleAiGuideTask}
+                  onTriggerBurst={handleTriggerBurst}
+                  onUpdateTaskCoords={handleUpdateTaskCoords}
+                />
+              ) : (
+                <PrioritizedListView
+                  tasks={filteredAndSortedTasks}
+                  viewMode={viewMode === 'HABITS' ? 'HABITS' : viewMode}
+                  onToggleComplete={handleToggleComplete}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteTask}
+                  onFocusTask={handleFocusClick}
+                  onAiGuide={handleAiGuideTask}
+                  onTriggerBurst={handleTriggerBurst}
+                />
+              )}
+            </>
           )}
         </main>
 
@@ -1259,6 +1445,18 @@ export function App() {
           canClose={Boolean(session)}
         />
 
+        {/* Recurring Habit Discipline Modal */}
+        <HabitInputModal
+          isOpen={isHabitModalOpen}
+          onClose={() => {
+            setIsHabitModalOpen(false);
+            setEditingHabit(null);
+          }}
+          onSaveHabit={handleSaveHabit}
+          editingHabit={editingHabit}
+          availableCategories={availableCategories}
+        />
+
         {/* Mobile Persistent Bottom Taskbar (Thumb-Accessible Dock for Phone Screens up to 600px) */}
         <nav
           aria-label="Mobile Navigation Dock"
@@ -1268,7 +1466,7 @@ export function App() {
           <button
             type="button"
             onClick={() => {
-              const modes: SortingViewMode[] = ['STRATEGIC', 'DEADLINE', 'MATRIX', 'IMPACT_EFFORT'];
+              const modes: SortingViewMode[] = ['STRATEGIC', 'DEADLINE', 'MATRIX', 'IMPACT_EFFORT', 'HABITS'];
               const nextIdx = (modes.indexOf(viewMode) + 1) % modes.length;
               setViewMode(modes[nextIdx]);
             }}
@@ -1277,7 +1475,7 @@ export function App() {
           >
             <Activity className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
             <span className="font-bold truncate max-w-full text-center">
-              {viewMode === 'STRATEGIC' ? 'Strategic' : viewMode === 'DEADLINE' ? 'Deadline' : viewMode === 'MATRIX' ? 'Matrix' : 'Impact'}
+              {viewMode === 'STRATEGIC' ? 'Strategic' : viewMode === 'DEADLINE' ? 'Deadline' : viewMode === 'MATRIX' ? 'Matrix' : viewMode === 'IMPACT_EFFORT' ? 'Impact' : 'Habits'}
             </span>
           </button>
 

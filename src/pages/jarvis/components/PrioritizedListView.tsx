@@ -8,11 +8,11 @@ import React from 'react';
 import { TaskCard } from './TaskCard';
 import { TaskItem } from '../types/task';
 import { isHighImportance, isHighUrgency } from '../services/priorityEngine';
-import { AlertCircle, Calendar, Zap, Trash2 } from 'lucide-react';
+import { AlertCircle, Calendar, Zap, Trash2, Repeat, CheckCircle2 } from 'lucide-react';
 
 interface PrioritizedListViewProps {
   tasks: TaskItem[];
-  viewMode: 'STRATEGIC' | 'DEADLINE';
+  viewMode: 'STRATEGIC' | 'DEADLINE' | 'HABITS';
   onToggleComplete: (id: string, isCompleted: boolean) => void;
   onEdit: (task: TaskItem) => void;
   onDelete: (id: string) => void;
@@ -43,6 +43,31 @@ export const PrioritizedListView: React.FC<PrioritizedListViewProps> = ({
   onTriggerBurst
 }) => {
   const getSections = (): SectionDescriptor[] => {
+    if (viewMode === 'HABITS') {
+      return [
+        {
+          key: 'pending-habits',
+          title: 'PENDING HABIT CADENCES (INCOMPLETE THIS PERIOD)',
+          subtitle: 'Active Recurring Disciplines Requiring Verification for Current Window',
+          icon: <Repeat className="w-4 h-4 text-violet-500" />,
+          headerBorder: 'border-violet-200 dark:border-violet-500/40 bg-violet-50/80 dark:bg-violet-950/20',
+          badgeStyle: 'bg-violet-100 dark:bg-violet-500/20 text-violet-800 dark:text-violet-200 border-violet-300 dark:border-violet-500/40',
+          containerBg: 'bg-gradient-to-b from-violet-50/30 via-white to-white dark:from-violet-950/10 dark:via-slate-900/40 dark:to-slate-900/30',
+          filter: (t) => Boolean(t.isHabit && !t.isCompleted)
+        },
+        {
+          key: 'completed-habits',
+          title: 'RESOLVED HABIT CADENCES (VERIFIED COMPLETED)',
+          subtitle: 'Habit Disciplines Successfully Executed in Current Recurrence Cycle',
+          icon: <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />,
+          headerBorder: 'border-emerald-200 dark:border-emerald-500/40 bg-emerald-50/80 dark:bg-emerald-950/20',
+          badgeStyle: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-500/40',
+          containerBg: 'bg-gradient-to-b from-emerald-50/30 via-white to-white dark:from-emerald-950/10 dark:via-slate-900/40 dark:to-slate-900/30',
+          filter: (t) => Boolean(t.isHabit && t.isCompleted)
+        }
+      ];
+    }
+
     if (viewMode === 'DEADLINE') {
       return [
         {

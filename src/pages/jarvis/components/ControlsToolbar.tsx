@@ -14,7 +14,8 @@ import {
   Clock,
   CheckCircle,
   X,
-  Target
+  Target,
+  Repeat
 } from 'lucide-react';
 import { SortingViewMode } from '../types/task';
 import { DEFAULT_TASK_CATEGORIES } from '../constants/definitions';
@@ -102,6 +103,15 @@ export const ControlsToolbar: React.FC<ControlsToolbarProps> = ({
           >
             <Target className="w-3.5 h-3.5 shrink-0" />
             <span>IMPACT-EFFORT 2X2</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onViewModeChange('HABITS')}
+            className={getButtonClass('HABITS')}
+          >
+            <Repeat className="w-3.5 h-3.5 shrink-0 text-violet-400" />
+            <span>HABIT CADENCE</span>
           </button>
         </div>
 
