@@ -39,7 +39,6 @@ interface NavbarProps {
   onOpenCommandPalette: () => void;
   onOpenSpotlight: () => void;
   onOpenBinSorting?: () => void;
-  onOpenAiPrompt?: () => void;
   isDark: boolean;
   onToggleTheme: () => void;
   isOnline: boolean;
@@ -58,7 +57,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCommandPalette,
   onOpenSpotlight,
   onOpenBinSorting,
-  onOpenAiPrompt,
   isDark,
   onToggleTheme,
   isOnline,
@@ -186,25 +184,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Mission Bins</span>
             </button>
           )}
-
-          {/* Gemini AI Assistant Trigger & Quota Badge */}
-          {onOpenAiPrompt && (
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={onOpenAiPrompt}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-cyan-400 dark:border-cyan-700/80 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 hover:from-cyan-500/20 hover:to-indigo-500/20 text-cyan-800 dark:text-cyan-300 text-xs font-mono font-extrabold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
-                title="Engage Gemini 3.8 Flash AI Assistant (ai create, ai guide, ai plan, ai audit)"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 animate-pulse" />
-                <span className="hidden sm:inline">Jarvis AI</span>
-              </button>
-
               {quotaStatus && onOpenQuotaHud && (
                 <div className="hidden lg:block">
                   <AiQuotaBadge status={quotaStatus} onClick={onOpenQuotaHud} />
-                </div>
-              )}
             </div>
           )}
 
@@ -414,21 +396,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>Mission Bins</span>
-              </button>
-            )}
-
-            {/* Jarvis AI Direct Trigger */}
-            {onOpenAiPrompt && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  onOpenAiPrompt();
-                }}
-                className="flex items-center gap-2 p-2.5 rounded-xl border border-cyan-400 dark:border-cyan-700 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 text-cyan-800 dark:text-cyan-300 font-bold active:scale-95 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse" />
-                <span>Jarvis AI</span>
               </button>
             )}
 

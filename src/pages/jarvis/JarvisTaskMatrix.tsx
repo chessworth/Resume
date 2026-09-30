@@ -1070,7 +1070,6 @@ export function App() {
             setIsSpotlightOpen(true);
           }}
           onOpenBinSorting={() => setIsBinSortingOpen(true)}
-          onOpenAiPrompt={() => setIsCommandPaletteOpen(true)}
           isDark={isDark}
           onToggleTheme={() => setIsDark((prev) => !prev)}
           isOnline={isOnline}
