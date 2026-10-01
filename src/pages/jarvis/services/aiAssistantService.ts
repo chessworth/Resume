@@ -169,7 +169,7 @@ export const aiAssistantService = {
   ): Promise<GeneratedTaskProposal> {
     assertQuotaAvailable();
 
-    const res = await fetch("/api/gemini/create-task", {
+    const res = await fetch("/.netlify/functions/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "create-task", prompt, availableBuckets }),
@@ -199,7 +199,7 @@ export const aiAssistantService = {
   ): Promise<TaskGuideResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/api/gemini/guide-task", {
+    const res = await fetch("/.netlify/functions/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "guide-task", task, breakIntoMicrotasks }),
@@ -224,7 +224,7 @@ export const aiAssistantService = {
   async generateDailyPlan(tasks: TaskItem[]): Promise<DailyPlanResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/api/gemini/daily-plan", {
+    const res = await fetch("/.netlify/functions/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "daily-plan", tasks }),
@@ -249,7 +249,7 @@ export const aiAssistantService = {
   async auditTaskPriorities(tasks: TaskItem[]): Promise<PriorityAuditResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/api/gemini/priority-audit", {
+    const res = await fetch("/.netlify/functions/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "priority-audit", tasks }),
