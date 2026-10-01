@@ -68,6 +68,7 @@ import { PlusCircle, ShieldAlert, Cpu, Sparkles, Activity, Layers, Target, Repea
 
 export function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [isTasksHydrated, setIsTasksHydrated] = useState<boolean>(false);
   const [session, setSession] = useState<UserSession | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -262,9 +263,19 @@ export function App() {
       }
 
       const initialTasks = await storageAdapter.fetchTasks();
-      if (isSubscribed) {
-        setTasks(initialTasks);
+      if (!isSubscribed) return;
+
+      // Synchronize habits against hydrated tasks and prune duplicates
+      const initialHabits = habitRepository.fetchHabits();
+      const syncResult = syncHabitsToTasks(initialHabits, initialTasks);
+      let resolvedTasks = initialTasks;
+      if (syncResult.hasChanges) {
+        resolvedTasks = syncResult.updatedTasks;
+        await storageAdapter.saveTasks(resolvedTasks);
       }
+
+      setTasks(resolvedTasks);
+      setIsTasksHydrated(true);
     }
 
     hydrate();
@@ -277,7 +288,14 @@ export function App() {
         setIsAuthModalOpen(true);
       } else {
         const refreshed = await storageAdapter.fetchTasks();
-        setTasks(refreshed);
+        const currentHabits = habitRepository.fetchHabits();
+        const syncResult = syncHabitsToTasks(currentHabits, refreshed);
+        let resolved = refreshed;
+        if (syncResult.hasChanges) {
+          resolved = syncResult.updatedTasks;
+          await storageAdapter.saveTasks(resolved);
+        }
+        setTasks(resolved);
       }
     });
 
@@ -287,15 +305,20 @@ export function App() {
     };
   }, [pushTransientToast]);
 
-  // Phase 4.5: Synchronize recurring habits with the task list on habit updates or task hydration
+  // Phase 4.5: Synchronize recurring habits with the task list on habit updates
   useEffect(() => {
-    if (tasks.length === 0 && habits.length === 0) return;
-    const syncResult = syncHabitsToTasks(habits, tasks);
-    if (syncResult.hasChanges) {
-      setTasks(syncResult.updatedTasks);
-      syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
-    }
-  }, [habits]);
+    // CRITICAL: Block synchronization until tasks are hydrated from persistent storage to prevent task multiplication
+    if (!isTasksHydrated) return;
+
+    setTasks((currentTasks) => {
+      const syncResult = syncHabitsToTasks(habits, currentTasks);
+      if (syncResult.hasChanges) {
+        storageAdapter.saveTasks(syncResult.updatedTasks);
+        return syncResult.updatedTasks;
+      }
+      return currentTasks;
+    });
+  }, [habits, isTasksHydrated]);
 
   // Phase 4: Supabase Realtime Subscription Listener
   useEffect(() => {
@@ -496,7 +519,7 @@ export function App() {
       setTasks((prevTasks) => {
         const syncResult = syncHabitsToTasks(newHabits, prevTasks);
         if (syncResult.hasChanges) {
-          syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
+          storageAdapter.saveTasks(syncResult.updatedTasks);
           return syncResult.updatedTasks;
         }
         return prevTasks;
@@ -526,7 +549,7 @@ export function App() {
       setTasks((prevTasks) => {
         const syncResult = syncHabitsToTasks(updated, prevTasks);
         if (syncResult.hasChanges) {
-          syncResult.updatedTasks.forEach((t: TaskItem) => storageAdapter.saveTask(t));
+          storageAdapter.saveTasks(syncResult.updatedTasks);
           return syncResult.updatedTasks;
         }
         return prevTasks;

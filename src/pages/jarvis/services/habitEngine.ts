@@ -333,15 +333,17 @@ export function toggleHabitCompletion(
 
 /**
  * Synchronizes active habit definitions into material TaskItems.
- * Ensures every active habit has a corresponding task for its current recurrence window.
+ * Ensures every active habit has exactly one corresponding task for its current recurrence window.
+ * Prunes any redundant duplicate instances caused by race conditions or multiple reloads.
  */
 export function syncHabitsToTasks(
   habits: HabitItem[],
   existingTasks: TaskItem[],
   targetDate: Date = new Date(),
-): { updatedTasks: TaskItem[]; hasChanges: boolean } {
+): { updatedTasks: TaskItem[]; hasChanges: boolean; prunedTaskIds: string[] } {
   const activeHabits = habits.filter((h) => !h.archived);
   let hasChanges = false;
+  const prunedTaskIds: string[] = [];
   const taskMap = new Map<string, TaskItem>();
 
   // Map existing tasks
@@ -355,16 +357,57 @@ export function syncHabitsToTasks(
       (log) => log.periodKey === periodKey,
     );
 
-    // Check if task already exists for this habit and period
-    const existingTask = Array.from(taskMap.values()).find(
+    // Find ALL tasks corresponding to this habit and active period
+    const matchingTasks = Array.from(taskMap.values()).filter(
       (t) =>
-        t.isHabit && t.habitId === habit.id && t.habitPeriodKey === periodKey,
+        Boolean(t.isHabit) &&
+        t.habitId === habit.id &&
+        (t.habitPeriodKey === periodKey ||
+          (!t.habitPeriodKey &&
+            (!t.dueDate || t.dueDate.startsWith(periodKey.slice(0, 10))))),
     );
+
+    let existingTask: TaskItem | undefined;
+    if (matchingTasks.length > 0) {
+      // Prioritize completed tasks, then latest updated timestamp
+      matchingTasks.sort((a, b) => {
+        if (a.isCompleted !== b.isCompleted) return a.isCompleted ? -1 : 1;
+        return (
+          new Date(b.updatedAt || 0).getTime() -
+          new Date(a.updatedAt || 0).getTime()
+        );
+      });
+
+      existingTask = matchingTasks[0];
+
+      // Prune redundant duplicate instances to guarantee single task per habit cadence
+      for (let i = 1; i < matchingTasks.length; i++) {
+        const duplicateTask = matchingTasks[i];
+        taskMap.delete(duplicateTask.id);
+        prunedTaskIds.push(duplicateTask.id);
+        hasChanges = true;
+      }
+    }
 
     if (existingTask) {
       // Synchronize completion status and streak metadata if drifted
       let taskChanged = false;
 
+      if (
+        !existingTask.habitPeriodKey ||
+        existingTask.habitPeriodKey !== periodKey
+      ) {
+        existingTask.habitPeriodKey = periodKey;
+        taskChanged = true;
+      }
+      if (!existingTask.isHabit) {
+        existingTask.isHabit = true;
+        taskChanged = true;
+      }
+      if (existingTask.habitId !== habit.id) {
+        existingTask.habitId = habit.id;
+        taskChanged = true;
+      }
       if (existingTask.isCompleted !== isCompleted) {
         existingTask.isCompleted = isCompleted;
         existingTask.completedAt = isCompleted
@@ -388,6 +431,10 @@ export function syncHabitsToTasks(
         existingTask.category = habit.category;
         taskChanged = true;
       }
+      if (existingTask.dueDate !== deadline.deadlineIso) {
+        existingTask.dueDate = deadline.deadlineIso;
+        taskChanged = true;
+      }
 
       if (taskChanged) {
         existingTask.updatedAt = new Date().toISOString();
@@ -395,7 +442,7 @@ export function syncHabitsToTasks(
         hasChanges = true;
       }
     } else {
-      // Materialize new active task for current habit recurrence period
+      // Materialize single active task for current habit recurrence period
       const newTaskId = generateUUID();
       const newTask: TaskItem = {
         id: newTaskId,
@@ -434,6 +481,7 @@ export function syncHabitsToTasks(
   return {
     updatedTasks: Array.from(taskMap.values()),
     hasChanges,
+    prunedTaskIds,
   };
 }
 

@@ -5,17 +5,20 @@
  * @packageDocumentation
  */
 
-import { TaskItem, UserSession } from '../types/task';
-import { calculateRecommendedUrgency, checkUrgencyEscalation } from '../constants/definitions';
-import { isSupabaseConfigured } from './supabaseClient';
-import { generateUUID, isValidUUID } from '../utils/uuid';
+import { TaskItem, UserSession } from "../types/task";
+import {
+  calculateRecommendedUrgency,
+  checkUrgencyEscalation,
+} from "../constants/definitions";
+import { isSupabaseConfigured } from "./supabaseClient";
+import { generateUUID, isValidUUID } from "../utils/uuid";
 
 const STORAGE_KEYS = {
-  TASKS: 'jarvis_tasks_v1',
-  SESSION: 'jarvis_session_v1',
-  THEME: 'jarvis_theme_v1',
-  DISMISSED_BUBBLES: 'jarvis_dismissed_bubbles_v1',
-  MEGA_BUCKETS: 'jarvis_mega_buckets_v1'
+  TASKS: "jarvis_tasks_v1",
+  SESSION: "jarvis_session_v1",
+  THEME: "jarvis_theme_v1",
+  DISMISSED_BUBBLES: "jarvis_dismissed_bubbles_v1",
+  MEGA_BUCKETS: "jarvis_mega_buckets_v1",
 } as const;
 
 /**
@@ -24,6 +27,7 @@ const STORAGE_KEYS = {
 export interface ITaskRepository {
   fetchTasks(): Promise<TaskItem[]>;
   saveTask(task: TaskItem): Promise<TaskItem>;
+  saveTasks(tasks: TaskItem[]): Promise<void>;
   updateTask(id: string, updates: Partial<TaskItem>): Promise<TaskItem>;
   deleteTask(id: string): Promise<boolean>;
   fetchSession(): Promise<UserSession | null>;
@@ -40,11 +44,12 @@ export interface ITaskRepository {
  */
 const SEED_TASKS: TaskItem[] = [
   {
-    id: 'e0100000-0000-4000-8000-000000000001',
-    title: 'Complete core architecture documentation & Supabase migration plan',
-    notes: 'Draft data schema for cloud synchronization and offline queue resolution.',
-    category: 'Work',
-    megaBucket: 'Core Engine 2.0',
+    id: "e0100000-0000-4000-8000-000000000001",
+    title: "Complete core architecture documentation & Supabase migration plan",
+    notes:
+      "Draft data schema for cloud synchronization and offline queue resolution.",
+    category: "Work",
+    megaBucket: "Core Engine 2.0",
     importance: 4,
     urgency: 4,
     recommendedUrgency: 4,
@@ -52,20 +57,21 @@ const SEED_TASKS: TaskItem[] = [
     effort: 2,
     estimatedDurationMinutes: 60,
     actualDurationSeconds: 1800,
-    cognitiveStrain: 'HIGH',
+    cognitiveStrain: "HIGH",
     dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     isCompleted: false,
     completedAt: null,
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
-    lastWorkedAt: new Date(Date.now() - 1800000).toISOString()
+    lastWorkedAt: new Date(Date.now() - 1800000).toISOString(),
   },
   {
-    id: 'e0100000-0000-4000-8000-000000000002',
-    title: 'Finish high-impact life vision manifesto & personal core goals',
-    notes: 'Non-negotiable foundational document for guiding 5-year trajectory.',
-    category: 'Strategic Life',
-    megaBucket: 'Life Operating System',
+    id: "e0100000-0000-4000-8000-000000000002",
+    title: "Finish high-impact life vision manifesto & personal core goals",
+    notes:
+      "Non-negotiable foundational document for guiding 5-year trajectory.",
+    category: "Strategic Life",
+    megaBucket: "Life Operating System",
     importance: 5,
     urgency: 3,
     recommendedUrgency: 3,
@@ -73,19 +79,19 @@ const SEED_TASKS: TaskItem[] = [
     effort: 4,
     estimatedDurationMinutes: 120,
     actualDurationSeconds: 0,
-    cognitiveStrain: 'EXTREME',
+    cognitiveStrain: "EXTREME",
     dueDate: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
     isCompleted: false,
     completedAt: null,
     createdAt: new Date(Date.now() - 7200000).toISOString(),
-    updatedAt: new Date(Date.now() - 7200000).toISOString()
+    updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
   {
-    id: 'e0100000-0000-4000-8000-000000000003',
-    title: 'Renew server hosting SSL certificates and verify DNS propagation',
-    notes: 'Expiring in 18 hours. Urgent operational requirement.',
-    category: 'Operations',
-    megaBucket: 'Infrastructure & DevOps',
+    id: "e0100000-0000-4000-8000-000000000003",
+    title: "Renew server hosting SSL certificates and verify DNS propagation",
+    notes: "Expiring in 18 hours. Urgent operational requirement.",
+    category: "Operations",
+    megaBucket: "Infrastructure & DevOps",
     importance: 3,
     urgency: 5,
     recommendedUrgency: 5,
@@ -93,18 +99,18 @@ const SEED_TASKS: TaskItem[] = [
     effort: 1,
     estimatedDurationMinutes: 25,
     actualDurationSeconds: 0,
-    cognitiveStrain: 'LOW',
+    cognitiveStrain: "LOW",
     dueDate: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
     isCompleted: false,
     completedAt: null,
     createdAt: new Date(Date.now() - 10800000).toISOString(),
-    updatedAt: new Date(Date.now() - 10800000).toISOString()
+    updatedAt: new Date(Date.now() - 10800000).toISOString(),
   },
   {
-    id: 'e0100000-0000-4000-8000-000000000004',
-    title: 'Review speculative tech podcast episode on quantum computing',
-    notes: 'Low impact exploratory media consumption.',
-    category: 'Personal',
+    id: "e0100000-0000-4000-8000-000000000004",
+    title: "Review speculative tech podcast episode on quantum computing",
+    notes: "Low impact exploratory media consumption.",
+    category: "Personal",
     megaBucket: null,
     importance: 1,
     urgency: 1,
@@ -113,19 +119,19 @@ const SEED_TASKS: TaskItem[] = [
     effort: 2,
     estimatedDurationMinutes: 45,
     actualDurationSeconds: 0,
-    cognitiveStrain: 'LOW',
+    cognitiveStrain: "LOW",
     dueDate: null,
     isCompleted: false,
     completedAt: null,
     createdAt: new Date(Date.now() - 14400000).toISOString(),
-    updatedAt: new Date(Date.now() - 14400000).toISOString()
-  }
+    updatedAt: new Date(Date.now() - 14400000).toISOString(),
+  },
 ];
 
 const DEFAULT_MEGA_BUCKETS = [
-  'Core Engine 2.0',
-  'Life Operating System',
-  'Infrastructure & DevOps'
+  "Core Engine 2.0",
+  "Life Operating System",
+  "Infrastructure & DevOps",
 ];
 
 /**
@@ -157,13 +163,13 @@ export class LocalStorageTaskRepository implements ITaskRepository {
         const taskItem: TaskItem = {
           ...t,
           id: validId,
-          impact: t.impact ?? (t.importance ?? 3),
+          impact: t.impact ?? t.importance ?? 3,
           effort: t.effort ?? 3,
           estimatedDurationMinutes: t.estimatedDurationMinutes ?? 30,
           actualDurationSeconds: t.actualDurationSeconds ?? 0,
-          cognitiveStrain: t.cognitiveStrain ?? 'MODERATE',
+          cognitiveStrain: t.cognitiveStrain ?? "MODERATE",
           megaBucket: t.megaBucket || null,
-          recommendedUrgency: calculateRecommendedUrgency(t.dueDate)
+          recommendedUrgency: calculateRecommendedUrgency(t.dueDate),
         };
 
         // Compute urgency escalation daemon flag
@@ -178,7 +184,10 @@ export class LocalStorageTaskRepository implements ITaskRepository {
 
       return tasks;
     } catch (error) {
-      console.error('[Jarvis Storage] Failed to load tasks from localStorage:', error);
+      console.error(
+        "[Jarvis Storage] Failed to load tasks from localStorage:",
+        error,
+      );
       return [];
     }
   }
@@ -188,13 +197,13 @@ export class LocalStorageTaskRepository implements ITaskRepository {
    */
   async saveTask(task: TaskItem): Promise<TaskItem> {
     const tasks = await this.fetchTasks();
-    const existingIndex = tasks.findIndex(t => t.id === task.id);
+    const existingIndex = tasks.findIndex((t) => t.id === task.id);
     let updatedTasks: TaskItem[];
 
     const enrichedTask: TaskItem = {
       ...task,
       isEscalated: checkUrgencyEscalation(task),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     if (existingIndex >= 0) {
@@ -209,11 +218,23 @@ export class LocalStorageTaskRepository implements ITaskRepository {
   }
 
   /**
+   * Persists an entire task list collection in a single atomic storage operation.
+   */
+  async saveTasks(tasks: TaskItem[]): Promise<void> {
+    const enrichedTasks = tasks.map((t) => ({
+      ...t,
+      isEscalated: checkUrgencyEscalation(t),
+      updatedAt: t.updatedAt || new Date().toISOString(),
+    }));
+    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(enrichedTasks));
+  }
+
+  /**
    * Updates discrete properties of an existing task item.
    */
   async updateTask(id: string, updates: Partial<TaskItem>): Promise<TaskItem> {
     const tasks = await this.fetchTasks();
-    const index = tasks.findIndex(t => t.id === id);
+    const index = tasks.findIndex((t) => t.id === id);
     if (index === -1) {
       throw new Error(`Task entity with id ${id} not found.`);
     }
@@ -223,9 +244,13 @@ export class LocalStorageTaskRepository implements ITaskRepository {
       ...current,
       ...updates,
       updatedAt: new Date().toISOString(),
-      ...(updates.dueDate !== undefined ? {
-        recommendedUrgency: calculateRecommendedUrgency(updates.dueDate ?? null)
-      } : {})
+      ...(updates.dueDate !== undefined
+        ? {
+            recommendedUrgency: calculateRecommendedUrgency(
+              updates.dueDate ?? null,
+            ),
+          }
+        : {}),
     };
 
     updated.isEscalated = checkUrgencyEscalation(updated);
@@ -240,7 +265,7 @@ export class LocalStorageTaskRepository implements ITaskRepository {
    */
   async deleteTask(id: string): Promise<boolean> {
     const tasks = await this.fetchTasks();
-    const filtered = tasks.filter(t => t.id !== id);
+    const filtered = tasks.filter((t) => t.id !== id);
     localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(filtered));
     return true;
   }
@@ -288,7 +313,10 @@ export class LocalStorageTaskRepository implements ITaskRepository {
     const current = this.getDismissedBubbles();
     if (!current.includes(id)) {
       current.push(id);
-      localStorage.setItem(STORAGE_KEYS.DISMISSED_BUBBLES, JSON.stringify(current));
+      localStorage.setItem(
+        STORAGE_KEYS.DISMISSED_BUBBLES,
+        JSON.stringify(current),
+      );
     }
   }
 
@@ -299,7 +327,10 @@ export class LocalStorageTaskRepository implements ITaskRepository {
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.MEGA_BUCKETS);
       if (!raw) {
-        localStorage.setItem(STORAGE_KEYS.MEGA_BUCKETS, JSON.stringify(DEFAULT_MEGA_BUCKETS));
+        localStorage.setItem(
+          STORAGE_KEYS.MEGA_BUCKETS,
+          JSON.stringify(DEFAULT_MEGA_BUCKETS),
+        );
         return DEFAULT_MEGA_BUCKETS;
       }
       return JSON.parse(raw);
@@ -336,11 +367,11 @@ class HybridTaskRepository implements ITaskRepository {
 
   async fetchTasks(): Promise<TaskItem[]> {
     if (await this.shouldUseCloud()) {
-      const { supabaseRepository } = await import('./supabaseRepository');
+      const { supabaseRepository } = await import("./supabaseRepository");
       const cloudTasks = await supabaseRepository.fetchTasks();
       return cloudTasks.map((t) => ({
         ...t,
-        isEscalated: checkUrgencyEscalation(t)
+        isEscalated: checkUrgencyEscalation(t),
       }));
     }
     return this.localRepo.fetchTasks();
@@ -348,15 +379,23 @@ class HybridTaskRepository implements ITaskRepository {
 
   async saveTask(task: TaskItem): Promise<TaskItem> {
     if (await this.shouldUseCloud()) {
-      const { supabaseRepository } = await import('./supabaseRepository');
+      const { supabaseRepository } = await import("./supabaseRepository");
       return supabaseRepository.saveTask(task);
     }
     return this.localRepo.saveTask(task);
   }
 
+  async saveTasks(tasks: TaskItem[]): Promise<void> {
+    if (await this.shouldUseCloud()) {
+      const { supabaseRepository } = await import("./supabaseRepository");
+      return supabaseRepository.saveTasks(tasks);
+    }
+    return this.localRepo.saveTasks(tasks);
+  }
+
   async updateTask(id: string, updates: Partial<TaskItem>): Promise<TaskItem> {
     if (await this.shouldUseCloud()) {
-      const { supabaseRepository } = await import('./supabaseRepository');
+      const { supabaseRepository } = await import("./supabaseRepository");
       return supabaseRepository.updateTask(id, updates);
     }
     return this.localRepo.updateTask(id, updates);
@@ -364,7 +403,7 @@ class HybridTaskRepository implements ITaskRepository {
 
   async deleteTask(id: string): Promise<boolean> {
     if (await this.shouldUseCloud()) {
-      const { supabaseRepository } = await import('./supabaseRepository');
+      const { supabaseRepository } = await import("./supabaseRepository");
       return supabaseRepository.deleteTask(id);
     }
     return this.localRepo.deleteTask(id);
