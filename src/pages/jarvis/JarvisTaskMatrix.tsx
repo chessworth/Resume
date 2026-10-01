@@ -713,8 +713,23 @@ export function App() {
     [pushTransientToast, quotaStatus.resetsInFormatted]
   );
 
+  const checkAndNotifyFallback = useCallback(
+    (meta?: { modelUsed?: string; isFallback?: boolean }) => {
+      if (meta?.isFallback) {
+        pushTransientToast({
+          id: 'toast-ai-fallback-' + Date.now(),
+          title: 'HIGH DEMAND // SECONDARY MODEL ACTIVE',
+          message: 'Primary model is experiencing peak demand. Request completed with Gemini 3.1 Flash-Lite.',
+          variant: 'info',
+          autoDismissMs: 5000,
+        });
+      }
+    },
+    [pushTransientToast]
+  );
+
   /**
-   * Option A: Synthesizes task parameters with Gemini 3.8 Flash and pre-populates
+   * Option A: Synthesizes task parameters with Gemini AI and pre-populates
    * the TaskInputModal for operator review and manual calibration before saving.
    */
   const handleAiCreateTask = useCallback(
@@ -749,6 +764,8 @@ export function App() {
         setIsAiProposalOpen(true);
         setIsTaskModalOpen(true);
 
+        checkAndNotifyFallback(proposal.meta);
+
         pushTransientToast({
           id: 'toast-ai-create-' + Date.now(),
           title: 'GEMINI AI SYNTHESIS COMPLETE',
@@ -762,7 +779,7 @@ export function App() {
         setIsAiLoading(false);
       }
     },
-    [availableBuckets, pushTransientToast, handleAiError]
+    [availableBuckets, pushTransientToast, handleAiError, checkAndNotifyFallback]
   );
 
   /**
@@ -800,13 +817,14 @@ export function App() {
       try {
         const guide = await aiAssistantService.generateTaskGuide(target, true);
         setGuideData(guide);
+        checkAndNotifyFallback(guide.meta);
       } catch (err: any) {
         handleAiError(err, 'AI ROADMAP ERROR', 'Failed to generate execution guide with Gemini AI.');
       } finally {
         setIsGuideLoading(false);
       }
     },
-    [tasks, pushTransientToast, handleAiError]
+    [tasks, pushTransientToast, handleAiError, checkAndNotifyFallback]
   );
 
   /**
@@ -886,13 +904,14 @@ export function App() {
 
     try {
       const plan = await aiAssistantService.generateDailyPlan(active);
+      checkAndNotifyFallback(plan.meta);
       setPlanData(plan);
     } catch (err: any) {
       handleAiError(err, 'SCHEDULE GENERATION NOTICE', 'Failed to generate schedule with Gemini AI.');
     } finally {
       setIsPlanLoading(false);
     }
-  }, [tasks, pushTransientToast, handleAiError]);
+  }, [tasks, pushTransientToast, handleAiError, checkAndNotifyFallback]);
 
   /**
    * Suggestion 5: Priority Calibration Audit - detects misclassifications and deadline conflicts.
@@ -915,14 +934,15 @@ export function App() {
     setIsAuditLoading(true);
 
     try {
-      const audit = await aiAssistantService.auditTaskPriorities(active);
+      const audit: PriorityAuditResponse = await aiAssistantService.auditTaskPriorities(active);
       setAuditData(audit);
+      checkAndNotifyFallback(audit.meta);
     } catch (err: any) {
       handleAiError(err, 'CALIBRATION AUDIT NOTICE', 'Failed to conduct audit with Gemini AI.');
     } finally {
       setIsAuditLoading(false);
     }
-  }, [tasks, pushTransientToast, handleAiError]);
+  }, [tasks, pushTransientToast, handleAiError, checkAndNotifyFallback]);
 
   /**
    * Applies recommended single calibration from audit finding.

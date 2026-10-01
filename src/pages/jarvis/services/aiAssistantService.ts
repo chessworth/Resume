@@ -17,6 +17,11 @@ import {
 } from "../types/task";
 import { aiQuotaService, QuotaStatus } from "./aiQuotaService";
 
+export interface AiExecutionMeta {
+  modelUsed?: string;
+  isFallback?: boolean;
+}
+
 export interface GeneratedTaskProposal {
   title: string;
   notes?: string;
@@ -30,12 +35,14 @@ export interface GeneratedTaskProposal {
   cognitiveStrain?: CognitiveStrainLevel;
   megaBucket?: string | null;
   microtasks?: string[];
+  meta?: AiExecutionMeta;
 }
 
 export interface TaskGuidePhase {
   phaseName: string;
   durationMinutes: number;
   actions: string[];
+  meta?: AiExecutionMeta;
 }
 
 export interface TaskGuideResponse {
@@ -45,6 +52,7 @@ export interface TaskGuideResponse {
   phases: TaskGuidePhase[];
   pitfallsToAvoid: string[];
   microtasks: string[];
+  meta?: AiExecutionMeta;
 }
 
 export interface DailyScheduleBlock {
@@ -53,6 +61,7 @@ export interface DailyScheduleBlock {
   blockLabel: string;
   focusMinutes: number;
   rationale: string;
+  meta?: AiExecutionMeta;
 }
 
 export interface DailyPlanResponse {
@@ -60,6 +69,7 @@ export interface DailyPlanResponse {
   totalEstimatedMinutes?: number;
   schedule: DailyScheduleBlock[];
   restRecommendations?: string[];
+  meta?: AiExecutionMeta;
 }
 
 export interface AuditFinding {
@@ -72,6 +82,7 @@ export interface AuditFinding {
   suggestedUrgency?: UrgencyLevel;
   suggestedImpact?: ImpactLevel;
   suggestedEffort?: EffortLevel;
+  meta?: AiExecutionMeta;
 }
 
 export interface PriorityAuditResponse {
@@ -79,6 +90,7 @@ export interface PriorityAuditResponse {
   executiveSummary: string;
   anomaliesFound?: number;
   findings: AuditFinding[];
+  meta?: AiExecutionMeta;
 }
 
 /**
@@ -157,7 +169,7 @@ export const aiAssistantService = {
   ): Promise<GeneratedTaskProposal> {
     assertQuotaAvailable();
 
-    const res = await fetch("/.netlify/functions/gemini", {
+    const res = await fetch("/api/gemini/create-task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "create-task", prompt, availableBuckets }),
@@ -175,7 +187,7 @@ export const aiAssistantService = {
     }
 
     aiQuotaService.recordRequest(600);
-    return json.data as GeneratedTaskProposal;
+    return { ...(json.data || {}), meta: json.meta } as GeneratedTaskProposal;
   },
 
   /**
@@ -187,7 +199,7 @@ export const aiAssistantService = {
   ): Promise<TaskGuideResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/.netlify/functions/gemini", {
+    const res = await fetch("/api/gemini/guide-task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "guide-task", task, breakIntoMicrotasks }),
@@ -203,7 +215,7 @@ export const aiAssistantService = {
     }
 
     aiQuotaService.recordRequest(850);
-    return json.data as TaskGuideResponse;
+    return { ...(json.data || {}), meta: json.meta } as TaskGuideResponse;
   },
 
   /**
@@ -212,7 +224,7 @@ export const aiAssistantService = {
   async generateDailyPlan(tasks: TaskItem[]): Promise<DailyPlanResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/.netlify/functions/gemini", {
+    const res = await fetch("/api/gemini/daily-plan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "daily-plan", tasks }),
@@ -228,7 +240,7 @@ export const aiAssistantService = {
     }
 
     aiQuotaService.recordRequest(900);
-    return json.data as DailyPlanResponse;
+    return { ...(json.data || {}), meta: json.meta } as DailyPlanResponse;
   },
 
   /**
@@ -237,7 +249,7 @@ export const aiAssistantService = {
   async auditTaskPriorities(tasks: TaskItem[]): Promise<PriorityAuditResponse> {
     assertQuotaAvailable();
 
-    const res = await fetch("/.netlify/functions/gemini", {
+    const res = await fetch("/api/gemini/priority-audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "priority-audit", tasks }),
@@ -255,7 +267,7 @@ export const aiAssistantService = {
     }
 
     aiQuotaService.recordRequest(750);
-    return json.data as PriorityAuditResponse;
+    return { ...(json.data || {}), meta: json.meta } as PriorityAuditResponse;
   },
 
   /**
