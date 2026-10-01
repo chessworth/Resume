@@ -568,11 +568,8 @@ export function App() {
   }, [pushTransientToast]);
 
   const handleDeleteHabit = useCallback((id: string) => {
-    setHabits((prev) => {
-      const updated = prev.filter((h) => h.id !== id);
-      habitRepository.saveHabits(updated);
-      return updated;
-    });
+    habitRepository.deleteHabit(id);
+    setHabits((prev) => prev.filter((h) => h.id !== id));
 
     setTasks((prevTasks) => {
       const toDelete = prevTasks.filter((t) => t.habitId === id);

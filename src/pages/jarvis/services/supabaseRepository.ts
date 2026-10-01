@@ -6,7 +6,12 @@
  */
 
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
-import { ITaskRepository, LocalStorageTaskRepository } from "./storageAdapter";
+import {
+  ITaskRepository,
+  LocalStorageTaskRepository,
+  getDeletedTaskIds,
+  recordDeletedTaskId,
+} from "./storageAdapter";
 import { TaskItem, UserSession, CognitiveStrainLevel } from "../types/task";
 import { calculateRecommendedUrgency } from "../constants/definitions";
 import { generateUUID, isValidUUID } from "../utils/uuid";
@@ -138,9 +143,23 @@ export class SupabaseTaskRepository implements ITaskRepository {
       }
 
       if (data) {
-        const cloudTasks = data.map((row) =>
-          mapRowToTask(row as SupabaseTaskRow),
-        );
+        const deletedIds = getDeletedTaskIds();
+        const cloudTasks = data
+          .map((row) => mapRowToTask(row as SupabaseTaskRow))
+          .filter((t) => !t.isDeleted && !deletedIds.has(t.id));
+
+        // Purge any zombie tasks on the remote server that match tombstoned IDs
+        const zombieRows = data.filter((row: any) => deletedIds.has(row.id));
+        if (zombieRows.length > 0) {
+          for (const zombie of zombieRows) {
+            supabase
+              .from("tasks")
+              .delete()
+              .eq("id", zombie.id)
+              .eq("user_id", userId)
+              .then(() => {});
+          }
+        }
         // Synchronize local cache for offline availability
         localStorage.setItem("jarvis_tasks_v1", JSON.stringify(cloudTasks));
         return cloudTasks;
@@ -294,9 +313,11 @@ export class SupabaseTaskRepository implements ITaskRepository {
   }
 
   /**
-   * Permanently deletes a task from the database.
+   * Permanently deletes a task from the database and persists a permanent local tombstone.
    */
   async deleteTask(id: string): Promise<boolean> {
+    recordDeletedTaskId(id);
+
     if (!isSupabaseConfigured() || !supabase) {
       return this.localFallback.deleteTask(id);
     }
@@ -315,6 +336,17 @@ export class SupabaseTaskRepository implements ITaskRepository {
 
       if (error) {
         console.warn("[Jarvis Cloud] Supabase delete error:", error.message);
+      }
+
+      // Soft-delete fallback attempt if is_deleted column exists
+      try {
+        await supabase
+          .from("tasks")
+          .update({ is_deleted: true, updated_at: new Date().toISOString() })
+          .eq("id", id)
+          .eq("user_id", userId);
+      } catch {
+        // Ignore if column is_deleted is not in schema
       }
     } catch (err) {
       console.warn("[Jarvis Cloud] Network failure on delete:", err);

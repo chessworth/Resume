@@ -13,14 +13,83 @@ import {
 import { isSupabaseConfigured } from "./supabaseClient";
 import { generateUUID, isValidUUID } from "../utils/uuid";
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   TASKS: "jarvis_tasks_v1",
   SESSION: "jarvis_session_v1",
   THEME: "jarvis_theme_v1",
   DISMISSED_BUBBLES: "jarvis_dismissed_bubbles_v1",
   MEGA_BUCKETS: "jarvis_mega_buckets_v1",
+  DELETED_TASK_IDS: "jarvis_deleted_task_ids_v1",
+  DELETED_HABIT_PERIODS: "jarvis_deleted_habit_periods_v1",
+  INITIALIZED_FLAG: "jarvis_initialized_v1",
 } as const;
 
+/**
+ * Retrieves cached set of permanently deleted task UUIDs.
+ */
+export function getDeletedTaskIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DELETED_TASK_IDS);
+    if (!raw) return new Set<string>();
+    const list = JSON.parse(raw);
+    return new Set(Array.isArray(list) ? list : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+/**
+ * Persists a task UUID into the permanent tombstone deletion registry.
+ */
+export function recordDeletedTaskId(id: string): void {
+  try {
+    const set = getDeletedTaskIds();
+    set.add(id);
+    localStorage.setItem(
+      STORAGE_KEYS.DELETED_TASK_IDS,
+      JSON.stringify(Array.from(set)),
+    );
+  } catch (err) {
+    console.warn("[Jarvis Storage] Failed to record deleted task ID:", err);
+  }
+}
+
+/**
+ * Retrieves set of explicitly pruned habit-period keys (e.g. "habitId:2026-09-30").
+ */
+export function getDeletedHabitPeriods(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DELETED_HABIT_PERIODS);
+    if (!raw) return new Set<string>();
+    const list = JSON.parse(raw);
+    return new Set(Array.isArray(list) ? list : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+/**
+ * Records that a habit task for a specific recurrence period was explicitly deleted by the user.
+ * Prevents syncHabitsToTasks from resurrecting this task for the current window.
+ */
+export function recordDeletedHabitPeriod(
+  habitId: string,
+  periodKey: string,
+): void {
+  try {
+    const set = getDeletedHabitPeriods();
+    set.add(`${habitId}:${periodKey}`);
+    localStorage.setItem(
+      STORAGE_KEYS.DELETED_HABIT_PERIODS,
+      JSON.stringify(Array.from(set)),
+    );
+  } catch (err) {
+    console.warn(
+      "[Jarvis Storage] Failed to record deleted habit period:",
+      err,
+    );
+  }
+}
 /**
  * Interface contract for storage providers.
  */
@@ -144,39 +213,49 @@ export class LocalStorageTaskRepository implements ITaskRepository {
    */
   async fetchTasks(): Promise<TaskItem[]> {
     try {
+      const deletedIds = getDeletedTaskIds();
       const raw = localStorage.getItem(STORAGE_KEYS.TASKS);
-      if (!raw) {
+      const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED_FLAG);
+
+      if (raw === null && !isInitialized) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(SEED_TASKS));
+        localStorage.setItem(STORAGE_KEYS.INITIALIZED_FLAG, "true");
         return SEED_TASKS;
       }
+      if (raw === null) {
+        return [];
+      }
+
       const rawTasks: TaskItem[] = JSON.parse(raw);
       let needsResave = false;
 
-      const tasks = rawTasks.map((t) => {
-        let validId = t.id;
-        // Auto-migrate any legacy non-UUID IDs (e.g., 'seed-task-1', 'tsk_123') to RFC 4122 UUIDs
-        if (!isValidUUID(validId)) {
-          validId = generateUUID();
-          needsResave = true;
-        }
+      const tasks = rawTasks
+        .filter((t) => !t.isDeleted && !deletedIds.has(t.id))
+        .map((t) => {
+          let validId = t.id;
+          // Auto-migrate any legacy non-UUID IDs (e.g., 'seed-task-1', 'tsk_123') to RFC 4122 UUIDs
+          if (!isValidUUID(validId)) {
+            validId = generateUUID();
+            needsResave = true;
+          }
 
-        const taskItem: TaskItem = {
-          ...t,
-          id: validId,
-          impact: t.impact ?? t.importance ?? 3,
-          effort: t.effort ?? 3,
-          estimatedDurationMinutes: t.estimatedDurationMinutes ?? 30,
-          actualDurationSeconds: t.actualDurationSeconds ?? 0,
-          cognitiveStrain: t.cognitiveStrain ?? "MODERATE",
-          megaBucket: t.megaBucket || null,
-          recommendedUrgency: calculateRecommendedUrgency(t.dueDate),
-        };
+          const taskItem: TaskItem = {
+            ...t,
+            id: validId,
+            impact: t.impact ?? t.importance ?? 3,
+            effort: t.effort ?? 3,
+            estimatedDurationMinutes: t.estimatedDurationMinutes ?? 30,
+            actualDurationSeconds: t.actualDurationSeconds ?? 0,
+            cognitiveStrain: t.cognitiveStrain ?? "MODERATE",
+            megaBucket: t.megaBucket || null,
+            recommendedUrgency: calculateRecommendedUrgency(t.dueDate),
+          };
 
-        // Compute urgency escalation daemon flag
-        taskItem.isEscalated = checkUrgencyEscalation(taskItem);
+          // Compute urgency escalation daemon flag
+          taskItem.isEscalated = checkUrgencyEscalation(taskItem);
 
-        return taskItem;
-      });
+          return taskItem;
+        });
 
       if (needsResave) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
@@ -196,6 +275,11 @@ export class LocalStorageTaskRepository implements ITaskRepository {
    * Inserts or appends a new task record.
    */
   async saveTask(task: TaskItem): Promise<TaskItem> {
+    const deletedIds = getDeletedTaskIds();
+    if (task.isDeleted || deletedIds.has(task.id)) {
+      return task;
+    }
+
     const tasks = await this.fetchTasks();
     const existingIndex = tasks.findIndex((t) => t.id === task.id);
     let updatedTasks: TaskItem[];
@@ -219,9 +303,15 @@ export class LocalStorageTaskRepository implements ITaskRepository {
 
   /**
    * Persists an entire task list collection in a single atomic storage operation.
+   * Strips any deleted task entities from being re-persisted.
    */
   async saveTasks(tasks: TaskItem[]): Promise<void> {
-    const enrichedTasks = tasks.map((t) => ({
+    const deletedIds = getDeletedTaskIds();
+    const activeTasks = tasks.filter(
+      (t) => !t.isDeleted && !deletedIds.has(t.id),
+    );
+
+    const enrichedTasks = activeTasks.map((t) => ({
       ...t,
       isEscalated: checkUrgencyEscalation(t),
       updatedAt: t.updatedAt || new Date().toISOString(),
@@ -261,10 +351,16 @@ export class LocalStorageTaskRepository implements ITaskRepository {
   }
 
   /**
-   * Permanently deletes a task by ID.
+   * Permanently deletes a task by ID and registers a tombstone to prevent resurrection.
    */
   async deleteTask(id: string): Promise<boolean> {
+    recordDeletedTaskId(id);
     const tasks = await this.fetchTasks();
+    const target = tasks.find((t) => t.id === id);
+    if (target?.isHabit && target.habitId && target.habitPeriodKey) {
+      recordDeletedHabitPeriod(target.habitId, target.habitPeriodKey);
+    }
+
     const filtered = tasks.filter((t) => t.id !== id);
     localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(filtered));
     return true;

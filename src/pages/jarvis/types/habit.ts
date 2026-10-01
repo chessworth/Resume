@@ -82,6 +82,8 @@ export interface HabitItem {
   completionHistory: HabitCompletionLog[];
   /** Flag denoting whether the habit is actively monitored */
   archived: boolean;
+  /** Soft delete tombstone flag ensuring permanent deletion persistence */
+  isDeleted?: boolean;
   /** Creation timestamp in ISO 8601 */
   createdAt: string;
   /** Last update timestamp in ISO 8601 */

@@ -14,9 +14,41 @@ import {
 } from "../types/habit";
 import { TaskItem } from "../types/task";
 import { generateUUID } from "../utils/uuid";
+import { getDeletedTaskIds, getDeletedHabitPeriods } from "./storageAdapter";
 
 const STORAGE_KEY_HABITS = "jarvis_habits_v1";
+const STORAGE_KEY_DELETED_HABITS = "jarvis_deleted_habit_ids_v1";
+const STORAGE_KEY_HABITS_INITIALIZED = "jarvis_habits_initialized_v1";
 
+/**
+ * Retrieves set of permanently deleted habit UUIDs.
+ */
+export function getDeletedHabitIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_DELETED_HABITS);
+    if (!raw) return new Set<string>();
+    const list = JSON.parse(raw);
+    return new Set(Array.isArray(list) ? list : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+/**
+ * Persists a habit UUID into the permanent tombstone deletion registry.
+ */
+export function recordDeletedHabitId(id: string): void {
+  try {
+    const set = getDeletedHabitIds();
+    set.add(id);
+    localStorage.setItem(
+      STORAGE_KEY_DELETED_HABITS,
+      JSON.stringify(Array.from(set)),
+    );
+  } catch (err) {
+    console.warn("[HabitRepository] Failed to record deleted habit ID:", err);
+  }
+}
 /**
  * Seed habits showcasing daily, weekday, and weekly cadences.
  */
@@ -341,13 +373,30 @@ export function syncHabitsToTasks(
   existingTasks: TaskItem[],
   targetDate: Date = new Date(),
 ): { updatedTasks: TaskItem[]; hasChanges: boolean; prunedTaskIds: string[] } {
-  const activeHabits = habits.filter((h) => !h.archived);
+  const deletedHabitIds = getDeletedHabitIds();
+  const deletedTaskIds = getDeletedTaskIds();
+  const deletedHabitPeriods = getDeletedHabitPeriods();
+
+  const activeHabits = habits.filter(
+    (h) => !h.archived && !h.isDeleted && !deletedHabitIds.has(h.id),
+  );
   let hasChanges = false;
   const prunedTaskIds: string[] = [];
   const taskMap = new Map<string, TaskItem>();
 
-  // Map existing tasks
-  existingTasks.forEach((t) => taskMap.set(t.id, { ...t }));
+  // Map existing tasks, pruning any tombstoned tasks or tasks whose habit was deleted
+  existingTasks.forEach((t) => {
+    if (
+      t.isDeleted ||
+      deletedTaskIds.has(t.id) ||
+      (t.habitId && deletedHabitIds.has(t.habitId))
+    ) {
+      prunedTaskIds.push(t.id);
+      hasChanges = true;
+      return;
+    }
+    taskMap.set(t.id, { ...t });
+  });
 
   for (const habit of activeHabits) {
     const periodKey = getHabitPeriodKey(habit, targetDate);
@@ -356,6 +405,22 @@ export function syncHabitsToTasks(
     const matchedLog = habit.completionHistory?.find(
       (log) => log.periodKey === periodKey,
     );
+
+    // If this recurrence window was explicitly deleted by the operator, do not create or maintain it
+    if (deletedHabitPeriods.has(`${habit.id}:${periodKey}`)) {
+      const matchingTasks = Array.from(taskMap.values()).filter(
+        (t) =>
+          Boolean(t.isHabit) &&
+          t.habitId === habit.id &&
+          t.habitPeriodKey === periodKey,
+      );
+      for (const m of matchingTasks) {
+        taskMap.delete(m.id);
+        prunedTaskIds.push(m.id);
+        hasChanges = true;
+      }
+      continue;
+    }
 
     // Find ALL tasks corresponding to this habit and active period
     const matchingTasks = Array.from(taskMap.values()).filter(
@@ -533,23 +598,37 @@ export const habitRepository = {
   fetchHabits(): HabitItem[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_HABITS);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+      const isInitialized = localStorage.getItem(
+        STORAGE_KEY_HABITS_INITIALIZED,
+      );
+      const deletedIds = getDeletedHabitIds();
+
+      if (raw === null && !isInitialized) {
+        localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(SEED_HABITS));
+        localStorage.setItem(STORAGE_KEY_HABITS_INITIALIZED, "true");
+        return SEED_HABITS;
+      }
+      if (raw === null) {
+        return [];
+      }
+
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((h) => !h.isDeleted && !deletedIds.has(h.id));
       }
     } catch {
-      // Fallback to seed on parse error
+      // Fallback to empty on parse error
     }
-    // Seed initial habits
-    localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(SEED_HABITS));
-    return SEED_HABITS;
+    return [];
   },
 
   saveHabits(habits: HabitItem[]): void {
     try {
-      localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(habits));
+      const deletedIds = getDeletedHabitIds();
+      const activeHabits = habits.filter(
+        (h) => !h.isDeleted && !deletedIds.has(h.id),
+      );
+      localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(activeHabits));
     } catch (e) {
       console.error("[HabitRepository] Failed to save habits:", e);
     }
@@ -574,6 +653,7 @@ export const habitRepository = {
   },
 
   deleteHabit(id: string): HabitItem[] {
+    recordDeletedHabitId(id);
     const current = this.fetchHabits();
     const updated = current.filter((h) => h.id !== id);
     this.saveHabits(updated);

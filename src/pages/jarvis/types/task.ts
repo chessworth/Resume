@@ -129,6 +129,8 @@ export interface TaskItem {
   createdAt: string;
   /** Last updated timestamp in ISO 8601 */
   updatedAt: string;
+  /** Soft delete tombstone flag ensuring permanent deletion persistence */
+  isDeleted?: boolean;
   /** Flag denoting whether this task originates from an active recurring habit */
   isHabit?: boolean;
   /** Originating habit UUID if this is a recurring habit */
